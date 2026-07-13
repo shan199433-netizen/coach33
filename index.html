@@ -7,7 +7,6 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#050507">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -280,22 +279,24 @@ body{
 .view-toggle-btn.active{background:var(--pink-main);color:#050507;border-color:transparent;box-shadow:0 4px 14px rgba(255,151,183,0.3);}
 
 #dayViewGroup{flex:1;display:flex;flex-direction:column;min-height:0;}
-.week-timeline-wrap{flex:1;display:none;flex-direction:column;min-height:0;padding:12px 0 100px 0;}
-.week-timeline-header{display:flex;flex-shrink:0;padding:0 16px 0 16px;}
-.wt-gutter-spacer{width:42px;flex-shrink:0;}
-.wt-day-header{flex:1;text-align:center;font-size:10.5px;color:var(--text-muted);font-weight:700;padding-bottom:8px;}
-.wt-day-header .num{display:block;font-size:13px;color:var(--text-main);margin-top:2px;}
-.week-timeline-scroll{flex:1;overflow:auto;display:flex;padding:0 16px 0 16px;}
-.wt-gutter{width:42px;flex-shrink:0;position:relative;}
-.wt-hour-label{font-size:9px;color:var(--text-faint);border-top:1px solid var(--border-soft);padding-top:2px;box-sizing:border-box;}
-.week-timeline-body{flex:1;display:flex;position:relative;}
-.wt-day-col{flex:1;position:relative;border-left:1px solid var(--border-soft);}
+.week-timeline-wrap{flex:1;display:none;flex-direction:column;min-height:0;padding:10px 0 100px 0;}
+.week-timeline-header{display:flex;flex-shrink:0;padding:0 8px 0 8px;}
+.wt-gutter-spacer{width:34px;flex-shrink:0;}
+.wt-day-header{flex:1;min-width:0;text-align:center;font-size:10px;color:var(--text-muted);font-weight:700;padding-bottom:6px;}
+.wt-day-header .num{display:block;font-size:12.5px;color:var(--text-main);margin-top:1px;}
+.week-timeline-scroll{flex:1;overflow-y:auto;overflow-x:hidden;display:flex;padding:0 8px 0 8px;touch-action:pan-y;-webkit-overflow-scrolling:touch;position:relative;}
+.wt-zoom-sizer{position:relative;width:100%;}
+.wt-zoom-inner{position:absolute;top:0;left:0;width:100%;display:flex;transform-origin:top left;}
+.wt-gutter{width:34px;flex-shrink:0;position:relative;}
+.wt-hour-label{font-size:8.5px;color:var(--text-faint);border-top:1px solid var(--border-soft);padding-top:2px;box-sizing:border-box;}
+.week-timeline-body{flex:1;display:flex;position:relative;min-width:0;}
+.wt-day-col{flex:1;min-width:0;position:relative;border-left:1px solid var(--border-soft);}
 
-.wt-block{ position:absolute;left:2px;right:2px;border-radius:6px;padding:6px 5px;overflow:hidden;cursor:pointer;font-size:10px;line-height:1.4;color:#0b0b0e;background:var(--status-open);box-shadow:0 2px 8px rgba(0,0,0,0.3); }
+.wt-block{ position:absolute;left:1.5px;right:1.5px;border-radius:6px;padding:3px 3px;overflow:visible;cursor:pointer;font-size:9px;line-height:1.25;color:#0b0b0e;background:var(--status-open);box-shadow:0 2px 8px rgba(0,0,0,0.3);box-sizing:border-box; }
 .wt-block.full{background:var(--status-full);}
 .wt-block.closed{background:var(--status-closed);color:var(--text-muted);}
-.wt-block-time{display:block;font-weight:800;}
-.wt-block-label{display:block;opacity:1;font-weight:700;word-break:break-all;}
+.wt-block-time{display:block;font-weight:800;font-size:8px;white-space:nowrap;}
+.wt-block-label{display:block;opacity:1;font-weight:700;overflow-wrap:break-word;word-break:break-word;}
 .detail-value{font-size:13px;color:var(--text-main);background:var(--bg-elevated);border:1px solid var(--border-soft);border-radius:12px;padding:10px 12px;}
 
 .remaining-lessons-box{ background:linear-gradient(135deg,rgba(255,151,183,0.16),rgba(255,92,144,0.08)); border:1px solid var(--pink-deep);border-radius:16px;padding:14px 16px;margin-bottom:16px; }
@@ -368,20 +369,20 @@ body.light-theme .coach-avatar{ color:#fff; }
 
   <div class="header">
     <div class="coach-profile">
-      <div class="coach-avatar"><i class="fa-solid fa-dumbbell"></i></div>
+      <div class="coach-avatar">🏋️</div>
       <div class="coach-info">
         <h1 id="top-coach-name">教練載入中...</h1>
-        <p><i class="fa-solid fa-bolt"></i> 營運中</p>
+        <p>⚡ 營運中</p>
       </div>
     </div>
     <div class="header-actions">
-      <div class="icon-btn" id="bell-btn"><i class="fa-regular fa-bell"></i><span class="badge">2</span></div>
+      <div class="icon-btn" id="bell-btn">🔔<span class="badge">2</span></div>
     </div>
   </div>
 
   <div class="stats-bar">
-    <div class="stat-pill"><i class="fa-solid fa-calendar-check"></i>今日預約 <b class="num" id="todayCount">0</b> 堂</div>
-    <div class="stat-pill"><i class="fa-solid fa-clipboard-check"></i>本月已上課 <b class="num" id="monthlySessionsTop">0</b> 堂</div>
+    <div class="stat-pill">📆今日預約 <b class="num" id="todayCount">0</b> 堂</div>
+    <div class="stat-pill">📋本月已上課 <b class="num" id="monthlySessionsTop">0</b> 堂</div>
     <div class="live-badge"><div class="live-dot"></div>雲端資料連線中</div>
   </div>
 
@@ -402,21 +403,25 @@ body.light-theme .coach-avatar{ color:#fff; }
     </div>
     <div class="week-timeline-wrap" id="weekTimelineWrap">
       <div class="week-timeline-header" id="weekTimelineHeader"></div>
-      <div class="week-timeline-scroll">
-        <div class="wt-gutter" id="weekTimelineGutter"></div>
-        <div class="week-timeline-body" id="weekTimelineBody"></div>
+      <div class="week-timeline-scroll" id="weekTimelineScroll">
+        <div class="wt-zoom-sizer" id="weekZoomSizer">
+          <div class="wt-zoom-inner" id="weekZoomInner">
+            <div class="wt-gutter" id="weekTimelineGutter"></div>
+            <div class="week-timeline-body" id="weekTimelineBody"></div>
+          </div>
+        </div>
       </div>
     </div>
-    <button class="fab" id="fabAdd"><i class="fa-solid fa-plus"></i></button>
+    <button class="fab" id="fabAdd">➕</button>
   </div>
 
   <div class="view" id="view-students">
     <div class="search-row">
       <div class="search-bar">
-        <i class="fa-solid fa-magnifying-glass"></i>
+        🔍
         <input type="text" id="studentSearch" placeholder="搜尋學員姓名/手機">
       </div>
-      <button class="add-student-btn" id="addStudentBtn"><i class="fa-solid fa-plus"></i></button>
+      <button class="add-student-btn" id="addStudentBtn">➕</button>
     </div>
     <div class="filter-chip-row" id="studentFilterChips"></div>
     <div class="content-area" style="padding-top:6px;" id="studentList"></div>
@@ -426,12 +431,12 @@ body.light-theme .coach-avatar{ color:#fff; }
     <div class="content-area" style="padding:0 0 100px 0;">
       <div class="hero-row">
         <div class="hero-card">
-          <div class="hc-label"><i class="fa-solid fa-clipboard-check"></i>本月已上課</div>
+          <div class="hc-label">📋本月已上課</div>
           <div class="hc-value"><span class="num" id="heroSessionsVal">0</span><small>堂</small></div>
-          <div class="hc-sub trend"><i class="fa-solid fa-arrow-trend-up"></i>較上月 +4 堂</div>
+          <div class="hc-sub trend">📈較上月 +4 堂</div>
         </div>
         <div class="hero-card">
-          <div class="hc-label"><i class="fa-solid fa-tags"></i>本月銷售</div>
+          <div class="hc-label">🏷️本月銷售</div>
           <div class="hc-value"><span class="num" id="heroSalesCountVal">0</span><small>堂</small></div>
           <div class="hc-sub money" id="heroSalesAmountVal">NT$0</div>
         </div>
@@ -439,7 +444,7 @@ body.light-theme .coach-avatar{ color:#fff; }
 
       <div class="hero-row goal-row">
         <div class="hero-card">
-          <div class="hc-label">🎯 本月目標<i class="fa-solid fa-pen hc-edit-icon" id="editGoalBtn1"></i></div>
+          <div class="hc-label">🎯 本月目標<span class="hc-edit-icon" id="editGoalBtn1">✏️</span></div>
           <div class="hc-value"><span class="num" id="goalSessionsVal">--</span><small>堂</small></div>
           <div class="goal-bar"><div class="goal-bar-fill" id="heroSessionsBar" style="width:0%;"></div></div>
           <div class="hc-goal" id="heroSessionsGoal">點擊筆型圖示設定本月目標</div>
@@ -459,9 +464,9 @@ body.light-theme .coach-avatar{ color:#fff; }
 
       <div class="accordion-section" id="incomeSummarySection" style="margin:14px 20px 4px 20px;">
         <div class="accordion-header">
-          <div class="settings-icon"><i class="fa-solid fa-table-list"></i></div>
+          <div class="settings-icon">🗂️</div>
           <div class="settings-main"><h4>本月收入總表</h4><p>總計 <b id="incomeSummaryTotal" style="color:var(--pink-light);">NT$0</b></p></div>
-          <i class="fa-solid fa-chevron-down accordion-chev"></i>
+          <span class="accordion-chev">▾</span>
         </div>
         <div class="accordion-body"><div id="incomeSummaryList"></div></div>
       </div>
@@ -473,14 +478,14 @@ body.light-theme .coach-avatar{ color:#fff; }
 
       <div class="accordion-section" id="ledgerSection" style="margin:14px 20px 4px 20px;">
         <div class="accordion-header">
-          <div class="settings-icon"><i class="fa-solid fa-receipt"></i></div>
+          <div class="settings-icon">🧾</div>
           <div class="settings-main"><h4>成交購課明細</h4></div>
-          <i class="fa-solid fa-chevron-down accordion-chev"></i>
+          <span class="accordion-chev">▾</span>
         </div>
         <div class="accordion-body"><div class="ledger-list" id="ledgerList"></div></div>
       </div>
     </div>
-    <button class="fab" id="fabAddLedger"><i class="fa-solid fa-plus"></i></button>
+    <button class="fab" id="fabAddLedger">➕</button>
   </div>
 
   <div class="view" id="view-settings">
@@ -489,7 +494,7 @@ body.light-theme .coach-avatar{ color:#fff; }
         <h3>✨ 學員免登入約課連結</h3>
         <div class="link-row">
           <input type="text" id="bookingLink" value="產生地網址中..." readonly>
-          <button class="copy-btn" id="copyLinkBtn"><i class="fa-solid fa-copy"></i>複製連結</button>
+          <button class="copy-btn" id="copyLinkBtn">🔗複製連結</button>
         </div>
         <p style="color:var(--text-faint); font-size:11px; padding: 6px 4px 0 4px; line-height: 1.4;">
           📌 複製此網址並放在 LINE 官方帳號的圖文選單。學員點擊後即可免帳密填名預約，預約成功後資料會直接連動至此。
@@ -499,37 +504,37 @@ body.light-theme .coach-avatar{ color:#fff; }
       <div class="settings-group">
         <h3>教練資訊</h3>
         <div class="settings-row" onclick="openEditProfile()">
-          <div class="settings-icon"><i class="fa-solid fa-user-pen"></i></div>
+          <div class="settings-icon">📝</div>
           <div class="settings-main"><h4>編輯個人資料</h4><p>設定您的教練姓名與個人網址代號</p></div>
-          <i class="fa-solid fa-chevron-right settings-chev"></i>
+          <span class="settings-chev">›</span>
         </div>
       </div>
       <div class="settings-group">
         <div class="accordion-section" data-acc="courseTypes">
-          <div class="accordion-header"><div class="settings-icon"><i class="fa-solid fa-list"></i></div><div class="settings-main"><h4>課程種類</h4><p>新增、修改、刪除課程種類</p></div><i class="fa-solid fa-chevron-down accordion-chev"></i></div>
+          <div class="accordion-header"><div class="settings-icon">📚</div><div class="settings-main"><h4>課程種類</h4><p>新增、修改、刪除課程種類</p></div><span class="accordion-chev">▾</span></div>
           <div class="accordion-body"><div class="manage-card" id="courseTypeManage"></div></div>
         </div>
         <div class="accordion-section" data-acc="locations">
-          <div class="accordion-header"><div class="settings-icon"><i class="fa-solid fa-location-dot"></i></div><div class="settings-main"><h4>授課地點</h4><p>新增、修改、刪除授課地點</p></div><i class="fa-solid fa-chevron-down accordion-chev"></i></div>
+          <div class="accordion-header"><div class="settings-icon">📍</div><div class="settings-main"><h4>授課地點</h4><p>新增、修改、刪除授課地點</p></div><span class="accordion-chev">▾</span></div>
           <div class="accordion-body"><div class="manage-card" id="locationManage"></div></div>
         </div>
         <div class="accordion-section" data-acc="studentTags">
-          <div class="accordion-header"><div class="settings-icon"><i class="fa-solid fa-user-tag"></i></div><div class="settings-main"><h4>學員分類標籤</h4><p>學員頁篩選按鈕依此自動產生</p></div><i class="fa-solid fa-chevron-down accordion-chev"></i></div>
+          <div class="accordion-header"><div class="settings-icon">🏷️</div><div class="settings-main"><h4>學員分類標籤</h4><p>學員頁篩選按鈕依此自動產生</p></div><span class="accordion-chev">▾</span></div>
           <div class="accordion-body"><div class="manage-card" id="studentTagManage"></div></div>
         </div>
         <div class="accordion-section" data-acc="incomeItems">
-          <div class="accordion-header"><div class="settings-icon"><i class="fa-solid fa-sack-dollar"></i></div><div class="settings-main"><h4>收入項目管理</h4><p>記帳時可選擇，並自動累加至總表</p></div><i class="fa-solid fa-chevron-down accordion-chev"></i></div>
+          <div class="accordion-header"><div class="settings-icon">💰</div><div class="settings-main"><h4>收入項目管理</h4><p>記帳時可選擇，並自動累加至總表</p></div><span class="accordion-chev">▾</span></div>
           <div class="accordion-body"><div class="manage-card" id="incomeItemManage"></div></div>
         </div>
         <div class="accordion-section" data-acc="theme">
-          <div class="accordion-header"><div class="settings-icon"><i class="fa-solid fa-palette"></i></div><div class="settings-main"><h4>外觀主題</h4><p>切換整體配色風格</p></div><i class="fa-solid fa-chevron-down accordion-chev"></i></div>
+          <div class="accordion-header"><div class="settings-icon">🎨</div><div class="settings-main"><h4>外觀主題</h4><p>切換整體配色風格</p></div><span class="accordion-chev">▾</span></div>
           <div class="accordion-body"><div class="manage-card"><div class="theme-swatch-grid" id="themeSwatchGrid"></div></div></div>
         </div>
       </div>
       <div class="settings-group">
         <h3>其他</h3>
         <div class="settings-row" style="margin-top:10px;border-radius:16px;" onclick="confirmAction('登出帳號','確定要登出 FitSync 嗎？',() => auth.signOut())">
-          <div class="settings-icon" style="color:var(--accent-red);"><i class="fa-solid fa-right-from-bracket"></i></div>
+          <div class="settings-icon" style="color:var(--accent-red);">🚪</div>
           <div class="settings-main"><h4 style="color:var(--accent-red);">登出</h4><p>結束目前的管理登入狀態</p></div>
         </div>
       </div>
@@ -537,17 +542,17 @@ body.light-theme .coach-avatar{ color:#fff; }
   </div>
 
   <div class="bottom-nav">
-    <div class="nav-item active" data-view="schedule"><i class="fa-solid fa-calendar-days"></i><span>行事曆</span></div>
-    <div class="nav-item" data-view="students"><i class="fa-solid fa-user-group"></i><span>學員</span></div>
-    <div class="nav-item" data-view="stats"><i class="fa-solid fa-wallet"></i><span>記帳</span></div>
-    <div class="nav-item" data-view="settings"><i class="fa-solid fa-gear"></i><span>設定</span></div>
+    <div class="nav-item active" data-view="schedule">📅<span>行事曆</span></div>
+    <div class="nav-item" data-view="students">👥<span>學員</span></div>
+    <div class="nav-item" data-view="stats">👛<span>記帳</span></div>
+    <div class="nav-item" data-view="settings">⚙️<span>設定</span></div>
   </div>
 
   <div class="sheet-overlay" id="sheetOverlay">
     <div class="sheet" id="sheetBody"></div>
   </div>
 
-  <div class="toast" id="toast"><i class="fa-solid fa-circle-check"></i><span id="toastText">已完成</span></div>
+  <div class="toast" id="toast">✅<span id="toastText">已完成</span></div>
 </div>
 
 <script>
@@ -713,13 +718,13 @@ function renderEditableList(containerId, arr, fieldName, placeholder){
   const rows = arr.map((item,i)=>`
     <div class="edit-row" data-idx="${i}">
       <input type="text" class="edit-input rename-input" value="${escapeHtml(item)}" data-idx="${i}">
-      <button class="edit-icon-btn del" data-idx="${i}" title="刪除"><i class="fa-solid fa-trash"></i></button>
+      <button class="edit-icon-btn del" data-idx="${i}" title="刪除">🗑️</button>
     </div>
   `).join('');
   el.innerHTML = (arr.length ? rows : `<div class="edit-empty-hint">目前尚無項目，請於下方新增</div>`) + `
     <div class="edit-row add-row">
       <input type="text" class="edit-input new-item-input" placeholder="${escapeHtml(placeholder)}">
-      <button class="edit-icon-btn add" title="新增"><i class="fa-solid fa-plus"></i></button>
+      <button class="edit-icon-btn add" title="新增">➕</button>
     </div>
   `;
 
@@ -980,7 +985,7 @@ function renderSlots(){
     .sort((a,b) => (a.timestamp?.seconds||0) - (b.timestamp?.seconds||0));
 
   if(daySlots.length === 0){
-    list.innerHTML = `<div class="empty-state"><i class="fa-regular fa-calendar"></i><p>這天還沒有安排任何時段<br>點右下角「＋」新增可預約時段</p></div>`;
+    list.innerHTML = `<div class="empty-state">📅<p>這天還沒有安排任何時段<br>點右下角「＋」新增可預約時段</p></div>`;
     return;
   }
 
@@ -988,13 +993,13 @@ function renderSlots(){
     <div class="slot-card ${s.status}" data-id="${s.id}">
       <div class="slot-stripe"></div>
       <div class="slot-body">
-        <div class="slot-avatar">${s.status==='full' ? (s.studentName ? escapeHtml(s.studentName[0]) : '✓') : '<i class="fa-regular fa-clock"></i>'}</div>
+        <div class="slot-avatar">${s.status==='full' ? (s.studentName ? escapeHtml(s.studentName[0]) : '✓') : '⏰'}</div>
         <div class="slot-text">
           <div class="slot-time">${s.time||''}</div>
           <div class="slot-detail">${s.courseType||''}${s.location? ' · '+s.location : ''}${s.status==='full' && s.studentName ? ' · '+s.studentName : ''}</div>
         </div>
       </div>
-      <button class="slot-action" data-action="${s.status==='open' ? 'close' : 'remove'}"><i class="fa-solid ${s.status==='open' ? 'fa-lock' : 'fa-trash'}"></i>${s.status==='open' ? '關閉' : '刪除'}</button>
+      <button class="slot-action" data-action="${s.status==='open' ? 'close' : 'remove'}">${s.status==='open' ? '🔒' : '🗑️'}${s.status==='open' ? '關閉' : '刪除'}</button>
     </div>
   `).join('');
 
@@ -1072,10 +1077,13 @@ function getWeekDates(baseDate){
   return arr;
 }
 
+let wtZoom = 1;
+const WT_ZOOM_MIN = 0.75, WT_ZOOM_MAX = 2.5;
+
 function renderWeekTimeline(){
   const weekDates = getWeekDates(new Date());
-  const rowH = 56;
-  const totalH = rowH * 19;
+  const rowH = 44; // 較緊湊的每小時高度，06:00-24:00 共 18 小時
+  const totalH = rowH * 18;
 
   let gutterHtml = '';
   for(let h=6; h<=24; h++){ gutterHtml += `<div class="wt-hour-label" style="height:${rowH}px;">${String(h).padStart(2,'0')}:00</div>`; }
@@ -1089,8 +1097,8 @@ function renderWeekTimeline(){
       if(!dt) return '';
       if(dt.getHours() < 6) return '';
       const top = (dt.getHours() - 6) * rowH + (dt.getMinutes()/60)*rowH;
-      const height = rowH - 4;
-      
+      const height = rowH - 3;
+
       let displayLabel = escapeHtml(s.courseType||'');
       if(s.status === 'full' && s.studentName) {
         displayLabel = `<b>${escapeHtml(s.studentName)}</b><br>${escapeHtml(s.courseType||'')}`;
@@ -1110,11 +1118,60 @@ function renderWeekTimeline(){
   bodyEl.innerHTML = daysHtml;
   bodyEl.style.height = totalH+'px';
 
+  const innerEl = document.getElementById('weekZoomInner');
+  innerEl.style.height = totalH+'px';
+  innerEl.dataset.naturalHeight = totalH;
+  applyWeekZoom();
+
   bodyEl.querySelectorAll('.wt-block').forEach(b=>{
     b.addEventListener('click', ()=>{
       const slot = allSlots.find(s=>s.id===b.dataset.id);
       if(slot) openSlotDetail(slot);
     });
+  });
+
+  attachWeekPinchZoom();
+}
+
+function applyWeekZoom(){
+  const inner = document.getElementById('weekZoomInner');
+  const sizer = document.getElementById('weekZoomSizer');
+  if(!inner || !sizer) return;
+  const naturalH = Number(inner.dataset.naturalHeight || 0);
+  inner.style.transform = `scaleY(${wtZoom})`;
+  sizer.style.height = (naturalH * wtZoom) + 'px';
+}
+
+function wtTouchDist(t1, t2){ return Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY); }
+
+// 雙指縮放：僅垂直方向自由縮放（放大列高與文字），水平方向永遠固定顯示完整一週七天，不會左右滑動
+function attachWeekPinchZoom(){
+  const scrollEl = document.getElementById('weekTimelineScroll');
+  if(!scrollEl || scrollEl.dataset.pinchBound) return;
+  scrollEl.dataset.pinchBound = '1';
+
+  let startDist = null, startZoom = 1;
+
+  scrollEl.addEventListener('touchstart', (e)=>{
+    if(e.touches.length === 2){
+      startDist = wtTouchDist(e.touches[0], e.touches[1]);
+      startZoom = wtZoom;
+    }
+  }, {passive:true});
+
+  scrollEl.addEventListener('touchmove', (e)=>{
+    if(e.touches.length === 2 && startDist){
+      e.preventDefault();
+      const d = wtTouchDist(e.touches[0], e.touches[1]);
+      let z = startZoom * (d / startDist);
+      z = Math.min(WT_ZOOM_MAX, Math.max(WT_ZOOM_MIN, z));
+      wtZoom = z;
+      applyWeekZoom();
+    }
+  }, {passive:false});
+
+  scrollEl.addEventListener('touchend', (e)=>{
+    if(e.touches.length < 2) startDist = null;
   });
 }
 
@@ -1323,7 +1380,7 @@ function openStudentForm(student){
 
     ${isEdit ? `
     <div class="remaining-lessons-box">
-      <div class="rl-label"><i class="fa-solid fa-layer-group"></i>剩餘堂數</div>
+      <div class="rl-label">🗂️剩餘堂數</div>
       <div class="rl-value"><span class="num" style="${remainingLessons<0?'color:var(--accent-red);':''}">${remainingLessons}</span><small>堂</small></div>
       <div class="rl-sub">已購 ${totalPurchasedLessons} 堂 － 已上課/已預約 ${classCount} 堂</div>
     </div>
@@ -1336,17 +1393,17 @@ function openStudentForm(student){
     ${isEdit ? `
     <div class="accordion-section" style="margin-top:16px;">
       <div class="accordion-header">
-        <div class="settings-icon"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+        <div class="settings-icon">🧾</div>
         <div class="settings-main"><h4>所有購課紀錄</h4><p>共 ${purchaseCount} 筆</p></div>
-        <i class="fa-solid fa-chevron-down accordion-chev"></i>
+        <span class="accordion-chev">▾</span>
       </div>
       <div class="accordion-body"><div class="student-record-box">${purchaseRecordsHtml}</div></div>
     </div>
     <div class="accordion-section">
       <div class="accordion-header">
-        <div class="settings-icon"><i class="fa-solid fa-calendar-check"></i></div>
+        <div class="settings-icon">📆</div>
         <div class="settings-main"><h4>所有上課歷史/預約紀錄</h4><p>共 ${classCount} 筆</p></div>
-        <i class="fa-solid fa-chevron-down accordion-chev"></i>
+        <span class="accordion-chev">▾</span>
       </div>
       <div class="accordion-body"><div class="student-record-box">${classRecordsHtml}</div></div>
     </div>
@@ -1356,7 +1413,7 @@ function openStudentForm(student){
       <button class="sheet-btn ghost" id="cancelStuBtn">關閉</button>
       <button class="sheet-btn primary" id="saveStuBtn">儲存變更</button>
     </div>
-    ${isEdit ? `<div style="margin-top:10px;"><button class="sheet-btn danger" style="width:100%;" id="deleteStuBtn"><i class="fa-solid fa-trash"></i>&nbsp;刪除此學員</button></div>` : ''}
+    ${isEdit ? `<div style="margin-top:10px;"><button class="sheet-btn danger" style="width:100%;" id="deleteStuBtn">🗑️&nbsp;刪除此學員</button></div>` : ''}
   `);
   openSheet();
   document.querySelectorAll('#sheetBody .accordion-header').forEach(h=>{
@@ -1405,7 +1462,7 @@ function renderStudents(filter=''){
     const matchesTag = activeStudentFilter==='全部' || (s.tags||[]).includes(activeStudentFilter);
     return matchesSearch && matchesTag;
   });
-  if(filtered.length===0){ list.innerHTML = `<div class="empty-state"><i class="fa-solid fa-user-magnifying-glass"></i><p>目前暫無符合條件的學員名單</p></div>`; return; }
+  if(filtered.length===0){ list.innerHTML = `<div class="empty-state">🔍<p>目前暫無符合條件的學員名單</p></div>`; return; }
   list.innerHTML = filtered.map(s=>`
     <div class="student-card" data-id="${s.id}">
       <div class="student-avatar">${escapeHtml(s.name[0])}</div>
@@ -1440,7 +1497,7 @@ function renderLedger(){
     return `
     <div class="student-card">
       <div class="student-avatar" style="color:${isIncome ? 'var(--accent-green)' : 'var(--accent-red)'};">
-        <i class="fa-solid ${isIncome ? 'fa-arrow-down' : 'fa-arrow-up'}"></i>
+        ${isIncome ? '⬇️' : '⬆️'}
       </div>
       <div class="student-info"><h3>${title}</h3><p>${sub}</p></div>
     </div>`;
