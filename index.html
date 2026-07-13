@@ -14,6 +14,12 @@
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap');
+@font-face{
+  font-family:'NaikaiFont';
+  src:url('https://cdn.jsdelivr.net/gh/max32002/naikaifont@1.0/webfont/NaikaiFont-Regular-Lite.woff2') format('woff2');
+  font-weight:400;
+  font-display:swap;
+}
 
 :root{
   --bg-base:#050507;
@@ -42,7 +48,7 @@
 
 *,*::before,*::after{
   box-sizing:border-box;margin:0;padding:0;
-  font-family:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  font-family:'NaikaiFont','Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
   -webkit-tap-highlight-color:transparent;
 }
 
@@ -56,7 +62,7 @@ body{
   transition:background .25s ease,color .25s ease;
 }
 
-.num{font-family:'Manrope',sans-serif;font-variant-numeric:tabular-nums;}
+.num{font-family:'NaikaiFont','Manrope',sans-serif;font-variant-numeric:tabular-nums;}
 
 .auth-wrapper {
   width: 100%; max-width: 412px; padding: 30px 24px;
@@ -198,12 +204,13 @@ body{
 .link-row input{ flex:1;background:transparent;border:none;outline:none;color:var(--text-muted);font-size:11.5px;min-width:0; }
 .copy-btn{ flex-shrink:0;background:var(--pink-main);color:#050507;border:none;border-radius:10px; padding:8px 13px;font-size:11.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px; }
 .copy-btn:active{transform:scale(0.95);}
-.bottom-nav{ position:absolute;bottom:0;left:0;width:100%;height:74px;background:var(--overlay-nav); backdrop-filter:blur(16px);border-top:1px solid var(--border-color); display:flex;justify-content:space-around;align-items:center;z-index:25;padding-bottom:6px;flex-shrink:0; }
-.nav-item{ display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--text-muted); cursor:pointer;font-size:10.5px;font-weight:600;transition:color .2s;width:64px; }
-.nav-item i{font-size:18px;transition:transform .15s;}
-.nav-item.active{color:var(--pink-main);}
-.nav-item.active i{transform:translateY(-1px);}
-.nav-item:active i{transform:scale(0.88);}
+.bottom-nav{ position:absolute;bottom:0;left:0;width:100%;height:80px;background:var(--overlay-nav); backdrop-filter:blur(16px);border-top:1px solid var(--border-color); display:flex;justify-content:space-around;align-items:center;z-index:25;padding-bottom:6px;flex-shrink:0; }
+.nav-item{ display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--text-muted); cursor:pointer;font-size:12px;font-weight:700;transition:color .2s,background .2s;width:70px;padding:7px 4px;border-radius:16px; }
+.nav-icon{font-size:23px;line-height:1;transition:transform .15s;}
+.nav-label{font-size:12px;letter-spacing:.2px;}
+.nav-item.active{color:var(--pink-main);background:rgba(255,151,183,0.12);}
+.nav-item.active .nav-icon{transform:translateY(-1px) scale(1.05);}
+.nav-item:active .nav-icon{transform:scale(0.88);}
 .sheet-overlay{ position:absolute;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px); opacity:0;pointer-events:none;transition:opacity .25s ease;z-index:100; }
 .sheet-overlay.show{opacity:1;pointer-events:auto;}
 .sheet{ position:absolute;left:0;right:0;bottom:0;background:var(--bg-card); border-radius:24px 24px 0 0;padding:10px 20px calc(24px + env(safe-area-inset-bottom,0px)) 20px; border-top:1px solid var(--border-color); transform:translateY(100%);transition:transform .32s cubic-bezier(.32,.72,0,1); max-height:82%;overflow-y:auto; }
@@ -279,20 +286,24 @@ body{
 .view-toggle-btn.active{background:var(--pink-main);color:#050507;border-color:transparent;box-shadow:0 4px 14px rgba(255,151,183,0.3);}
 
 #dayViewGroup{flex:1;display:flex;flex-direction:column;min-height:0;}
-.week-timeline-wrap{flex:1;display:none;flex-direction:column;min-height:0;padding:10px 0 100px 0;}
+.week-timeline-wrap{flex:1;display:none;flex-direction:column;min-height:0;padding:8px 0 100px 0;overflow:hidden;}
+.week-nav-row{display:flex;align-items:center;justify-content:center;gap:14px;flex-shrink:0;padding:0 8px 8px 8px;}
+.week-nav-btn{width:30px;height:30px;border-radius:10px;background:var(--bg-card);border:1px solid var(--border-color);color:var(--text-main);font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
+.week-nav-btn:active{background:var(--pink-main);color:#050507;}
+.week-nav-label{font-size:12.5px;font-weight:700;color:var(--pink-light);min-width:96px;text-align:center;}
 .week-timeline-header{display:flex;flex-shrink:0;padding:0 8px 0 8px;}
-.wt-gutter-spacer{width:34px;flex-shrink:0;}
-.wt-day-header{flex:1;min-width:0;text-align:center;font-size:10px;color:var(--text-muted);font-weight:700;padding-bottom:6px;}
-.wt-day-header .num{display:block;font-size:12.5px;color:var(--text-main);margin-top:1px;}
-.week-timeline-scroll{flex:1;overflow-y:auto;overflow-x:hidden;display:flex;padding:0 8px 0 8px;touch-action:pan-y;-webkit-overflow-scrolling:touch;position:relative;}
-.wt-zoom-sizer{position:relative;width:100%;}
-.wt-zoom-inner{position:absolute;top:0;left:0;width:100%;display:flex;transform-origin:top left;}
-.wt-gutter{width:34px;flex-shrink:0;position:relative;}
-.wt-hour-label{font-size:8.5px;color:var(--text-faint);border-top:1px solid var(--border-soft);padding-top:2px;box-sizing:border-box;}
-.week-timeline-body{flex:1;display:flex;position:relative;min-width:0;}
-.wt-day-col{flex:1;min-width:0;position:relative;border-left:1px solid var(--border-soft);}
+.wt-gutter-spacer{width:32px;flex-shrink:0;}
+.wt-day-header{flex:1;min-width:0;text-align:center;font-size:9.5px;color:var(--text-muted);font-weight:700;padding-bottom:5px;}
+.wt-day-header .num{display:block;font-size:12px;color:var(--text-main);margin-top:1px;}
+.wt-day-header.is-today{color:var(--pink-main);}
+.wt-day-header.is-today .num{color:var(--pink-main);}
+.week-timeline-scroll{flex:1;min-height:0;overflow:hidden;display:flex;padding:0 8px 0 8px;touch-action:pan-y;position:relative;}
+.wt-gutter{width:32px;flex-shrink:0;position:relative;}
+.wt-hour-label{font-size:8px;color:var(--text-faint);border-top:1px solid var(--border-soft);padding-top:1px;box-sizing:border-box;position:absolute;left:0;right:0;}
+.week-timeline-body{flex:1;display:flex;position:relative;min-width:0;height:100%;}
+.wt-day-col{flex:1;min-width:0;position:relative;border-left:1px solid var(--border-soft);height:100%;}
 
-.wt-block{ position:absolute;left:1.5px;right:1.5px;border-radius:6px;padding:3px 3px;overflow:visible;cursor:pointer;font-size:9px;line-height:1.25;color:#0b0b0e;background:var(--status-open);box-shadow:0 2px 8px rgba(0,0,0,0.3);box-sizing:border-box; }
+.wt-block{ position:absolute;left:1.5px;right:1.5px;border-radius:5px;padding:2px 3px;overflow:visible;cursor:pointer;font-size:8.5px;line-height:1.2;color:#0b0b0e;background:var(--status-open);box-shadow:0 1px 5px rgba(0,0,0,0.3);box-sizing:border-box;z-index:1; }
 .wt-block.full{background:var(--status-full);}
 .wt-block.closed{background:var(--status-closed);color:var(--text-muted);}
 .wt-block-time{display:block;font-weight:800;font-size:8px;white-space:nowrap;}
@@ -402,14 +413,15 @@ body.light-theme .coach-avatar{ color:#fff; }
       </div>
     </div>
     <div class="week-timeline-wrap" id="weekTimelineWrap">
+      <div class="week-nav-row" id="weekNavRow">
+        <button class="week-nav-btn" id="weekPrevBtn">‹</button>
+        <span class="week-nav-label" id="weekNavLabel">本週</span>
+        <button class="week-nav-btn" id="weekNextBtn">›</button>
+      </div>
       <div class="week-timeline-header" id="weekTimelineHeader"></div>
       <div class="week-timeline-scroll" id="weekTimelineScroll">
-        <div class="wt-zoom-sizer" id="weekZoomSizer">
-          <div class="wt-zoom-inner" id="weekZoomInner">
-            <div class="wt-gutter" id="weekTimelineGutter"></div>
-            <div class="week-timeline-body" id="weekTimelineBody"></div>
-          </div>
-        </div>
+        <div class="wt-gutter" id="weekTimelineGutter"></div>
+        <div class="week-timeline-body" id="weekTimelineBody"></div>
       </div>
     </div>
     <button class="fab" id="fabAdd">➕</button>
@@ -479,7 +491,7 @@ body.light-theme .coach-avatar{ color:#fff; }
       <div class="accordion-section" id="ledgerSection" style="margin:14px 20px 4px 20px;">
         <div class="accordion-header">
           <div class="settings-icon">🧾</div>
-          <div class="settings-main"><h4>成交購課明細</h4></div>
+          <div class="settings-main"><h4>收支明細紀錄</h4><p>每一筆收入／支出的詳細紀錄，可回查對帳</p></div>
           <span class="accordion-chev">▾</span>
         </div>
         <div class="accordion-body"><div class="ledger-list" id="ledgerList"></div></div>
@@ -497,7 +509,7 @@ body.light-theme .coach-avatar{ color:#fff; }
           <button class="copy-btn" id="copyLinkBtn">🔗複製連結</button>
         </div>
         <p style="color:var(--text-faint); font-size:11px; padding: 6px 4px 0 4px; line-height: 1.4;">
-          📌 複製此網址並放在 LINE 官方帳號的圖文選單。學員點擊後即可免帳密填名預約，預約成功後資料會直接連動至此。
+          📌 複製此網址。學員點擊後即可免帳密填名預約，預約成功後資料會直接連動至此。
         </p>
       </div>
 
@@ -542,10 +554,10 @@ body.light-theme .coach-avatar{ color:#fff; }
   </div>
 
   <div class="bottom-nav">
-    <div class="nav-item active" data-view="schedule">📅<span>行事曆</span></div>
-    <div class="nav-item" data-view="students">👥<span>學員</span></div>
-    <div class="nav-item" data-view="stats">👛<span>記帳</span></div>
-    <div class="nav-item" data-view="settings">⚙️<span>設定</span></div>
+    <div class="nav-item active" data-view="schedule"><span class="nav-icon">📅</span><span class="nav-label">行事曆</span></div>
+    <div class="nav-item" data-view="students"><span class="nav-icon">👥</span><span class="nav-label">學員</span></div>
+    <div class="nav-item" data-view="stats"><span class="nav-icon">👛</span><span class="nav-label">記帳</span></div>
+    <div class="nav-item" data-view="settings"><span class="nav-icon">⚙️</span><span class="nav-label">設定</span></div>
   </div>
 
   <div class="sheet-overlay" id="sheetOverlay">
@@ -843,6 +855,7 @@ function syncCoachCloudData() {
       if(scheduleMode=='week') renderWeekTimeline();
       computeTodayCount();
       renderHeroStats();
+      updateNotificationBadge();
     });
 
   db.collection("coaches").doc(currentUid).collection("ledger")
@@ -1067,28 +1080,49 @@ function getWeekDates(baseDate){
   monday.setDate(d.getDate()+diffToMonday);
   const labels = ['一','二','三','四','五','六','日'];
   const arr = [];
+  const todayKey = (()=>{ const t=new Date(); return `${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`; })();
   for(let i=0;i<7;i++){
     const dt = new Date(monday);
     dt.setDate(monday.getDate()+i);
     const mm = String(dt.getMonth()+1).padStart(2,'0');
     const dd = String(dt.getDate()).padStart(2,'0');
-    arr.push({ date: dt, key: `${mm}-${dd}`, label: labels[i], num: dt.getDate() });
+    const key = `${mm}-${dd}`;
+    arr.push({ date: dt, key, label: labels[i], num: dt.getDate(), isToday: key===todayKey });
   }
   return arr;
 }
 
-let wtZoom = 1;
-const WT_ZOOM_MIN = 0.75, WT_ZOOM_MAX = 2.5;
+let weekOffset = 0; // 0 = 本週，-1 = 上週，+1 = 下週，以此類推
 
 function renderWeekTimeline(){
-  const weekDates = getWeekDates(new Date());
-  const rowH = 44; // 較緊湊的每小時高度，06:00-24:00 共 18 小時
-  const totalH = rowH * 18;
+  const base = new Date();
+  base.setDate(base.getDate() + weekOffset*7);
+  const weekDates = getWeekDates(base);
+
+  // 週切換列文字
+  const navLabel = document.getElementById('weekNavLabel');
+  if(navLabel){
+    if(weekOffset===0) navLabel.textContent = '本週';
+    else {
+      const first = weekDates[0], last = weekDates[6];
+      navLabel.textContent = `${String(first.date.getMonth()+1).padStart(2,'0')}/${String(first.date.getDate()).padStart(2,'0')} - ${String(last.date.getMonth()+1).padStart(2,'0')}/${String(last.date.getDate()).padStart(2,'0')}`;
+    }
+  }
+
+  const HOURS = 18; // 06:00 - 24:00
+  const scrollEl = document.getElementById('weekTimelineScroll');
+  // 動態計算列高，讓 18 小時完整塞進可視高度，不需要垂直捲動
+  const availH = scrollEl ? scrollEl.clientHeight : 540;
+  const rowH = Math.max(22, Math.floor(availH / HOURS));
+  const totalH = rowH * HOURS;
 
   let gutterHtml = '';
-  for(let h=6; h<=24; h++){ gutterHtml += `<div class="wt-hour-label" style="height:${rowH}px;">${String(h).padStart(2,'0')}:00</div>`; }
+  for(let h=6; h<=24; h++){
+    const i = h-6;
+    gutterHtml += `<div class="wt-hour-label" style="top:${i*rowH}px;height:${rowH}px;">${String(h).padStart(2,'0')}:00</div>`;
+  }
 
-  const headerHtml = `<div class="wt-gutter-spacer"></div>` + weekDates.map(wd=>`<div class="wt-day-header">${wd.label}<span class="num">${wd.num}</span></div>`).join('');
+  const headerHtml = `<div class="wt-gutter-spacer"></div>` + weekDates.map(wd=>`<div class="wt-day-header${wd.isToday?' is-today':''}">${wd.label}<span class="num">${wd.num}</span></div>`).join('');
 
   const daysHtml = weekDates.map(wd=>{
     const daySlots = allSlots.filter(s=>s.dateKey===wd.key);
@@ -1097,7 +1131,7 @@ function renderWeekTimeline(){
       if(!dt) return '';
       if(dt.getHours() < 6) return '';
       const top = (dt.getHours() - 6) * rowH + (dt.getMinutes()/60)*rowH;
-      const height = rowH - 3;
+      const height = Math.max(rowH - 2, 14);
 
       let displayLabel = escapeHtml(s.courseType||'');
       if(s.status === 'full' && s.studentName) {
@@ -1108,20 +1142,13 @@ function renderWeekTimeline(){
         <span class="wt-block-label">${displayLabel}</span>
       </div>`;
     }).join('');
-    return `<div class="wt-day-col" style="height:${totalH}px;">${blocksHtml}</div>`;
+    return `<div class="wt-day-col">${blocksHtml}</div>`;
   }).join('');
 
   document.getElementById('weekTimelineHeader').innerHTML = headerHtml;
   document.getElementById('weekTimelineGutter').innerHTML = gutterHtml;
-  document.getElementById('weekTimelineGutter').style.height = totalH+'px';
   const bodyEl = document.getElementById('weekTimelineBody');
   bodyEl.innerHTML = daysHtml;
-  bodyEl.style.height = totalH+'px';
-
-  const innerEl = document.getElementById('weekZoomInner');
-  innerEl.style.height = totalH+'px';
-  innerEl.dataset.naturalHeight = totalH;
-  applyWeekZoom();
 
   bodyEl.querySelectorAll('.wt-block').forEach(b=>{
     b.addEventListener('click', ()=>{
@@ -1130,49 +1157,50 @@ function renderWeekTimeline(){
     });
   });
 
-  attachWeekPinchZoom();
+  attachWeekNavControls();
 }
 
-function applyWeekZoom(){
-  const inner = document.getElementById('weekZoomInner');
-  const sizer = document.getElementById('weekZoomSizer');
-  if(!inner || !sizer) return;
-  const naturalH = Number(inner.dataset.naturalHeight || 0);
-  inner.style.transform = `scaleY(${wtZoom})`;
-  sizer.style.height = (naturalH * wtZoom) + 'px';
+function changeWeek(delta){
+  weekOffset += delta;
+  renderWeekTimeline();
 }
 
-function wtTouchDist(t1, t2){ return Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY); }
+// 左右滑動切換上一週/下一週；點擊 ‹ › 按鈕也可切換
+function attachWeekNavControls(){
+  const prevBtn = document.getElementById('weekPrevBtn');
+  const nextBtn = document.getElementById('weekNextBtn');
+  if(prevBtn && !prevBtn.dataset.bound){ prevBtn.dataset.bound='1'; prevBtn.addEventListener('click', ()=>changeWeek(-1)); }
+  if(nextBtn && !nextBtn.dataset.bound){ nextBtn.dataset.bound='1'; nextBtn.addEventListener('click', ()=>changeWeek(1)); }
 
-// 雙指縮放：僅垂直方向自由縮放（放大列高與文字），水平方向永遠固定顯示完整一週七天，不會左右滑動
-function attachWeekPinchZoom(){
   const scrollEl = document.getElementById('weekTimelineScroll');
-  if(!scrollEl || scrollEl.dataset.pinchBound) return;
-  scrollEl.dataset.pinchBound = '1';
+  if(!scrollEl || scrollEl.dataset.swipeBound) return;
+  scrollEl.dataset.swipeBound = '1';
 
-  let startDist = null, startZoom = 1;
+  let startX = null, startY = null, tracking = false;
 
   scrollEl.addEventListener('touchstart', (e)=>{
-    if(e.touches.length === 2){
-      startDist = wtTouchDist(e.touches[0], e.touches[1]);
-      startZoom = wtZoom;
+    if(e.touches.length === 1){
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+      tracking = true;
+    } else {
+      tracking = false;
     }
   }, {passive:true});
 
-  scrollEl.addEventListener('touchmove', (e)=>{
-    if(e.touches.length === 2 && startDist){
-      e.preventDefault();
-      const d = wtTouchDist(e.touches[0], e.touches[1]);
-      let z = startZoom * (d / startDist);
-      z = Math.min(WT_ZOOM_MAX, Math.max(WT_ZOOM_MIN, z));
-      wtZoom = z;
-      applyWeekZoom();
-    }
-  }, {passive:false});
-
   scrollEl.addEventListener('touchend', (e)=>{
-    if(e.touches.length < 2) startDist = null;
-  });
+    if(!tracking || startX===null) return;
+    const endX = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0].clientX : startX;
+    const endY = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0].clientY : startY;
+    const dx = endX - startX;
+    const dy = endY - startY;
+    if(Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy)*1.5){
+      changeWeek(dx < 0 ? 1 : -1);
+    }
+    startX = null; startY = null; tracking = false;
+  }, {passive:true});
+
+  window.addEventListener('resize', ()=>{ if(scheduleMode==='week') renderWeekTimeline(); });
 }
 
 function openAddSlot(){
@@ -1562,25 +1590,36 @@ function openAddLedger(){
   setSheet(`
     <div class="sheet-title">新增記帳</div>
     <div class="view-toggle-row" style="padding:0 0 14px 0;">
-      <button type="button" class="view-toggle-btn active" id="ledgerModeIncomeBtn">收入（購課明細）</button>
+      <button type="button" class="view-toggle-btn active" id="ledgerModeIncomeBtn">收入</button>
       <button type="button" class="view-toggle-btn" id="ledgerModeExpenseBtn">支出</button>
     </div>
     <div id="ledgerIncomeFields">
-      <div class="form-row"><label>學員姓名</label>
-        <input type="text" class="form-input" id="ledgerStudentName" list="ledgerStudentList" placeholder="輸入或選擇學員姓名">
+      <div class="view-toggle-row" style="padding:0 0 12px 0;">
+        <button type="button" class="view-toggle-btn active" id="billModeQtyBtn">依堂數計費</button>
+        <button type="button" class="view-toggle-btn" id="billModeLumpBtn">整筆金額</button>
+      </div>
+      <p style="font-size:11px;color:var(--text-faint);margin:-8px 0 12px 2px;line-height:1.5;" id="billModeHint">適合私人教練依購買堂數計費。若您是領月薪、包月制、團體班或按次收費的教練，可切換「整筆金額」直接輸入收到的款項。</p>
+      <div class="form-row"><label>學員姓名（選填）</label>
+        <input type="text" class="form-input" id="ledgerStudentName" list="ledgerStudentList" placeholder="輸入或選擇學員姓名，團體班/薪資可留空">
         <datalist id="ledgerStudentList">${studentOptions}</datalist>
       </div>
       <div class="form-row"><label>交易日期</label><input type="date" class="form-input" id="ledgerDate" value="${todayIso}"></div>
       <div class="form-row"><label>收入項目</label><select class="form-input" id="ledgerItem">${itemOptions}</select></div>
-      <div class="form-row"><label>購買堂數</label><input type="number" class="form-input" id="ledgerQty" value="1" min="0"></div>
-      <div class="form-row"><label>單價 (NT$)</label><input type="number" class="form-input" id="ledgerUnitPrice" placeholder="例如：1500"></div>
-      <div class="form-row"><label>總金額 (NT$，自動計算)</label><input type="number" class="form-input" id="ledgerTotal" readonly style="opacity:0.7;"></div>
+      <div id="ledgerQtyFields">
+        <div class="form-row"><label>購買堂數</label><input type="number" class="form-input" id="ledgerQty" value="1" min="0"></div>
+        <div class="form-row"><label>單價 (NT$)</label><input type="number" class="form-input" id="ledgerUnitPrice" placeholder="例如：1500"></div>
+        <div class="form-row"><label>總金額 (NT$，自動計算)</label><input type="number" class="form-input" id="ledgerTotal" readonly style="opacity:0.7;"></div>
+      </div>
+      <div class="form-row hidden" id="ledgerLumpFields">
+        <label>收到的金額 (NT$)</label>
+        <input type="number" class="form-input" id="ledgerLumpAmount" placeholder="例如：月薪 32000 / 團體班場次費 2400">
+      </div>
     </div>
     <div id="ledgerExpenseFields" class="hidden">
       <div class="form-row"><label>支出日期</label><input type="date" class="form-input" id="ledgerExpenseDate" value="${todayIso}"></div>
       <div class="form-row"><label>金額 (NT$)</label><input type="number" class="form-input" id="ledgerExpenseAmount" placeholder="例如：500"></div>
     </div>
-    <div class="form-row"><label>備註（選填）</label><input type="text" class="form-input" id="ledgerNote" placeholder="例如：加購課程 / 場地費"></div>
+    <div class="form-row"><label>備註（選填）</label><input type="text" class="form-input" id="ledgerNote" placeholder="例如：加購課程 / 場地費 / 7月份薪資"></div>
     <div class="sheet-actions">
       <button class="sheet-btn ghost" id="cancelLedgerBtn">取消</button>
       <button class="sheet-btn primary" id="saveLedgerBtn">確認新增</button>
@@ -1589,12 +1628,29 @@ function openAddLedger(){
   openSheet();
 
   let ledgerMode = 'income';
+  let billMode = 'qty';
   const incomeFieldsEl = document.getElementById('ledgerIncomeFields');
   const expenseFieldsEl = document.getElementById('ledgerExpenseFields');
   const incomeBtn = document.getElementById('ledgerModeIncomeBtn');
   const expenseBtn = document.getElementById('ledgerModeExpenseBtn');
   incomeBtn.onclick = ()=>{ ledgerMode='income'; incomeBtn.classList.add('active'); expenseBtn.classList.remove('active'); incomeFieldsEl.classList.remove('hidden'); expenseFieldsEl.classList.add('hidden'); };
   expenseBtn.onclick = ()=>{ ledgerMode='expense'; expenseBtn.classList.add('active'); incomeBtn.classList.remove('active'); expenseFieldsEl.classList.remove('hidden'); incomeFieldsEl.classList.add('hidden'); };
+
+  const qtyFieldsEl = document.getElementById('ledgerQtyFields');
+  const lumpFieldsEl = document.getElementById('ledgerLumpFields');
+  const billModeHint = document.getElementById('billModeHint');
+  const billQtyBtn = document.getElementById('billModeQtyBtn');
+  const billLumpBtn = document.getElementById('billModeLumpBtn');
+  billQtyBtn.onclick = ()=>{
+    billMode='qty'; billQtyBtn.classList.add('active'); billLumpBtn.classList.remove('active');
+    qtyFieldsEl.classList.remove('hidden'); lumpFieldsEl.classList.add('hidden');
+    billModeHint.textContent = '適合私人教練依購買堂數計費。若您是領月薪、包月制、團體班或按次收費的教練，可切換「整筆金額」直接輸入收到的款項。';
+  };
+  billLumpBtn.onclick = ()=>{
+    billMode='lump'; billLumpBtn.classList.add('active'); billQtyBtn.classList.remove('active');
+    lumpFieldsEl.classList.remove('hidden'); qtyFieldsEl.classList.add('hidden');
+    billModeHint.textContent = '直接輸入收到的整筆金額，適合月薪／包月／團體班／按次收費／抽成等各種薪資制度，不需計算堂數與單價。';
+  };
 
   const qtyInput = document.getElementById('ledgerQty');
   const priceInput = document.getElementById('ledgerUnitPrice');
@@ -1610,18 +1666,26 @@ function openAddLedger(){
       const studentName = document.getElementById('ledgerStudentName').value.trim();
       const transactionDate = document.getElementById('ledgerDate').value;
       const incomeItem = document.getElementById('ledgerItem').value;
-      const quantity = Number(qtyInput.value)||0;
-      const unitPrice = Number(priceInput.value)||0;
-      const amount = quantity*unitPrice;
       const note = document.getElementById('ledgerNote').value.trim();
       if(!incomeItem) return showToast('請選擇收入項目');
-      if(!amount || amount <= 0) return showToast('請輸入正確的購買堂數與單價');
+
+      let quantity, unitPrice, amount;
+      if(billMode === 'qty'){
+        quantity = Number(qtyInput.value)||0;
+        unitPrice = Number(priceInput.value)||0;
+        amount = quantity*unitPrice;
+        if(!amount || amount <= 0) return showToast('請輸入正確的購買堂數與單價');
+      } else {
+        amount = Number(document.getElementById('ledgerLumpAmount').value)||0;
+        quantity = 0; unitPrice = 0;
+        if(!amount || amount <= 0) return showToast('請輸入正確的金額');
+      }
 
       db.collection('coaches').doc(currentUid).collection('ledger').add({
         type: 'income', studentName, transactionDate, incomeItem, quantity, unitPrice, amount, note,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       }).then(()=>{
-        closeSheet(); showToast('✅ 已新增購課明細，並自動累加至本月收入總表');
+        closeSheet(); showToast('✅ 已新增收入紀錄，並自動累加至本月收入總表');
       }).catch(err=>{
         showToast('❌ 新增失敗: ' + err.message);
       });
@@ -1698,6 +1762,50 @@ function closeSheet(){ document.getElementById('sheetOverlay').classList.remove(
 function showToast(text){ const t = document.getElementById('toast'); document.getElementById('toastText').textContent = text; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2000); }
 function confirmAction(t,d,c){ setSheet(`<div class="sheet-title">${escapeHtml(t)}</div><div class="sheet-sub">${escapeHtml(d)}</div><div class="sheet-actions"><button class="sheet-btn ghost" onclick="closeSheet()">取消</button><button class="sheet-btn danger" id="okConfirmBtn">確認</button></div>`); openSheet(); document.getElementById('okConfirmBtn').onclick = ()=>{ closeSheet(); c(); }; }
 
+function updateNotificationBadge(){
+  const badgeEl = document.querySelector('#bell-btn .badge');
+  if(!badgeEl) return;
+  const openCount = (allSlots||[]).filter(s => s.status === 'open').length;
+  if(openCount > 0){
+    badgeEl.textContent = openCount > 99 ? '99+' : String(openCount);
+    badgeEl.style.display = 'flex';
+  } else {
+    badgeEl.style.display = 'none';
+  }
+}
+
+function openNotifications(){
+  const recentBookings = (allSlots||[])
+    .filter(s => s.status === 'full')
+    .slice()
+    .sort((a,b) => (b.bookedAt?.seconds||0) - (a.bookedAt?.seconds||0))
+    .slice(0, 8);
+
+  const openCount = (allSlots||[]).filter(s => s.status === 'open').length;
+
+  let itemsHtml = '';
+  if(openCount > 0){
+    itemsHtml += `<div class="record-item"><span>🟢 目前有 <b>${openCount}</b> 個開放時段尚未被預約</span></div>`;
+  }
+  if(recentBookings.length === 0 && openCount === 0){
+    itemsHtml += `<div class="empty-hint">目前沒有新的通知</div>`;
+  } else if(recentBookings.length){
+    itemsHtml += recentBookings.map(s => `
+      <div class="record-item">
+        <span>📌 ${escapeHtml(s.studentName||'學員')} 已預約 ${escapeHtml(s.time||'')}（${escapeHtml(s.courseType||'')}）</span>
+      </div>
+    `).join('');
+  }
+
+  setSheet(`
+    <div class="sheet-title">🔔 通知</div>
+    <div class="student-record-box" style="max-height:340px;">${itemsHtml}</div>
+    <div class="sheet-actions"><button class="sheet-btn ghost" id="closeNotifBtn">關閉</button></div>
+  `);
+  openSheet();
+  document.getElementById('closeNotifBtn').onclick = closeSheet;
+}
+
 function switchView(view){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
@@ -1712,6 +1820,7 @@ document.querySelectorAll('.nav-item').forEach(item=>{ item.addEventListener('cl
 document.querySelectorAll('.view-toggle-btn').forEach(btn=>{ btn.addEventListener('click', ()=>switchScheduleMode(btn.dataset.mode)); });
 
 document.getElementById('fabAdd').addEventListener('click', openAddSlot);
+document.getElementById('bell-btn').addEventListener('click', openNotifications);
 document.getElementById('fabAddLedger').addEventListener('click', openAddLedger);
 document.getElementById('addStudentBtn').addEventListener('click', openAddStudent);
 document.getElementById('sheetOverlay').addEventListener('click',(e)=>{ if(e.target.id==='sheetOverlay') closeSheet(); });
