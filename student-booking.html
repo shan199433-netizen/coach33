@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>預約您的專屬課程</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap');
+:root{
+  --bg-base:#050507;
+  --bg-surface:#0f1015;
+  --accent:#e2f063; /* 亮黃綠色 */
+  --text-main:#ffffff;
+  --text-muted:#8a8d98;
+}
+body {
+  background-color: var(--bg-base);
+  color: var(--text-main);
+  font-family: 'Plus Jakarta Sans', 'Noto Sans TC', sans-serif;
+  margin: 0; padding: 20px;
+}
+.booking-container {
+  max-width: 500px;
+  margin: 0 auto;
+  background: var(--bg-surface);
+  border-radius: 24px;
+  padding: 24px;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+h2 { font-family: 'Manrope'; margin-top: 0; }
+.form-group { margin-bottom: 20px; }
+.form-group label { display: block; margin-bottom: 8px; color: var(--text-muted); font-size: 14px; }
+.form-group input, .form-group select {
+  width: 100%; padding: 12px; border-radius: 12px;
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+  color: var(--text-main); box-sizing: border-box; font-size: 16px;
+}
+.btn-submit {
+  width: 100%; padding: 16px; background: var(--accent); color: #000;
+  border: none; border-radius: 14px; font-weight: 700; font-size: 16px; cursor: pointer;
+  box-shadow: 0 8px 24px rgba(226,240,99,0.2);
+}
+/* Toast 提示框 */
+#toast{ position:fixed; bottom:30px; left:50%; transform:translateX(-50%) translateY(100px); background:rgba(255,255,255,0.95); color:#000; padding:12px 24px; border-radius:30px; font-weight:600; font-size:14px; box-shadow:0 10px 30px rgba(0,0,0,0.3); transition:transform 0.4s cubic-bezier(0.175,0.885,0.32,1.275); z-index:9999; pointer-events:none; text-align:center; min-width:200px; }
+#toast.show{ transform:translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="booking-container">
+  <h2 id="coachNameTitle">📅 線上預約課程</h2>
+  <p style="color:var(--text-muted); font-size:14px; margin-bottom:30px;">請選擇您想預約的時段，並填寫基本聯絡資料。</p>
+  
+  <form id="bookingForm">
+    <div class="form-group">
+      <label><i class="fa-regular fa-calendar-days"></i> 選擇可用課堂時段</label>
+      <select id="slotSelect" required>
+        <option value="">-- 請選擇時段 --</option>
+        </select>
+    </div>
+    
+    <div class="form-group">
+      <label><i class="fa-regular fa-user"></i> 學員真實姓名</label>
+      <input type="text" id="studentName" placeholder="請輸入您的本名" required>
+    </div>
+    
+    <div class="form-group">
+      <label><i class="fa-solid fa-mobile-screen-button"></i> 手機號碼（主要聯絡電話）</label>
+      <input type="tel" id="studentPhone" placeholder="例如：0912345678" pattern="[0-9]{10}" required>
+    </div>
+    
+    <button type="submit" class="btn-submit">確認送出預約</button>
+  </form>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// 初始化 Firebase (請替換為你自己的 Firebase 配置)
+const firebaseConfig = {
+  apiKey: "AIzaSyDyLoQO7XFM_csyy3I1vCXpsBnvSQhCQw0",
+  authDomain: "coach-db8f3.firebaseapp.com",
+  databaseURL: "https://coach-db8f3-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "coach-db8f3",
+  storageBucket: "coach-db8f3.appspot.com",
+  messagingSenderId: "973515119042",
+  appId: "1:973515119042:web:76b53ac2b6a154d106de5b"
+};firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+// 💡 關鍵：從網址列解析教練的 UID 參數 (?coach=xxxx)
+const urlParams = new URLSearchParams(window.location.search);
+const coachUid = urlParams.get('coach');
+
+if (!coachUid) {
+  alert('⚠️ 預約網址無效，請重新向教練索取正確的 LINE 約課連結。');
+} else {
+  loadCoachData();
+  loadAvailableSlots();
+}
+
+// 1. 載入教練名稱（增加親切感）
+function loadCoachData() {
+  db.collection('coaches').doc(coachUid).get().then(doc => {
+    if (doc.exists && doc.data().name) {
+      document.getElementById('coachNameTitle').innerText = `📅 預約 ${doc.data().name} 的課程`;
+    }
+  });
+}
+
+// 2. 抓取該教練目前所有狀態為 "open" (尚未被預約) 的時段
+function loadAvailableSlots() {
+  const selectEl = document.getElementById('slotSelect');
+  
+  // 假設你的時段存在：coaches/{coachUid}/slots
+  db.collection('coaches').doc(coachUid).collection('slots')
+    .where('status', '==', 'open')
+    .orderBy('time', 'asc')
+    .get()
+    .then(snapshot => {
+      if(snapshot.empty) {
+        selectEl.innerHTML = '<option value="">目前教練暫無開放空檔</option>';
+        return;
+      }
+      snapshot.forEach(doc => {
+        const slot = doc.data();
+        const option = document.createElement('option');
+        option.value = doc.id; // Firestore 的文件 ID
+        option.innerText = slot.time; // 例如顯示："2026/07/15 (三) 14:00 - 15:00"
+        selectEl.appendChild(option);
+      });
+    }).catch(err => {
+      console.error("載入時段失敗:", err);
+    });
+}
+
+// 3. 處理學員送出預約表單
+document.getElementById('bookingForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  
+  const slotId = document.getElementById('slotSelect').value;
+  const sName = document.getElementById('studentName').value.trim();
+  const sPhone = document.getElementById('studentPhone').value.trim();
+  
+  if(!slotId) {
+    showToast('❌ 請先選擇上課時段');
+    return;
+  }
+
+  // A. 更新該時段的狀態為 "full"，並存入預約人資訊
+  const slotRef = db.collection('coaches').doc(coachUid).collection('slots').doc(slotId);
+  
+  slotRef.update({
+    status: 'full',
+    studentName: sName,
+    studentPhone: sPhone,
+    bookedAt: firebase.firestore.FieldValue.serverTimestamp()
+  })
+  .then(() => {
+    // B. 自動比對或建立學員檔案
+    checkAndCreateStudentProfile(sName, sPhone);
+  })
+  .catch(err => {
+    showToast('❌ 預約失敗，該時段可能剛被別人搶先約走了！');
+  });
+});
+
+// 4. 自動檢查並在教練名單建立學員資料
+function checkAndCreateStudentProfile(name, phone) {
+  const studentsRef = db.collection('coaches').doc(coachUid).collection('students');
+  
+  // 用手機號碼去查查這個教練是不是本來就有這個學員
+  studentsRef.where('phone', '==', phone).get().then(snapshot => {
+    if (snapshot.empty) {
+      // 找不到這支電話，代表是新同學！自動幫教練建立新學員檔案
+      studentsRef.add({
+        name: name,
+        phone: phone,
+        totalLessons: 0,  // 預設堂數
+        remainingLessons: 0,
+        notes: '★ 系統自動建立（學員經由 LINE 網址首次預約）',
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      }).then(() => {
+        completeBookingSuccess();
+      });
+    } else {
+      // 老同學約課，不重複建立檔案，直接完成
+      completeBookingSuccess();
+    }
+  });
+}
+
+function completeBookingSuccess() {
+  showToast('🎉 預約成功！教練已收到您的預約。');
+  // 3秒後重新整理網頁（清除已選時段），或可以導向成功感謝頁面
+  setTimeout(() => {
+    window.location.reload();
+  }, 2500);
+}
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.innerText = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>FitSync 教練同步控制台 (管理端)</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#050507">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap');
+
+:root{
+  --bg-base:#050507;
+  --bg-card:#0e0e12;
+  --bg-card-hover:#16161d;
+  --bg-elevated:#141419;
+  --text-main:#fafafa;
+  --text-muted:#9a9aa5;
+  --text-faint:#5c5c66;
+  --pink-light:#ffcad3;
+  --pink-main:#ff97b7;
+  --pink-deep:#ff5c90;
+  --accent-green:#00f576;
+  --accent-red:#ff5c6c;
+  --accent-blue:#7db8ff;
+  --accent-purple:#c39bff;
+  --border-color:rgba(255,202,211,0.13);
+  --border-soft:rgba(255,255,255,0.06);
+}
+
+*,*::before,*::after{
+  box-sizing:border-box;margin:0;padding:0;
+  font-family:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  -webkit-tap-highlight-color:transparent;
+}
+
+html,body{overscroll-behavior:none;}
+
+body{
+  background:var(--bg-base);
+  color:var(--text-main);
+  display:flex;justify-content:center;align-items:center;
+  min-height:100vh;overflow-x:hidden;
+}
+
+.num{font-family:'Manrope',sans-serif;font-variant-numeric:tabular-nums;}
+
+/* ===== 登入 / 註冊 介面樣式 ===== */
+.auth-wrapper {
+  width: 100%; max-width: 412px; padding: 30px 24px;
+  background: var(--bg-card); border-radius: 28px;
+  border: 1px solid var(--border-color); text-align: center;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+}
+.auth-logo { font-size: 32px; color: var(--pink-main); margin-bottom: 10px; font-weight: 800; }
+.auth-box input { width: 100%; padding: 14px; margin-bottom: 12px; background: var(--bg-elevated); border: 1px solid var(--border-soft); border-radius: 12px; color: #fff; outline: none; font-size: 14px; }
+.auth-box input:focus { border-color: var(--pink-main); }
+.auth-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, var(--pink-main), var(--pink-deep)); border: none; border-radius: 12px; color: #050507; font-weight: 700; font-size: 15px; cursor: pointer; margin-top: 8px; box-shadow: 0 4px 15px rgba(255,151,183,0.3); }
+.auth-btn:active { transform: scale(0.98); }
+.auth-switch { color: var(--text-muted); font-size: 13px; margin-top: 18px; cursor: pointer; text-decoration: underline; }
+
+/* ===== Coach UI 容器 ===== */
+.phone-container{
+  width:100%;max-width:412px;height:100vh;max-height:890px;
+  background:var(--bg-base);
+  position:relative;display:flex;flex-direction:column;overflow:hidden;
+  box-shadow:0 25px 60px -12px rgba(0,0,0,0.8);
+  border:1px solid rgba(255,255,255,0.06);
+}
+
+@media (min-width:450px){
+  .phone-container{border-radius:44px;height:874px;border:8px solid #17171d;}
+  .header{border-radius:36px 36px 0 0;}
+}
+
+.hidden { display: none !important; }
+
+/* ===== 核心排版樣式 ===== */
+.header{ padding:18px 20px 14px 20px; display:flex;justify-content:space-between;align-items:center; background:rgba(8,8,10,0.9);backdrop-filter:blur(14px); z-index:30;border-bottom:1px solid var(--border-color); flex-shrink:0; }
+.coach-profile{display:flex;align-items:center;gap:12px;}
+.coach-avatar{ width:46px;height:46px;border-radius:15px; background:linear-gradient(135deg,var(--pink-deep),var(--pink-main)); display:flex;justify-content:center;align-items:center;color:#0b0b0e;font-size:19px; box-shadow:0 0 16px rgba(255,92,144,0.45);flex-shrink:0; }
+.coach-info h1{font-size:15px;font-weight:700;letter-spacing:-0.2px;}
+.coach-info p{font-size:11.5px;color:var(--pink-light);display:flex;align-items:center;gap:5px;margin-top:2px;}
+.header-actions{display:flex;gap:9px;}
+.icon-btn{ position:relative;width:38px;height:38px;border-radius:12px; background:var(--bg-card);border:1px solid var(--border-color);color:var(--text-muted); display:flex;justify-content:center;align-items:center;cursor:pointer; transition:all .18s ease;font-size:15px; }
+.icon-btn:active{background:var(--pink-main);color:#000;box-shadow:0 0 12px rgba(255,151,183,0.5);transform:scale(0.94);}
+.icon-btn.gear-active{background:var(--pink-main);color:#050507;box-shadow:0 0 12px rgba(255,151,183,0.5);}
+.icon-btn .badge{ position:absolute;top:-4px;right:-4px;min-width:16px;height:16px;padding:0 4px; background:var(--pink-deep);border-radius:8px;font-size:9.5px;font-weight:700; display:flex;align-items:center;justify-content:center;box-shadow:0 0 6px rgba(255,92,144,0.6); border:2px solid var(--bg-base); }
+.stats-bar{ padding:12px 20px;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none; background:rgba(14,14,18,0.55);border-bottom:1px solid var(--border-color);flex-shrink:0; }
+.stats-bar::-webkit-scrollbar{display:none;}
+.stat-pill{ display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--text-muted); background:var(--bg-card);padding:7px 12px;border-radius:20px;border:1px solid var(--border-color); white-space:nowrap;flex-shrink:0; }
+.stat-pill i{color:var(--pink-main);font-size:11px;}
+.stat-pill b{color:var(--text-main);font-weight:700;}
+.live-badge{ font-size:10.5px;color:var(--pink-light);background:rgba(255,92,144,0.13); padding:6px 11px;border-radius:20px;border:1px solid var(--pink-deep); display:flex;align-items:center;gap:6px;white-space:nowrap;flex-shrink:0; }
+.live-dot{width:6px;height:6px;background:var(--accent-green);border-radius:50%; box-shadow:0 0 6px var(--accent-green);animation:pulse 1.6s infinite;}
+@keyframes pulse{0%{transform:scale(0.9);opacity:.7;}50%{transform:scale(1.25);opacity:1;}100%{transform:scale(0.9);opacity:.7;}}
+.view{display:none;flex:1;min-height:0;flex-direction:column;}
+.view.active{display:flex;}
+.date-scroller{padding:14px 16px 12px 16px;display:flex;gap:6px;flex-shrink:0;}
+.date-card{ flex:1;min-width:0;height:64px;border-radius:14px;background:var(--bg-card); border:1px solid var(--border-color);display:flex;flex-direction:column;justify-content:center; align-items:center;cursor:pointer;transition:all .22s cubic-bezier(.4,0,.2,1);position:relative; }
+.date-card .day{font-size:9.5px;color:var(--text-muted);margin-bottom:3px;}
+.date-card .dnum{font-size:14px;font-weight:700;color:var(--pink-light);}
+.date-card .dot{position:absolute;bottom:6px;width:4px;height:4px;border-radius:50%;background:var(--accent-green);}
+.date-card.active{ background:linear-gradient(135deg,var(--pink-light),var(--pink-main),var(--pink-deep)); border-color:transparent;box-shadow:0 0 20px rgba(255,151,183,0.4);transform:translateY(-2px); }
+.date-card.active .day,.date-card.active .dnum{color:#0b0b0e;font-weight:800;}
+.date-card.active .dot{background:#0b0b0e;}
+.content-area{flex:1;overflow-y:auto;padding:6px 20px 100px 20px;}
+.section-header{ font-size:12.5px;color:var(--pink-light);font-weight:700;letter-spacing:.2px; margin:12px 0 10px 0;display:flex;justify-content:space-between;align-items:center; }
+.section-header .muted{color:var(--text-faint);font-weight:500;}
+.empty-state{ text-align:center;padding:50px 20px;color:var(--text-faint); }
+.empty-state i{font-size:28px;margin-bottom:10px;color:var(--text-faint);display:block;}
+.empty-state p{font-size:12.5px;}
+.slot-card{ background:var(--bg-card);border-radius:18px;margin-bottom:10px;border:1px solid var(--border-color); display:flex;align-items:stretch;overflow:hidden;cursor:pointer;transition:background .18s ease; }
+.slot-card:active{background:var(--bg-card-hover);}
+.slot-stripe{width:5px;flex-shrink:0;}
+.slot-card.open .slot-stripe{background:var(--pink-main);box-shadow:0 0 10px var(--pink-main);}
+.slot-card.full .slot-stripe{background:var(--accent-green);box-shadow:0 0 10px var(--accent-green);}
+.slot-card.closed .slot-stripe{background:#3a3a42;}
+.slot-body{flex:1;padding:12px 12px;display:flex;align-items:center;gap:10px;min-width:0;}
+.slot-avatar{ width:36px;height:36px;border-radius:11px;flex-shrink:0; display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700; background:var(--bg-elevated);color:var(--text-muted);border:1px solid var(--border-soft); }
+.slot-card.full .slot-avatar{background:rgba(0,245,118,0.1);color:var(--accent-green);border-color:rgba(0,245,118,0.25);}
+.slot-card.open .slot-avatar{background:rgba(255,151,183,0.1);color:var(--pink-main);border-color:rgba(255,151,183,0.25);}
+.slot-text{min-width:0;flex:1;}
+.slot-time{font-size:13px;font-weight:700;color:var(--text-main);}
+.slot-detail{font-size:11.5px;color:var(--text-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.slot-card.open .slot-detail{color:var(--pink-main);}
+.slot-card.closed .slot-detail{color:var(--text-faint);}
+.slot-action{ display:flex;align-items:center;gap:5px;padding:0 14px;margin:0;flex-shrink:0; border:none;font-size:11px;font-weight:700;cursor:pointer;background:transparent;color:var(--text-muted); }
+.slot-action i{font-size:11px;}
+.slot-card.open .slot-action{color:var(--pink-main);}
+.slot-card.full .slot-action{color:var(--text-muted);}
+.slot-card.closed .slot-action{color:var(--text-faint);}
+.fab{ position:absolute;bottom:92px;right:20px;width:54px;height:54px;border-radius:18px; background:linear-gradient(135deg,var(--pink-light),var(--pink-deep));color:#0b0b0e; display:flex;justify-content:center;align-items:center;font-size:20px;cursor:pointer; box-shadow:0 6px 24px rgba(255,92,144,0.55);border:none;z-index:20;transition:transform .15s; }
+.fab:active{transform:scale(0.9);}
+.search-row{margin:14px 20px 6px 20px;display:flex;gap:9px;flex-shrink:0;}
+.search-bar{ flex:1;display:flex;align-items:center;gap:9px; background:var(--bg-card);border:1px solid var(--border-color);border-radius:14px;padding:10px 14px; }
+.search-bar i{color:var(--text-faint);font-size:13px;}
+.search-bar input{ flex:1;background:transparent;border:none;outline:none;color:var(--text-main);font-size:13px; }
+.search-bar input::placeholder{color:var(--text-faint);}
+.add-student-btn{ flex-shrink:0;width:44px;height:44px;border-radius:14px;background:var(--pink-main);color:#050507; border:none;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer; }
+.add-student-btn:active{transform:scale(0.92);}
+.student-card{ display:flex;align-items:center;gap:10px;background:var(--bg-card);border:1px solid var(--border-color); border-radius:16px;padding:12px 12px;margin-bottom:10px;cursor:pointer;transition:background .18s; }
+.student-card:active{background:var(--bg-card-hover);}
+.student-avatar{ width:42px;height:42px;border-radius:13px;flex-shrink:0; background:linear-gradient(135deg,#2b2b33,#1a1a20);display:flex;align-items:center;justify-content:center; font-size:14px;font-weight:700;color:var(--pink-light);border:1px solid var(--border-soft); }
+.student-info{flex:1;min-width:0;}
+.student-info h3{font-size:13.5px;font-weight:700;}
+.student-info p{font-size:11px;color:var(--text-muted);margin-top:2px;}
+.hero-row{display:flex;gap:10px;margin:14px 20px 4px 20px;flex-shrink:0;}
+.hero-card{ flex:1;min-width:0;background:linear-gradient(160deg,var(--bg-card),var(--bg-elevated)); border:1px solid var(--border-color);border-radius:20px;padding:16px 16px;position:relative;overflow:hidden; }
+.hero-card::after{ content:'';position:absolute;top:-34px;right:-34px;width:110px;height:110px;border-radius:50%; background:radial-gradient(circle,rgba(255,151,183,0.18),transparent 70%); }
+.hero-card .hc-label{font-size:11px;color:var(--text-muted);display:flex;align-items:center;gap:6px;position:relative;z-index:1;}
+.hero-card .hc-value{font-size:26px;font-weight:800;margin-top:8px;letter-spacing:-0.5px;position:relative;z-index:1;}
+.hero-card .hc-value small{font-size:12.5px;font-weight:600;color:var(--text-muted);margin-left:3px;}
+.hero-card .hc-sub{font-size:11px;margin-top:6px;position:relative;z-index:1;display:flex;align-items:center;gap:4px;}
+.hero-card .hc-sub.trend{color:var(--accent-green);}
+.hero-card .hc-sub.money{color:var(--pink-light);font-weight:700;}
+.goal-bar{height:6px;border-radius:4px;background:rgba(255,255,255,0.08);margin-top:10px;overflow:hidden;position:relative;z-index:1;}
+.goal-bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--pink-light),var(--pink-deep));transition:width .3s ease;}
+.hc-goal{font-size:10px;color:var(--text-faint);margin-top:6px;position:relative;z-index:1;}
+.mini-stats{display:flex;gap:10px;margin:12px 20px;flex-shrink:0;}
+.mini-stats .mini-stat{ flex:1;background:var(--bg-card);border:1px solid var(--border-color);border-radius:14px;padding:10px 12px; }
+.mini-stats .mini-stat .v{font-size:17px;font-weight:800;}
+.mini-stats .mini-stat .l{font-size:10.5px;color:var(--text-muted);margin-top:2px;}
+.bar-chart{ margin:6px 20px 4px 20px;background:var(--bg-card);border:1px solid var(--border-color);border-radius:16px; padding:16px 16px 12px 16px;flex-shrink:0; }
+.bar-chart .chart-title{font-size:11.5px;color:var(--text-muted);margin-bottom:12px;font-weight:600;}
+.bars{display:flex;align-items:flex-end;justify-content:space-between;height:70px;gap:6px;}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;}
+.bar-fill{ width:100%;border-radius:6px 6px 3px 3px;background:linear-gradient(180deg,var(--pink-light),var(--pink-deep)); box-shadow:0 0 8px rgba(255,151,183,0.3);min-height:4px; }
+.bar-col.today .bar-fill{background:linear-gradient(180deg,var(--accent-green),#00b558);box-shadow:0 0 8px rgba(0,245,118,0.35);}
+.bar-col span{font-size:9.5px;color:var(--text-faint);}
+.ledger-list{padding:2px 20px 100px 20px;}
+.settings-scroll{flex:1;overflow-y:auto;padding:14px 20px 100px 20px;}
+.settings-group{margin-bottom:18px;}
+.settings-group h3{font-size:11px;color:var(--text-faint);font-weight:700;letter-spacing:.3px;text-transform:uppercase;margin-bottom:8px;padding-left:4px;}
+.settings-row{ display:flex;align-items:center;gap:12px;background:var(--bg-card);border:1px solid var(--border-color); padding:13px 14px;cursor:pointer;transition:background .15s; }
+.settings-row:first-child{border-radius:16px 16px 0 0;}
+.settings-row:last-child{border-radius:0 0 16px 16px;}
+.settings-row:only-child{border-radius:16px;}
+.settings-row + .settings-row{border-top:none;}
+.settings-row:active{background:var(--bg-card-hover);}
+.settings-icon{ width:34px;height:34px;border-radius:11px;background:var(--bg-elevated);color:var(--pink-main); display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;border:1px solid var(--border-soft); }
+.settings-main{flex:1;min-width:0;}
+.settings-main h4{font-size:13px;font-weight:600;}
+.settings-main p{font-size:10.5px;color:var(--text-muted);margin-top:1px;}
+.settings-chev{color:var(--text-faint);font-size:12px;flex-shrink:0;}
+.manage-card{background:var(--bg-card);border:1px solid var(--border-color);border-radius:16px;padding:14px;}
+.link-row{ display:flex;align-items:center;gap:10px;background:var(--bg-card);border:1px solid var(--border-color); border-radius:16px;padding:12px 14px; }
+.link-row input{ flex:1;background:transparent;border:none;outline:none;color:var(--text-muted);font-size:11.5px;min-width:0; }
+.copy-btn{ flex-shrink:0;background:var(--pink-main);color:#050507;border:none;border-radius:10px; padding:8px 13px;font-size:11.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px; }
+.copy-btn:active{transform:scale(0.95);}
+.bottom-nav{ position:absolute;bottom:0;left:0;width:100%;height:74px;background:rgba(8,8,10,0.92); backdrop-filter:blur(16px);border-top:1px solid var(--border-color); display:flex;justify-content:space-around;align-items:center;z-index:25;padding-bottom:6px;flex-shrink:0; }
+.nav-item{ display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--text-muted); cursor:pointer;font-size:10.5px;font-weight:600;transition:color .2s;width:64px; }
+.nav-item i{font-size:18px;transition:transform .15s;}
+.nav-item.active{color:var(--pink-main);}
+.nav-item.active i{transform:translateY(-1px);}
+.nav-item:active i{transform:scale(0.88);}
+.sheet-overlay{ position:absolute;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px); opacity:0;pointer-events:none;transition:opacity .25s ease;z-index:100; }
+.sheet-overlay.show{opacity:1;pointer-events:auto;}
+.sheet{ position:absolute;left:0;right:0;bottom:0;background:var(--bg-card); border-radius:24px 24px 0 0;padding:10px 20px calc(24px + env(safe-area-inset-bottom,0px)) 20px; border-top:1px solid var(--border-color); transform:translateY(100%);transition:transform .32s cubic-bezier(.32,.72,0,1); max-height:82%;overflow-y:auto; }
+.sheet-overlay.show .sheet{transform:translateY(0);}
+.sheet-handle{width:36px;height:4px;background:var(--border-soft);border-radius:3px;margin:2px auto 16px auto;}
+.sheet-title{font-size:16px;font-weight:800;margin-bottom:4px;}
+.sheet-sub{font-size:12px;color:var(--text-muted);margin-bottom:18px;line-height:1.5;}
+.form-row{margin-bottom:14px;}
+.form-row label{font-size:11.5px;color:var(--text-muted);font-weight:600;margin-bottom:7px;display:block;}
+.form-input{ width:100%;background:var(--bg-elevated);border:1px solid var(--border-soft);border-radius:12px; padding:11px 13px;color:var(--text-main);font-size:13px;outline:none; }
+.form-input:focus{border-color:var(--pink-main);}
+.sheet-actions{display:flex;gap:10px;margin-top:6px;}
+.sheet-btn{ flex:1;padding:13px;border-radius:14px;font-size:13.5px;font-weight:700;cursor:pointer;border:none; display:flex;align-items:center;justify-content:center;gap:7px; }
+.sheet-btn.ghost{background:var(--bg-elevated);color:var(--text-muted);border:1px solid var(--border-soft);}
+.sheet-btn.primary{background:var(--pink-main);color:#050507;box-shadow:0 4px 16px rgba(255,151,183,0.35);}
+.sheet-btn.danger{background:rgba(255,92,108,0.12);color:var(--accent-red);border:1px solid rgba(255,92,108,0.3);}
+.sheet-btn:active{transform:scale(0.97);}
+.toast{ position:absolute;bottom:96px;left:50%;transform:translateX(-50%) translateY(20px); background:var(--bg-elevated);border:1px solid var(--border-color);color:var(--text-main); padding:11px 18px;border-radius:14px;font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:8px; box-shadow:0 8px 24px rgba(0,0,0,0.5);opacity:0;pointer-events:none;transition:all .28s cubic-bezier(.34,1.56,.64,1);z-index:200; white-space:nowrap; }
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast i{color:var(--accent-green);}
+</style>
+
+<script>
+  const firebaseConfig = {
+  apiKey: "AIzaSyBntQjf3bfUMup3Wue1zO4dqcyrRDjKTf8",
+  authDomain: "cocah-7dc25.firebaseapp.com",
+  projectId: "cocah-7dc25",
+  storageBucket: "cocah-7dc25.firebasestorage.app",
+  messagingSenderId: "258674160798",
+  appId: "1:258674160798:web:29e01d9b1f2dba7964b78f"
+};
+
+  // 初始化 Firebase
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+</script>
+</head>
+<body>
+
+<div id="auth-container" class="auth-wrapper">
+  <div class="auth-logo">FitSync</div>
+  <div class="auth-box">
+    <h3 id="auth-title" style="margin-bottom:16px; font-size:16px;">教練管理系統</h3>
+    <input type="email" id="auth-email" placeholder="輸入電子郵件 (Email)">
+    <input type="password" id="auth-password" placeholder="輸入密碼 (Password)">
+    <button class="auth-btn" id="auth-submit-btn" onclick="handleAuthSubmit()">登入後台</button>
+    <div id="auth-switch-text" class="auth-switch" onclick="toggleAuthMode()">還沒有帳號？註冊新教練帳號</div>
+  </div>
+</div>
+
+<div id="coach-app" class="phone-container hidden">
+
+  <div class="header">
+    <div class="coach-profile">
+      <div class="coach-avatar"><i class="fa-solid fa-dumbbell"></i></div>
+      <div class="coach-info">
+        <h1 id="top-coach-name">教練載入中...</h1>
+        <p><i class="fa-solid fa-bolt"></i> 營運中</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <div class="icon-btn" id="bell-btn"><i class="fa-regular fa-bell"></i><span class="badge">2</span></div>
+      <div class="icon-btn" id="gear-btn"><i class="fa-solid fa-gear"></i></div>
+    </div>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat-pill"><i class="fa-solid fa-calendar-check"></i>今日預約 <b class="num" id="todayCount">0</b> 堂</div>
+    <div class="stat-pill"><i class="fa-solid fa-clipboard-check"></i>本月已上課 <b class="num" id="monthlySessionsTop">0</b> 堂</div>
+    <div class="live-badge"><div class="live-dot"></div>雲端資料連線中</div>
+  </div>
+
+  <div class="view active" id="view-schedule">
+    <div class="date-scroller" id="dateScroller"></div>
+    <div class="content-area">
+      <div class="section-header">
+        <span>時段清單</span>
+        <span class="muted" id="scheduleDateLabel">07月14日（週二）</span>
+      </div>
+      <div id="slotList"></div>
+    </div>
+    <button class="fab" id="fabAdd"><i class="fa-solid fa-plus"></i></button>
+  </div>
+
+  <div class="view" id="view-students">
+    <div class="search-row">
+      <div class="search-bar">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="studentSearch" placeholder="搜尋學員姓名/手機">
+      </div>
+      <button class="add-student-btn" id="addStudentBtn"><i class="fa-solid fa-plus"></i></button>
+    </div>
+    <div class="content-area" style="padding-top:6px;" id="studentList"></div>
+  </div>
+
+  <div class="view" id="view-stats">
+    <div class="content-area" style="padding:0 0 100px 0;">
+      <div class="hero-row">
+        <div class="hero-card">
+          <div class="hc-label"><i class="fa-solid fa-clipboard-check"></i>本月已上課</div>
+          <div class="hc-value"><span class="num" id="heroSessionsVal">0</span><small>堂</small></div>
+          <div class="hc-sub trend"><i class="fa-solid fa-arrow-trend-up"></i>較上月 +4 堂</div>
+          <div class="goal-bar"><div class="goal-bar-fill" id="heroSessionsBar" style="width:0%;"></div></div>
+          <div class="hc-goal" id="heroSessionsGoal"></div>
+        </div>
+        <div class="hero-card">
+          <div class="hc-label"><i class="fa-solid fa-tags"></i>本月銷售</div>
+          <div class="hc-value"><span class="num" id="heroSalesCountVal">0</span><small>堂</small></div>
+          <div class="hc-sub money" id="heroSalesAmountVal">NT$0</div>
+          <div class="goal-bar"><div class="goal-bar-fill" id="heroSalesBar" style="width:0%;"></div></div>
+          <div class="hc-goal" id="heroSalesGoal"></div>
+        </div>
+      </div>
+      <div class="mini-stats">
+        <div class="mini-stat"><div class="v num">6</div><div class="l">待完成堂數</div></div>
+        <div class="mini-stat"><div class="v num">1,314</div><div class="l">平均堂費</div></div>
+      </div>
+      <div class="bar-chart">
+        <div class="chart-title">近 7 日營收（NT$）</div>
+        <div class="bars" id="weekBars"></div>
+      </div>
+      <div class="section-header" style="margin:18px 20px 8px 20px;"><span>最近紀錄</span><span class="muted">記帳明細</span></div>
+      <div class="ledger-list" id="ledgerList"></div>
+    </div>
+    <button class="fab" id="fabAddLedger"><i class="fa-solid fa-plus"></i></button>
+  </div>
+
+  <div class="view" id="view-settings">
+    <div class="settings-scroll">
+      <div class="settings-group">
+        <h3>學員免登入約課連結</h3>
+        <div class="link-row">
+          <input type="text" id="bookingLink" value="產生地網址中..." readonly>
+          <button class="copy-btn" id="copyLinkBtn"><i class="fa-solid fa-copy"></i>複製連結</button>
+        </div>
+        <p style="color:var(--text-faint); font-size:11px; padding: 6px 4px 0 4px; line-height: 1.4;">
+          📌 複製此網址並放在 LINE 官方帳號的圖文選單。學員點擊後即可免帳密填名預約，預約成功後資料會直接連動至此。
+        </p>
+      </div>
+
+      <div class="settings-group">
+        <h3>教練資訊</h3>
+        <div class="settings-row" onclick="openEditProfile()">
+          <div class="settings-icon"><i class="fa-solid fa-user-pen"></i></div>
+          <div class="settings-main"><h4>編輯個人資料</h4><p>姓名、專長標籤</p></div>
+          <i class="fa-solid fa-chevron-right settings-chev"></i>
+        </div>
+      </div>
+      <div class="settings-group">
+        <h3>可預約時段模版</h3>
+        <div class="week-list" id="weekGrid"></div>
+      </div>
+      <div class="settings-group">
+        <h3>課程種類</h3>
+        <div class="manage-card" id="courseTypeManage"></div>
+      </div>
+      <div class="settings-group">
+        <h3>授課地點</h3>
+        <div class="manage-card" id="locationManage"></div>
+      </div>
+      <div class="settings-group">
+        <h3>其他</h3>
+        <div class="settings-row" style="margin-top:10px;border-radius:16px;" onclick="confirmAction('登出帳號','確定要登出 FitSync 嗎？',() => auth.signOut(),'登出','fa-right-from-bracket')">
+          <div class="settings-icon" style="color:var(--accent-red);"><i class="fa-solid fa-right-from-bracket"></i></div>
+          <div class="settings-main"><h4 style="color:var(--accent-red);">登出</h4><p>結束目前的管理登入狀態</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <div class="nav-item active" data-view="schedule"><i class="fa-solid fa-calendar-days"></i><span>行程</span></div>
+    <div class="nav-item" data-view="students"><i class="fa-solid fa-user-group"></i><span>學員</span></div>
+    <div class="nav-item" data-view="stats"><i class="fa-solid fa-wallet"></i><span>記帳</span></div>
+  </div>
+
+  <div class="sheet-overlay" id="sheetOverlay">
+    <div class="sheet" id="sheetBody"></div>
+  </div>
+
+  <div class="toast" id="toast"><i class="fa-solid fa-circle-check"></i><span id="toastText">已完成</span></div>
+</div>
+
+<script>
+let isSignUpMode = false;
+let currentUid = null;
+
+const dateList = [{key:'07-13', day:'一', num:13},{key:'07-14', day:'二', num:14},{key:'07-15', day:'三', num:15},{key:'07-16', day:'四', num:16},{key:'07-17', day:'五', num:17},{key:'07-18', day:'六', num:18},{key:'07-19', day:'日', num:19}];
+let activeDateKey = '07-14';
+let courseTypes = ['重量訓練','核心雕塑','有氧體能','體態雕塑','筋膜放鬆'];
+let locations = ['A教室（信義館）','B教室（大安館）'];
+let coachProfile = { name:'新教練 Ray', specialties:['重量訓練'] };
+let students = [];
+let weekBarData = [{label:'一',value:2400},{label:'二',value:3200},{label:'三',value:1800},{label:'四',value:2600},{label:'五',value:4200},{label:'六',value:0},{label:'日',value:0}];
+let monthlyCompletedSessions = 18;
+
+function toggleAuthMode() {
+  isSignUpMode = !isSignUpMode;
+  document.getElementById('auth-title').innerText = isSignUpMode ? `註冊新教練帳號` : `教練登入系統`;
+  document.getElementById('auth-submit-btn').innerText = isSignUpMode ? '註冊並建立控制台' : '登入後台';
+  document.getElementById('auth-switch-text').innerText = isSignUpMode ? `已有帳號？點此返回登入` : `還沒有帳號？註冊新教練帳號`;
+}
+
+/* 核心身份驗證與 Firebase 註冊登入 */
+function handleAuthSubmit() {
+  const email = document.getElementById('auth-email').value;
+  const password = document.getElementById('auth-password').value;
+  if(!email || !password) return alert('請完整填寫信箱與密碼！');
+
+  if(isSignUpMode) {
+    auth.createUserWithEmailAndPassword(email, password)
+      .then((cred) => {
+        // 在基本 users 表中註記為教練
+        db.collection("users").doc(cred.user.uid).set({ role: 'coach', email: email });
+        // 建立初始教練檔案
+        db.collection("coaches").doc(cred.user.uid).set({ name: '未命名教練', email: email });
+        alert('教練帳號註冊成功！');
+      }).catch(err => alert('註冊失敗: ' + err.message));
+  } else {
+    auth.signInWithEmailAndPassword(email, password)
+      .catch(err => alert('登入失敗: ' + err.message));
+  }
+}
+
+/* 監聽全球登入狀態 */
+auth.onAuthStateChanged(user => {
+  const authUI = document.getElementById('auth-container');
+  const coachUI = document.getElementById('coach-app');
+  
+  if (user) {
+    currentUid = user.uid;
+    authUI.classList.add('hidden');
+    coachUI.classList.remove('hidden');
+
+    // 🔗 核心功能：動態注入該教練獨一無二的免登入 LINE 約課網址
+    // 假設你的學員預約網頁叫 student-booking.html
+    const generatedUrl = `${window.location.origin}/student-booking.html?coach=${currentUid}`;
+    document.getElementById('bookingLink').value = generatedUrl;
+    
+    // 一鍵複製邏輯
+    document.getElementById('copyLinkBtn').onclick = () => {
+      const linkInput = document.getElementById('bookingLink');
+      linkInput.select();
+      linkInput.setSelectionRange(0, 99999);
+      navigator.clipboard.writeText(linkInput.value).then(() => {
+        showToast('📋 約課網址已複製，可貼至 LINE 選單');
+      });
+    };
+
+    syncCoachCloudData();
+  } else {
+    currentUid = null;
+    authUI.classList.remove('hidden');
+    coachUI.classList.add('hidden');
+  }
+});
+
+/* 即時同步該教練專屬的雲端資料庫資料 */
+function syncCoachCloudData() {
+  // 1. 同步該教練的名單
+  db.collection("coaches").doc(currentUid).collection("students")
+    .onSnapshot((snapshot) => {
+      students = [];
+      snapshot.forEach(doc => students.push({id: doc.id, ...doc.data()}));
+      renderStudents();
+    });
+
+  // 2. 同步教練個人資料
+  db.collection("coaches").doc(currentUid).onSnapshot(doc => {
+    if(doc.exists) {
+      coachProfile = doc.data();
+      document.getElementById('top-coach-name').textContent = coachProfile.name || "未設定教練";
+    }
+  });
+  
+  renderDateScroller(); renderSlots(); renderBars(); renderLedger(); renderWeekList();
+  renderManageList('courseTypeManage', courseTypes);
+  renderManageList('locationManage', locations);
+  renderTopStats();
+}
+
+function renderTopStats(){ document.getElementById('todayCount').textContent = 0; document.getElementById('monthlySessionsTop').textContent = monthlyCompletedSessions; }
+function renderDateScroller(){ const el = document.getElementById('dateScroller'); el.innerHTML = dateList.map(d=>{ return `<div class="date-card ${d.key===activeDateKey?'active':''}" data-key="${d.key}"><span class="day">${d.day}</span><span class="dnum num">${d.num}</span></div>`; }).join(''); el.querySelectorAll('.date-card').forEach(c=>{ c.addEventListener('click',()=>{ activeDateKey = c.dataset.key; renderDateScroller(); renderSlots(); }); }); }
+function renderSlots(){ const d = dateList.find(x=>x.key===activeDateKey); document.getElementById('scheduleDateLabel').textContent = `07月${d.num}日（週${d.day}）`; const list = document.getElementById('slotList'); list.innerHTML = `<div class="empty-state"><i class="fa-regular fa-calendar"></i><p>這天還沒有安排任何時段<br>點右下角「＋」新增可預約時段</p></div>`; }
+function openAddSlot(){ showToast('功能整合成功，隨時可進行雲端欄位對接！'); }
+
+/* 雲端資料庫連動：手動新增學員 */
+function openAddStudent(){
+  setSheet(`
+    <div class="sheet-title">手動建立學員</div>
+    <div class="form-row"><label>學員姓名</label><input type="text" class="form-input" id="stuName" placeholder="請輸入學員姓名"></div>
+    <div class="form-row"><label>手機號碼 (用於系統比對代碼)</label><input type="tel" class="form-input" id="stuPhone" placeholder="例如：0912345678"></div>
+    <div class="sheet-actions">
+      <button class="sheet-btn ghost" id="cancelStuBtn">取消</button>
+      <button class="sheet-btn primary" id="saveStuBtn">確認新增</button>
+    </div>
+  `);
+  openSheet();
+  document.getElementById('cancelStuBtn').onclick = closeSheet;
+  document.getElementById('saveStuBtn').onclick = ()=>{
+    const name = document.getElementById('stuName').value.trim();
+    const phone = document.getElementById('stuPhone').value.trim();
+    if(!name || !phone) return showToast('請完整填寫姓名與電話');
+    
+    db.collection("coaches").doc(currentUid).collection("students").add({
+      name: name, phone: phone, totalLessons: 0, notes: '教練手動新增建立'
+    }).then(() => {
+      closeSheet(); showToast(`成功同步學員「${name}」`);
+    });
+  };
+}
+
+function renderStudents(filter=''){
+  const list = document.getElementById('studentList');
+  const filtered = students.filter(s=>s.name.includes(filter) || (s.phone && s.phone.includes(filter)));
+  if(filtered.length===0){ list.innerHTML = `<div class="empty-state"><i class="fa-solid fa-user-magnifying-glass"></i><p>目前暫無雲端學員名單</p></div>`; return; }
+  list.innerHTML = filtered.map(s=>`
+    <div class="student-card">
+      <div class="student-avatar">${s.name[0]}</div>
+      <div class="student-info"><h3>${s.name}</h3><p>📞 ${s.phone || '未登錄電話'}</p></div>
+    </div>
+  `).join('');
+}
+
+function renderBars(){ const el = document.getElementById('weekBars'); const max = Math.max(...weekBarData.map(d=>d.value),1); el.innerHTML = weekBarData.map((d,i)=>{ const h = d.value===0 ? 4 : Math.max(6,(d.value/max)*70); return `<div class="bar-col ${i===1?'today':''}"><div class="bar-fill" style="height:${h}px;"></div><span>${d.label}</span></div>`; }).join(''); }
+function renderLedger(){ const el = document.getElementById('ledgerList'); el.innerHTML = `<div style="text-align:center; padding:20px; color:var(--text-faint); font-size:12px;">暫無最新記帳明細</div>`; }
+function openAddLedger(){ showToast('記帳功能預留'); }
+function renderWeekList(){ const el = document.getElementById('weekGrid'); el.innerHTML = `<div class="week-card"><div class="week-empty-hint">固定排程系統已就緒</div></div>`; }
+function renderManageList(c,a){ const el = document.getElementById(c); el.innerHTML = `<span style="font-size:12px; color:var(--text-muted);">${a.join('、')}</span>`; }
+function openEditProfile(){ showToast('資料修改功能'); }
+
+function setSheet(html){ document.getElementById('sheetBody').innerHTML = `<div class="sheet-handle"></div>${html}`; }
+function openSheet(){ document.getElementById('sheetOverlay').classList.add('show'); }
+function closeSheet(){ document.getElementById('sheetOverlay').classList.remove('show'); }
+function showToast(text){ const t = document.getElementById('toast'); document.getElementById('toastText').textContent = text; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2000); }
+function confirmAction(t,d,c){ setSheet(`<div class="sheet-title">${t}</div><div class="sheet-sub">${d}</div><div class="sheet-actions"><button class="sheet-btn ghost" onclick="closeSheet()">取消</button><button class="sheet-btn danger" id="okConfirmBtn">確認</button></div>`); openSheet(); document.getElementById('okConfirmBtn').onclick = ()=>{ closeSheet(); c(); }; }
+
+function switchView(view){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('view-'+view).classList.add('active');
+  document.querySelector(`.nav-item[data-view="${view}"]`).classList.add('active');
+}
+document.querySelectorAll('.nav-item').forEach(item=>{ item.addEventListener('click',()=>switchView(item.dataset.view)); });
+
+document.getElementById('fabAdd').addEventListener('click', openAddSlot);
+document.getElementById('fabAddLedger').addEventListener('click', openAddLedger);
+document.getElementById('addStudentBtn').addEventListener('click', openAddStudent);
+document.getElementById('sheetOverlay').addEventListener('click',(e)=>{ if(e.target.id==='sheetOverlay') closeSheet(); });
+document.getElementById('gear-btn').addEventListener('click',()=>switchView('settings'));
+document.getElementById('studentSearch').addEventListener('input',(e)=>renderStudents(e.target.value));
+</script>
+</body>
+</html>
