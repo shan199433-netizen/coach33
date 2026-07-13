@@ -7,7 +7,6 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#050507">
-<!-- 修正長方形框框：更換為最新穩定版 Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -60,7 +59,6 @@ body{
 
 .num{font-family:'Manrope',sans-serif;font-variant-numeric:tabular-nums;}
 
-/* ===== 登入 / 註冊 介面樣式 ===== */
 .auth-wrapper {
   width: 100%; max-width: 412px; padding: 30px 24px;
   background: var(--bg-card); border-radius: 28px;
@@ -74,7 +72,6 @@ body{
 .auth-btn:active { transform: scale(0.98); }
 .auth-switch { color: var(--text-muted); font-size: 13px; margin-top: 18px; cursor: pointer; text-decoration: underline; }
 
-/* ===== Coach UI 容器 ===== */
 .phone-container{
   width:100%;max-width:412px;height:100vh;max-height:890px;
   background:var(--bg-base);
@@ -90,7 +87,6 @@ body{
 
 .hidden { display: none !important; }
 
-/* ===== 核心排版樣式 ===== */
 .header{ padding:18px 20px 14px 20px; display:flex;justify-content:space-between;align-items:center; background:var(--overlay-strong);backdrop-filter:blur(14px); z-index:30;border-bottom:1px solid var(--border-color); flex-shrink:0; }
 .coach-profile{display:flex;align-items:center;gap:12px;}
 .coach-avatar{ width:46px;height:46px;border-radius:15px; background:linear-gradient(135deg,var(--pink-deep),var(--pink-main)); display:flex;justify-content:center;align-items:center;color:#0b0b0e;font-size:19px; box-shadow:0 0 16px rgba(255,92,144,0.45);flex-shrink:0; }
@@ -163,7 +159,6 @@ body{
 .hero-row{display:flex;gap:10px;margin:14px 20px 4px 20px;flex-shrink:0;}
 .hero-row.goal-row{margin-top:10px;}
 .hero-card{ flex:1;min-width:0;background:linear-gradient(160deg,var(--bg-card),var(--bg-elevated)); border:1px solid var(--border-color);border-radius:20px;padding:16px 16px;position:relative;overflow:hidden; }
-.hero-card::after{ content:'';position:absolute;top:-34px;right:-34px;width:110px;height:110px;border-radius:50%; background:radial-gradient(circle,rgba(255,151,183,0.18),transparent 70%); }
 .hero-card .hc-label{font-size:11px;color:var(--text-muted);display:flex;align-items:center;gap:6px;position:relative;z-index:1;}
 .hero-card .hc-value{font-size:26px;font-weight:800;margin-top:8px;letter-spacing:-0.5px;position:relative;z-index:1;}
 .hero-card .hc-value small{font-size:12.5px;font-weight:600;color:var(--text-muted);margin-left:3px;}
@@ -234,7 +229,6 @@ body{
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 .toast i{color:var(--accent-green);}
 
-/* ===== 可編輯清單 ===== */
 .edit-row{display:flex;align-items:center;gap:8px;padding:9px 0;}
 .edit-row + .edit-row{border-top:1px solid var(--border-soft);}
 .edit-input{flex:1;background:var(--bg-elevated);border:1px solid var(--border-soft);border-radius:10px;padding:9px 11px;color:var(--text-main);font-size:12.5px;outline:none;min-width:0;}
@@ -246,12 +240,10 @@ body{
 .edit-icon-btn.add:active{transform:scale(0.92);}
 .edit-empty-hint{font-size:11.5px;color:var(--text-faint);padding:4px 0 9px 0;}
 
-/* ===== Chip 切換元件 ===== */
 .chip-toggle-group{display:flex;flex-wrap:wrap;gap:8px;}
 .chip-toggle{ padding:8px 14px;border-radius:20px;background:var(--bg-elevated);border:1px solid var(--border-soft); color:var(--text-muted);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s; }
 .chip-toggle.active{background:var(--pink-main);color:#050507;border-color:transparent;box-shadow:0 2px 10px rgba(255,151,183,0.3);}
 
-/* ===== 學員篩選 chips ===== */
 .filter-chip-row{display:flex;gap:8px;overflow-x:auto;padding:0 20px 12px 20px;flex-shrink:0;scrollbar-width:none;}
 .filter-chip-row::-webkit-scrollbar{display:none;}
 .filter-chip{ flex-shrink:0;padding:7px 14px;border-radius:16px;background:var(--bg-card);border:1px solid var(--border-color); color:var(--text-muted);font-size:11.5px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .15s; }
@@ -259,7 +251,6 @@ body{
 .student-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px;}
 .tag-badge{font-size:9.5px;font-weight:700;color:var(--pink-light);background:rgba(255,151,183,0.1);border:1px solid var(--border-soft);padding:2px 8px;border-radius:8px;}
 
-/* ===== 本月收入總表 ===== */
 .income-summary-card{margin:14px 20px 4px 20px;background:var(--bg-card);border:1px solid var(--border-color);border-radius:16px;padding:14px 16px;flex-shrink:0;}
 .income-summary-header{display:flex;justify-content:space-between;align-items:center;font-size:11.5px;color:var(--text-muted);font-weight:700;margin-bottom:10px;}
 .income-summary-header b{color:var(--pink-light);font-size:14px;}
@@ -277,7 +268,6 @@ body{
 .hc-edit-icon{margin-left:auto;cursor:pointer;color:var(--text-faint);font-size:10px;padding:4px;position:relative;z-index:2;}
 .hc-edit-icon:active{color:var(--pink-main);}
 
-/* ===== 設定頁收合面板 ===== */
 .accordion-section{background:var(--bg-card);border:1px solid var(--border-color);border-radius:16px;overflow:hidden;margin-bottom:12px;}
 .accordion-header{display:flex;align-items:center;gap:12px;padding:13px 14px;cursor:pointer;}
 .accordion-chev{color:var(--text-faint);font-size:12px;margin-left:auto;transition:transform .25s ease;flex-shrink:0;}
@@ -285,12 +275,10 @@ body{
 .accordion-body{display:none;padding:0 14px 14px 14px;}
 .accordion-section.open .accordion-body{display:block;}
 
-/* ===== 日/週 檢視切換 ===== */
 .view-toggle-row{display:flex;gap:8px;padding:14px 20px 0 20px;flex-shrink:0;}
 .view-toggle-btn{flex:1;padding:9px;border-radius:12px;background:var(--bg-card);border:1px solid var(--border-color);color:var(--text-muted);font-size:12px;font-weight:700;cursor:pointer;}
 .view-toggle-btn.active{background:var(--pink-main);color:#050507;border-color:transparent;box-shadow:0 4px 14px rgba(255,151,183,0.3);}
 
-/* ===== 週檢視時間軸 ===== */
 #dayViewGroup{flex:1;display:flex;flex-direction:column;min-height:0;}
 .week-timeline-wrap{flex:1;display:none;flex-direction:column;min-height:0;padding:12px 0 100px 0;}
 .week-timeline-header{display:flex;flex-shrink:0;padding:0 16px 0 16px;}
@@ -302,15 +290,14 @@ body{
 .wt-hour-label{font-size:9px;color:var(--text-faint);border-top:1px solid var(--border-soft);padding-top:2px;box-sizing:border-box;}
 .week-timeline-body{flex:1;display:flex;position:relative;}
 .wt-day-col{flex:1;position:relative;border-left:1px solid var(--border-soft);}
-/* 調整週檢視方塊的高度自適應與字型換行，確保能看見會員名字 */
-.wt-block{ position:absolute;left:2px;right:2px;border-radius:6px;padding:4px 5px;overflow:hidden;cursor:pointer;font-size:9px;line-height:1.3;color:#0b0b0e;background:var(--status-open);box-shadow:0 2px 8px rgba(0,0,0,0.3); }
+
+.wt-block{ position:absolute;left:2px;right:2px;border-radius:6px;padding:6px 5px;overflow:hidden;cursor:pointer;font-size:10px;line-height:1.4;color:#0b0b0e;background:var(--status-open);box-shadow:0 2px 8px rgba(0,0,0,0.3); }
 .wt-block.full{background:var(--status-full);}
 .wt-block.closed{background:var(--status-closed);color:var(--text-muted);}
 .wt-block-time{display:block;font-weight:800;}
-.wt-block-label{display:block;opacity:0.9;font-weight:600;}
+.wt-block-label{display:block;opacity:1;font-weight:700;word-break:break-all;}
 .detail-value{font-size:13px;color:var(--text-main);background:var(--bg-elevated);border:1px solid var(--border-soft);border-radius:12px;padding:10px 12px;}
 
-/* ===== 專屬學員詳細記錄面板樣式 ===== */
 .remaining-lessons-box{ background:linear-gradient(135deg,rgba(255,151,183,0.16),rgba(255,92,144,0.08)); border:1px solid var(--pink-deep);border-radius:16px;padding:14px 16px;margin-bottom:16px; }
 .remaining-lessons-box .rl-label{font-size:11.5px;color:var(--pink-light);font-weight:700;display:flex;align-items:center;gap:6px;}
 .remaining-lessons-box .rl-value{font-size:26px;font-weight:800;margin-top:4px;}
@@ -320,7 +307,6 @@ body{
 .record-item{font-size:11.5px;padding:6px 4px;border-bottom:1px solid rgba(255,255,255,0.04);display:flex;justify-content:space-between;}
 .record-item:last-child{border-bottom:none;}
 
-/* ===== 主題切換 ===== */
 .theme-swatch-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
 .theme-swatch{background:var(--bg-card);border:1px solid var(--border-color);border-radius:14px;padding:11px 8px;cursor:pointer;text-align:center;transition:border-color .15s;}
 .theme-swatch.active{border-color:var(--pink-main);box-shadow:0 0 0 1px var(--pink-main);}
@@ -328,7 +314,6 @@ body{
 .swatch-colors span{width:15px;height:15px;border-radius:50%;border:1px solid rgba(128,128,128,0.3);display:inline-block;}
 .swatch-name{font-size:10px;color:var(--text-muted);font-weight:600;display:block;}
 
-/* ===== 主題色票定義 ===== */
 body.theme-default{ --bg-base:#050507; --bg-card:#0e0e12; --bg-card-hover:#16161d; --bg-elevated:#141419; --text-main:#fafafa; --text-muted:#9a9aa5; --text-faint:#5c5c66; --pink-light:#ffcad3; --pink-main:#ff97b7; --pink-deep:#ff5c90; --border-color:rgba(255,202,211,0.13); --border-soft:rgba(255,255,255,0.06); }
 body.theme-moss{ --bg-base:#0f2019; --bg-card:#1F4D3A; --bg-card-hover:#26593f; --bg-elevated:#173a2a; --text-main:#F7E3D1; --text-muted:#c9d9c8; --text-faint:#8aa696; --pink-light:#F7E3D1; --pink-main:#E58DA7; --pink-deep:#cf7592; --border-color:rgba(247,227,209,0.15); --border-soft:rgba(255,255,255,0.07); }
 body.theme-peacock{ --bg-base:#0c1416; --bg-card:#015467; --bg-card-hover:#026278; --bg-elevated:#082f3a; --text-main:#F5E9DD; --text-muted:#a9c6cc; --text-faint:#5f8790; --pink-light:#e7c2a1; --pink-main:#8D5130; --pink-deep:#6e3d24; --border-color:rgba(141,81,48,0.25); --border-soft:rgba(255,255,255,0.06); }
@@ -439,7 +424,6 @@ body.light-theme .coach-avatar{ color:#fff; }
 
   <div class="view" id="view-stats">
     <div class="content-area" style="padding:0 0 100px 0;">
-      <!-- 純數據統計：本月已上課堂數、本月銷售，不夾雜目標數值/進度條 -->
       <div class="hero-row">
         <div class="hero-card">
           <div class="hc-label"><i class="fa-solid fa-clipboard-check"></i>本月已上課</div>
@@ -453,19 +437,18 @@ body.light-theme .coach-avatar{ color:#fff; }
         </div>
       </div>
 
-      <!-- 目標欄位獨立分離為全新區塊 -->
       <div class="hero-row goal-row">
         <div class="hero-card">
-          <div class="hc-label"><i class="fa-solid fa-bullseye"></i>本月目標上課數<i class="fa-solid fa-pen hc-edit-icon" id="editGoalBtn1"></i></div>
+          <div class="hc-label">🎯 本月目標<i class="fa-solid fa-pen hc-edit-icon" id="editGoalBtn1"></i></div>
           <div class="hc-value"><span class="num" id="goalSessionsVal">--</span><small>堂</small></div>
           <div class="goal-bar"><div class="goal-bar-fill" id="heroSessionsBar" style="width:0%;"></div></div>
           <div class="hc-goal" id="heroSessionsGoal">點擊筆型圖示設定本月目標</div>
         </div>
         <div class="hero-card">
-          <div class="hc-label"><i class="fa-solid fa-sack-dollar"></i>目標業績（銷售金額）<i class="fa-solid fa-pen hc-edit-icon" id="editGoalBtn2"></i></div>
+          <div class="hc-label">📈 本月進度</div>
           <div class="hc-value" id="goalSalesVal">--</div>
           <div class="goal-bar"><div class="goal-bar-fill" id="heroSalesBar" style="width:0%;"></div></div>
-          <div class="hc-goal" id="heroSalesGoal">點擊筆型圖示設定本月目標</div>
+          <div class="hc-goal" id="heroSalesGoal">設定目標後自動累加進度</div>
         </div>
       </div>
 
@@ -474,7 +457,6 @@ body.light-theme .coach-avatar{ color:#fff; }
         <div class="mini-stat"><div class="v num">1,314</div><div class="l">平均堂費</div></div>
       </div>
 
-      <!-- 本月收入總表：改為收合介面 -->
       <div class="accordion-section" id="incomeSummarySection" style="margin:14px 20px 4px 20px;">
         <div class="accordion-header">
           <div class="settings-icon"><i class="fa-solid fa-table-list"></i></div>
@@ -489,7 +471,6 @@ body.light-theme .coach-avatar{ color:#fff; }
         <div class="bars" id="weekBars"></div>
       </div>
 
-      <!-- 「最近紀錄」更名為「成交購課明細」，去除冗字註解，並改為收合介面 -->
       <div class="accordion-section" id="ledgerSection" style="margin:14px 20px 4px 20px;">
         <div class="accordion-header">
           <div class="settings-icon"><i class="fa-solid fa-receipt"></i></div>
@@ -505,7 +486,7 @@ body.light-theme .coach-avatar{ color:#fff; }
   <div class="view" id="view-settings">
     <div class="settings-scroll">
       <div class="settings-group">
-        <h3>學員免登入約課連結</h3>
+        <h3>✨ 學員免登入約課連結</h3>
         <div class="link-row">
           <input type="text" id="bookingLink" value="產生地網址中..." readonly>
           <button class="copy-btn" id="copyLinkBtn"><i class="fa-solid fa-copy"></i>複製連結</button>
@@ -524,7 +505,6 @@ body.light-theme .coach-avatar{ color:#fff; }
         </div>
       </div>
       <div class="settings-group">
-        <!-- 移除專長標籤管理、可預約時段模版 -->
         <div class="accordion-section" data-acc="courseTypes">
           <div class="accordion-header"><div class="settings-icon"><i class="fa-solid fa-list"></i></div><div class="settings-main"><h4>課程種類</h4><p>新增、修改、刪除課程種類</p></div><i class="fa-solid fa-chevron-down accordion-chev"></i></div>
           <div class="accordion-body"><div class="manage-card" id="courseTypeManage"></div></div>
@@ -861,7 +841,7 @@ function syncCoachCloudData() {
     });
 
   db.collection("coaches").doc(currentUid).collection("ledger")
-    .orderBy('createdAt','desc').limit(100) // 上調上限便於學員歷史撈取
+    .orderBy('createdAt','desc').limit(100)
     .onSnapshot((snapshot) => {
       ledgerEntries = [];
       snapshot.forEach(doc => ledgerEntries.push({id: doc.id, ...doc.data()}));
@@ -935,7 +915,7 @@ function renderHeroStats(){
   if(sessionsBar) sessionsBar.style.width = goalSessions>0 ? Math.min(100,(completedSessions/goalSessions)*100)+'%' : '0%';
   if(salesBar) salesBar.style.width = goalSales>0 ? Math.min(100,(monthIncomeTotal/goalSales)*100)+'%' : '0%';
   if(sessionsGoalEl) sessionsGoalEl.textContent = goalSessions>0 ? `目標 ${goalSessions} 堂（點擊筆型圖示修改）` : '點擊筆型圖示設定本月目標';
-  if(salesGoalEl) salesGoalEl.textContent = goalSales>0 ? `目標 NT$${goalSales.toLocaleString()}（點擊筆型圖示修改）` : '點擊筆型圖示設定本月目標';
+  if(salesGoalEl) salesGoalEl.textContent = goalSales>0 ? `目標 NT$${goalSales.toLocaleString()}` : '設定目標後自動累加進度';
 
   const goalSessionsValEl = document.getElementById('goalSessionsVal');
   const goalSalesValEl = document.getElementById('goalSalesVal');
@@ -976,10 +956,9 @@ function formatDisplayTime(dt){
 }
 function dateStrToKey(dateStr){ const [y,m,d] = dateStr.split('-'); return `${m}-${d}`; }
 
-// 24小時制數字下拉選單（時：00~23 / 分：00,15,30,45），全面不出現上午/下午
 function buildHourOptions(defaultHour){
   let html = '';
-  for(let h=0; h<24; h++){
+  for(let h=6; h<=24; h++){
     const v = String(h).padStart(2,'0');
     html += `<option value="${v}" ${h===defaultHour?'selected':''}>${v}</option>`;
   }
@@ -1095,11 +1074,11 @@ function getWeekDates(baseDate){
 
 function renderWeekTimeline(){
   const weekDates = getWeekDates(new Date());
-  const rowH = 48;
-  const totalH = rowH*24;
+  const rowH = 56;
+  const totalH = rowH * 19;
 
   let gutterHtml = '';
-  for(let h=0; h<24; h++){ gutterHtml += `<div class="wt-hour-label" style="height:${rowH}px;">${String(h).padStart(2,'0')}:00</div>`; }
+  for(let h=6; h<=24; h++){ gutterHtml += `<div class="wt-hour-label" style="height:${rowH}px;">${String(h).padStart(2,'0')}:00</div>`; }
 
   const headerHtml = `<div class="wt-gutter-spacer"></div>` + weekDates.map(wd=>`<div class="wt-day-header">${wd.label}<span class="num">${wd.num}</span></div>`).join('');
 
@@ -1108,10 +1087,10 @@ function renderWeekTimeline(){
     const blocksHtml = daySlots.map(s=>{
       const dt = s.timestamp && s.timestamp.toDate ? s.timestamp.toDate() : null;
       if(!dt) return '';
-      const top = dt.getHours()*rowH + (dt.getMinutes()/60)*rowH;
-      const height = Math.max(38, rowH*0.85); // 稍微加高色塊以利文字容納
+      if(dt.getHours() < 6) return '';
+      const top = (dt.getHours() - 6) * rowH + (dt.getMinutes()/60)*rowH;
+      const height = rowH - 4;
       
-      // 週檢視修正：已被預約時要能看到會員名字（例如：小美 \n 重量訓練）
       let displayLabel = escapeHtml(s.courseType||'');
       if(s.status === 'full' && s.studentName) {
         displayLabel = `<b>${escapeHtml(s.studentName)}</b><br>${escapeHtml(s.courseType||'')}`;
@@ -1143,28 +1122,40 @@ function openAddSlot(){
   const d = dateList.find(x=>x.key===activeDateKey);
   const studentOptions = students.map(s=>`<option value="${escapeHtml(s.name)}">`).join('');
   
-  // 修正時間欄位為 24 小時制自由填選、上課地點提供可不填選項、開放時段不需課程種類
   setSheet(`
     <div class="sheet-title">新增排課</div>
     <div class="view-toggle-row" style="padding:0 0 14px 0;">
-      <button type="button" class="view-toggle-btn active" id="slotModeOpenBtn">開放時段（供學員預約）</button>
+      <button type="button" class="view-toggle-btn active" id="slotModeOpenBtn">批次開放時段（供約課）</button>
       <button type="button" class="view-toggle-btn" id="slotModeManualBtn">手動排課</button>
     </div>
     <div class="form-row"><label>日期</label><input type="date" class="form-input" id="slotDate" value="${d.iso}"></div>
-    <!-- 24小時制數字下拉選單，無上午/下午 -->
-    <div class="form-row"><label>開始時間 (24小時制)</label>
+    
+    <div class="form-row" id="timeRangeRow">
+      <label>批次時間範圍 (06:00 - 24:00)</label>
       <div class="time-select-row">
         <select class="form-input" id="slotHour">${buildHourOptions(9)}</select>
+        <span class="time-colon">點 至</span>
+        <select class="form-input" id="slotEndHour">${buildHourOptions(12)}</select>
+        <span class="time-colon">點</span>
+      </div>
+      <p style="font-size:11px;color:var(--text-faint);margin-top:6px;">系統將在範圍內自動每小時建立一堂可預約課。</p>
+    </div>
+
+    <div class="form-row hidden" id="singleTimeRow">
+      <label>開始時間</label>
+      <div class="time-select-row">
+        <select class="form-input" id="singleHour">${buildHourOptions(9)}</select>
         <span class="time-colon">:</span>
-        <select class="form-input" id="slotMinute">${buildMinuteOptions(0)}</select>
+        <select class="form-input" id="singleMinute">${buildMinuteOptions(0)}</select>
       </div>
     </div>
+
     <div class="form-row hidden" id="slotStudentRow">
-      <label>學員姓名（打字可自動搜尋現有名單，若查無直接鍵入將同步新建學員）</label>
+      <label>學員姓名</label>
       <input type="text" class="form-input" id="slotStudentName" list="slotStudentList" placeholder="請鍵入姓氏進行篩選，例如：陳">
       <datalist id="slotStudentList">${studentOptions}</datalist>
     </div>
-    <div class="form-row" id="slotCourseRow"><label>課程種類</label>
+    <div class="form-row hidden" id="slotCourseRow"><label>課程種類</label>
       <select class="form-input" id="slotCourse">${courseTypes.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('')}</select>
     </div>
     <div class="form-row"><label>上課地點 (選填)</label>
@@ -1185,9 +1176,8 @@ function openAddSlot(){
   const manualBtn = document.getElementById('slotModeManualBtn');
   const studentRow = document.getElementById('slotStudentRow');
   const courseRow = document.getElementById('slotCourseRow');
-
-  // 開放時段：不需要顯示課程種類
-  courseRow.classList.add('hidden');
+  const timeRangeRow = document.getElementById('timeRangeRow');
+  const singleTimeRow = document.getElementById('singleTimeRow');
 
   openBtn.onclick = ()=>{ 
     slotMode='open'; 
@@ -1195,6 +1185,8 @@ function openAddSlot(){
     manualBtn.classList.remove('active'); 
     studentRow.classList.add('hidden'); 
     courseRow.classList.add('hidden'); 
+    timeRangeRow.classList.remove('hidden');
+    singleTimeRow.classList.add('hidden');
   };
   manualBtn.onclick = ()=>{ 
     slotMode='manual'; 
@@ -1202,50 +1194,73 @@ function openAddSlot(){
     openBtn.classList.remove('active'); 
     studentRow.classList.remove('hidden'); 
     courseRow.classList.remove('hidden'); 
+    timeRangeRow.classList.add('hidden');
+    singleTimeRow.classList.remove('hidden');
   };
 
   document.getElementById('cancelSlotBtn').onclick = closeSheet;
-  document.getElementById('saveSlotBtn').onclick = ()=>{
+  document.getElementById('saveSlotBtn').onclick = async ()=>{
     const dateStr = document.getElementById('slotDate').value;
-    const timeStr = `${document.getElementById('slotHour').value}:${document.getElementById('slotMinute').value}`;
-    const course = document.getElementById('slotCourse').value;
-    const location = document.getElementById('slotLocation').value; // 空字串即代表不指定上課地點 (可填可不填)
-    if(!dateStr || !timeStr) return showToast('請完整選擇日期與時間');
+    const location = document.getElementById('slotLocation').value;
+    if(!dateStr) return showToast('請選擇日期');
 
-    const dt = new Date(`${dateStr}T${timeStr}:00`);
-    const payload = {
-      timestamp: firebase.firestore.Timestamp.fromDate(dt),
-      dateKey: dateStrToKey(dateStr),
-      time: formatDisplayTime(dt),
-      courseType: slotMode==='manual' ? course : '預約空檔',
-      location: location || '',
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    };
+    const batch = db.batch();
+    const ref = db.collection('coaches').doc(currentUid).collection('slots');
 
-    if(slotMode === 'manual'){
+    if(slotMode === 'open') {
+      const startH = parseInt(document.getElementById('slotHour').value);
+      const endH = parseInt(document.getElementById('slotEndHour').value);
+      if(startH >= endH) return showToast('結束小時必須大於開始小時');
+
+      for(let h = startH; h < endH; h++) {
+        const timeStr = `${String(h).padStart(2,'0')}:00`;
+        const dt = new Date(`${dateStr}T${timeStr}:00`);
+        const newDocRef = ref.doc();
+        batch.set(newDocRef, {
+          timestamp: firebase.firestore.Timestamp.fromDate(dt),
+          dateKey: dateStrToKey(dateStr),
+          time: formatDisplayTime(dt),
+          courseType: '預約空檔',
+          location: location || '',
+          status: 'open',
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      }
+      await batch.commit();
+      closeSheet(); showToast('✅ 已成功批次開放時段');
+    } else {
+      const hStr = document.getElementById('singleHour').value;
+      const mStr = document.getElementById('singleMinute').value;
+      const course = document.getElementById('slotCourse').value;
       const studentName = document.getElementById('slotStudentName').value.trim();
       if(!studentName) return showToast('請輸入或選擇學員姓名');
+
+      const dt = new Date(`${dateStr}T${hStr}:${mStr}:00`);
       const matched = students.find(s=>s.name===studentName);
-      payload.status = 'full';
-      payload.studentName = studentName;
-      payload.studentPhone = matched ? (matched.phone||'') : '';
-      payload.bookedAt = firebase.firestore.FieldValue.serverTimestamp();
       
-      // 自動同步新增查無此名的學員名單
+      const payload = {
+        timestamp: firebase.firestore.Timestamp.fromDate(dt),
+        dateKey: dateStrToKey(dateStr),
+        time: formatDisplayTime(dt),
+        courseType: course,
+        location: location || '',
+        status: 'full',
+        studentName: studentName,
+        studentPhone: matched ? (matched.phone||'') : '',
+        bookedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      };
+
       if(!matched) {
          db.collection("coaches").doc(currentUid).collection("students").add({
             name: studentName, phone: '', tags: [], totalLessons: 1, notes: '手動排課自動關聯建立', createdAt: firebase.firestore.FieldValue.serverTimestamp()
          });
       }
-    } else {
-      payload.status = 'open';
-    }
 
-    db.collection('coaches').doc(currentUid).collection('slots').add(payload).then(()=>{
-      closeSheet(); showToast(slotMode==='manual' ? '✅ 已手動新增課程' : '✅ 已新增開放時段');
-    }).catch(err=>{
-      showToast('❌ 新增失敗: ' + err.message);
-    });
+      ref.add(payload).then(()=>{
+        closeSheet(); showToast('✅ 已手動新增排課');
+      });
+    }
   };
 }
 
@@ -1267,13 +1282,11 @@ function renderStudentFilterChips(){
 function openAddStudent(){ openStudentForm(null); }
 function openEditStudent(id){ const s = students.find(x=>x.id===id); if(s) openStudentForm(s); }
 
-// 點擊會員名字彈出詳細面板：整合顯示購課紀錄與上課紀錄功能
 function openStudentForm(student){
   const isEdit = !!student;
   const selectedTags = new Set(student ? (student.tags||[]) : []);
   const chipsHtml = studentTags.length ? studentTags.map(tag=>`<div class="chip-toggle ${selectedTags.has(tag)?'active':''}" data-tag="${escapeHtml(tag)}">${escapeHtml(tag)}</div>`).join('') : '<span style="font-size:12px;color:var(--text-faint);">尚未設定學員分類標籤</span>';
 
-  // 抓取個別學員紀錄明細
   let purchaseRecordsHtml = '<div style="font-size:11.5px;color:var(--text-faint);">暫無購課明細</div>';
   let classRecordsHtml = '<div style="font-size:11.5px;color:var(--text-faint);">暫無授課時段紀錄</div>';
   let purchaseCount = 0, classCount = 0, totalPurchasedLessons = 0, remainingLessons = 0;
@@ -1302,7 +1315,6 @@ function openStudentForm(student){
         `).join('');
      }
 
-     // 剩餘堂數 = 歷史購課總堂數 - 已上課/已預約總堂數
      remainingLessons = totalPurchasedLessons - classCount;
   }
 
@@ -1313,7 +1325,7 @@ function openStudentForm(student){
     <div class="remaining-lessons-box">
       <div class="rl-label"><i class="fa-solid fa-layer-group"></i>剩餘堂數</div>
       <div class="rl-value"><span class="num" style="${remainingLessons<0?'color:var(--accent-red);':''}">${remainingLessons}</span><small>堂</small></div>
-      <div class="rl-sub">已購 ${totalPurchasedLessons} 堂　－　已上課/已預約 ${classCount} 堂</div>
+      <div class="rl-sub">已購 ${totalPurchasedLessons} 堂 － 已上課/已預約 ${classCount} 堂</div>
     </div>
     ` : ''}
 
@@ -1322,7 +1334,6 @@ function openStudentForm(student){
     <div class="form-row"><label>學員分類標籤</label><div class="chip-toggle-group" id="stuTagChips">${chipsHtml}</div></div>
     
     ${isEdit ? `
-    <!-- 歷史購課紀錄與上課紀錄改為收合式介面，避免畫面過長 -->
     <div class="accordion-section" style="margin-top:16px;">
       <div class="accordion-header">
         <div class="settings-icon"><i class="fa-solid fa-file-invoice-dollar"></i></div>
@@ -1575,7 +1586,6 @@ function openAddLedger(){
   };
 }
 
-// 瘦身編輯個人資料彈出視窗：移除專長標籤多選
 function openEditProfile(forceOpen){
   setSheet(`
     <div class="sheet-title">編輯個人資料</div>
@@ -1636,6 +1646,10 @@ function switchView(view){
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('view-'+view).classList.add('active');
   document.querySelector(`.nav-item[data-view="${view}"]`).classList.add('active');
+  
+  document.querySelectorAll('#view-settings .accordion-section').forEach(section => {
+    section.classList.remove('open');
+  });
 }
 document.querySelectorAll('.nav-item').forEach(item=>{ item.addEventListener('click',()=>switchView(item.dataset.view)); });
 document.querySelectorAll('.view-toggle-btn').forEach(btn=>{ btn.addEventListener('click', ()=>switchScheduleMode(btn.dataset.mode)); });
@@ -1649,7 +1663,6 @@ document.querySelectorAll('.accordion-header').forEach(h=>{
   h.addEventListener('click', ()=>{ h.closest('.accordion-section').classList.toggle('open'); });
 });
 document.getElementById('editGoalBtn1').addEventListener('click', (e)=>{ e.stopPropagation(); openGoalEdit(); });
-document.getElementById('editGoalBtn2').addEventListener('click', (e)=>{ e.stopPropagation(); openGoalEdit(); });
 </script>
 </body>
 </html>
