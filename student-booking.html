@@ -92,15 +92,31 @@ const firebaseConfig = {
 };firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// 💡 關鍵：從網址列解析教練的 UID 參數 (?coach=xxxx)
+// 💡 關鍵：從網址列解析教練的「專屬代號 slug」(?coach=daisy)，而非直接使用 uid
 const urlParams = new URLSearchParams(window.location.search);
-const coachUid = urlParams.get('coach');
+const coachSlug = urlParams.get('coach');
+let coachUid = null;
 
-if (!coachUid) {
-  alert('⚠️ 預約網址無效，請重新向教練索取正確的 LINE 約課連結。');
+if (!coachSlug) {
+  alert('⚠️ 預約網址無效，請重新向教練索取正確的約課連結。');
 } else {
-  loadCoachData();
-  loadAvailableSlots();
+  resolveCoachAndLoad();
+}
+
+// 0. 先用代號查出真正的教練 uid，這樣每位教練都能用自己的代號，不會互相衝突
+function resolveCoachAndLoad(){
+  db.collection('coachSlugs').doc(coachSlug).get().then(doc => {
+    if(!doc.exists){
+      alert('⚠️ 找不到這位教練，請確認連結是否正確，或重新向教練索取。');
+      return;
+    }
+    coachUid = doc.data().uid;
+    loadCoachData();
+    loadAvailableSlots();
+  }).catch(err=>{
+    console.error('查詢教練代號失敗:', err);
+    alert('⚠️ 載入失敗，請稍後再試一次。');
+  });
 }
 
 // 1. 載入教練名稱（增加親切感）
@@ -119,7 +135,7 @@ function loadAvailableSlots() {
   // 假設你的時段存在：coaches/{coachUid}/slots
   db.collection('coaches').doc(coachUid).collection('slots')
     .where('status', '==', 'open')
-    .orderBy('time', 'asc')
+    .orderBy('timestamp', 'asc')
     .get()
     .then(snapshot => {
       if(snapshot.empty) {
