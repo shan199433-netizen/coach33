@@ -389,12 +389,28 @@ body{
 let isSignUpMode = false;
 let currentUid = null;
 
-const dateList = [{key:'07-13', day:'一', num:13},{key:'07-14', day:'二', num:14},{key:'07-15', day:'三', num:15},{key:'07-16', day:'四', num:16},{key:'07-17', day:'五', num:17},{key:'07-18', day:'六', num:18},{key:'07-19', day:'日', num:19}];
-let activeDateKey = '07-14';
+function buildDateList(){
+  const dayNames = ['日','一','二','三','四','五','六'];
+  const arr = [];
+  const today = new Date();
+  for(let i=0;i<7;i++){
+    const d = new Date(today);
+    d.setDate(today.getDate()+i);
+    const mm = String(d.getMonth()+1).padStart(2,'0');
+    const dd = String(d.getDate()).padStart(2,'0');
+    arr.push({ key:`${mm}-${dd}`, day: dayNames[d.getDay()], num: d.getDate(), month: d.getMonth()+1, iso: `${d.getFullYear()}-${mm}-${dd}` });
+  }
+  return arr;
+}
+const dateList = buildDateList();
+let activeDateKey = dateList[0].key;
 let courseTypes = ['重量訓練','核心雕塑','有氧體能','體態雕塑','筋膜放鬆'];
 let locations = ['A教室（信義館）','B教室（大安館）'];
-let coachProfile = { name:'新教練 Ray', specialties:['重量訓練'] };
+let coachProfile = { name:'', specialties:[] };
 let students = [];
+let allSlots = [];
+let ledgerEntries = [];
+let slugPromptShown = false;
 let weekBarData = [{label:'一',value:2400},{label:'二',value:3200},{label:'三',value:1800},{label:'四',value:2600},{label:'五',value:4200},{label:'六',value:0},{label:'日',value:0}];
 let monthlyCompletedSessions = 18;
 
@@ -436,14 +452,10 @@ auth.onAuthStateChanged(user => {
     authUI.classList.add('hidden');
     coachUI.classList.remove('hidden');
 
-    // 🔗 核心功能：動態注入該教練獨一無二的免登入 LINE 約課網址
-    // 假設你的學員預約網頁叫 student-booking.html
-    const generatedUrl = `${window.location.origin}/student-booking.html?coach=${currentUid}`;
-    document.getElementById('bookingLink').value = generatedUrl;
-    
-    // 一鍵複製邏輯
+    // 一鍵複製邏輯（實際網址會在教練資料載入、確認代號後由 updateBookingLink() 產生）
     document.getElementById('copyLinkBtn').onclick = () => {
       const linkInput = document.getElementById('bookingLink');
+      if(!coachProfile.slug){ showToast('請先在「編輯個人資料」設定您的專屬代號'); return; }
       linkInput.select();
       linkInput.setSelectionRange(0, 99999);
       navigator.clipboard.writeText(linkInput.value).then(() => {
@@ -454,10 +466,55 @@ auth.onAuthStateChanged(user => {
     syncCoachCloudData();
   } else {
     currentUid = null;
+    slugPromptShown = false;
     authUI.classList.remove('hidden');
     coachUI.classList.add('hidden');
   }
 });
+
+/* 產生學員約課連結：自動偵測目前部署路徑（不寫死 repo 名稱），並使用教練專屬代號 */
+function updateBookingLink(){
+  const linkInput = document.getElementById('bookingLink');
+  if(!linkInput) return;
+  if(!coachProfile.slug){
+    linkInput.value = '請先在下方「編輯個人資料」設定您的專屬代號';
+    return;
+  }
+  let basePath = window.location.pathname;
+  if(basePath.endsWith('.html')){
+    basePath = basePath.substring(0, basePath.lastIndexOf('/')+1);
+  }
+  linkInput.value = `${window.location.origin}${basePath}student-booking.html?coach=${coachProfile.slug}`;
+}
+
+/* ===== 教練專屬代號 (slug) 工具：確保多位教練即使同名也不會撞連結 ===== */
+function slugify(str){
+  return (str||'').toString().trim().toLowerCase()
+    .replace(/\s+/g,'-')
+    .replace(/[^a-z0-9-]/g,'')
+    .replace(/-+/g,'-')
+    .replace(/^-|-$/g,'');
+}
+function checkSlugAvailable(slug){
+  return db.collection('coachSlugs').doc(slug).get().then(doc=>{
+    if(!doc.exists) return true;
+    return doc.data().uid === currentUid;
+  });
+}
+function reserveSlug(newSlug, oldSlug){
+  return db.runTransaction(async (tx)=>{
+    const newRef = db.collection('coachSlugs').doc(newSlug);
+    const newDoc = await tx.get(newRef);
+    if(newDoc.exists && newDoc.data().uid !== currentUid){
+      throw new Error('SLUG_TAKEN');
+    }
+    tx.set(newRef, { uid: currentUid, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+    if(oldSlug && oldSlug !== newSlug){
+      tx.delete(db.collection('coachSlugs').doc(oldSlug));
+    }
+    tx.update(db.collection('coaches').doc(currentUid), { slug: newSlug });
+  });
+}
 
 /* 即時同步該教練專屬的雲端資料庫資料 */
 function syncCoachCloudData() {
@@ -469,13 +526,39 @@ function syncCoachCloudData() {
       renderStudents();
     });
 
-  // 2. 同步教練個人資料
+  // 2. 同步教練個人資料（含專屬代號 slug）
   db.collection("coaches").doc(currentUid).onSnapshot(doc => {
     if(doc.exists) {
       coachProfile = doc.data();
       document.getElementById('top-coach-name').textContent = coachProfile.name || "未設定教練";
+      updateBookingLink();
+      if(!coachProfile.slug && !slugPromptShown){
+        slugPromptShown = true;
+        showToast('請先設定您的專屬約課代號');
+        openEditProfile(true);
+      }
     }
   });
+
+  // 3. 同步可預約時段
+  db.collection("coaches").doc(currentUid).collection("slots")
+    .onSnapshot((snapshot) => {
+      allSlots = [];
+      snapshot.forEach(doc => allSlots.push({id: doc.id, ...doc.data()}));
+      renderSlots();
+      computeTodayCount();
+      renderHeroStats();
+    });
+
+  // 4. 同步記帳明細
+  db.collection("coaches").doc(currentUid).collection("ledger")
+    .orderBy('createdAt','desc').limit(50)
+    .onSnapshot((snapshot) => {
+      ledgerEntries = [];
+      snapshot.forEach(doc => ledgerEntries.push({id: doc.id, ...doc.data()}));
+      renderLedger();
+      renderHeroStats();
+    });
   
   renderDateScroller(); renderSlots(); renderBars(); renderLedger(); renderWeekList();
   renderManageList('courseTypeManage', courseTypes);
@@ -483,10 +566,130 @@ function syncCoachCloudData() {
   renderTopStats();
 }
 
+function computeTodayCount(){
+  const todayKey = dateList[0].key;
+  const c = allSlots.filter(s => s.dateKey === todayKey && s.status !== 'closed').length;
+  const el = document.getElementById('todayCount');
+  if(el) el.textContent = c;
+}
+
+function renderHeroStats(){
+  const now = new Date();
+  const isThisMonth = (l) => l.createdAt && l.createdAt.toDate().getMonth()===now.getMonth() && l.createdAt.toDate().getFullYear()===now.getFullYear();
+  const monthIncomeEntries = ledgerEntries.filter(l => l.type==='income' && isThisMonth(l));
+  const monthIncome = monthIncomeEntries.reduce((sum,l)=>sum+Number(l.amount||0), 0);
+  const completedSessions = allSlots.filter(s => s.status === 'full').length;
+
+  const salesAmountEl = document.getElementById('heroSalesAmountVal');
+  const salesCountEl = document.getElementById('heroSalesCountVal');
+  const sessionsEl = document.getElementById('heroSessionsVal');
+  const topSessionsEl = document.getElementById('monthlySessionsTop');
+  if(salesAmountEl) salesAmountEl.textContent = `NT$${monthIncome.toLocaleString()}`;
+  if(salesCountEl) salesCountEl.textContent = monthIncomeEntries.length;
+  if(sessionsEl) sessionsEl.textContent = completedSessions;
+  if(topSessionsEl) topSessionsEl.textContent = completedSessions;
+}
+
 function renderTopStats(){ document.getElementById('todayCount').textContent = 0; document.getElementById('monthlySessionsTop').textContent = monthlyCompletedSessions; }
 function renderDateScroller(){ const el = document.getElementById('dateScroller'); el.innerHTML = dateList.map(d=>{ return `<div class="date-card ${d.key===activeDateKey?'active':''}" data-key="${d.key}"><span class="day">${d.day}</span><span class="dnum num">${d.num}</span></div>`; }).join(''); el.querySelectorAll('.date-card').forEach(c=>{ c.addEventListener('click',()=>{ activeDateKey = c.dataset.key; renderDateScroller(); renderSlots(); }); }); }
-function renderSlots(){ const d = dateList.find(x=>x.key===activeDateKey); document.getElementById('scheduleDateLabel').textContent = `07月${d.num}日（週${d.day}）`; const list = document.getElementById('slotList'); list.innerHTML = `<div class="empty-state"><i class="fa-regular fa-calendar"></i><p>這天還沒有安排任何時段<br>點右下角「＋」新增可預約時段</p></div>`; }
-function openAddSlot(){ showToast('功能整合成功，隨時可進行雲端欄位對接！'); }
+function formatDisplayTime(dt){
+  const dayNames = ['日','一','二','三','四','五','六'];
+  const mm = String(dt.getMonth()+1).padStart(2,'0');
+  const dd = String(dt.getDate()).padStart(2,'0');
+  const hh = String(dt.getHours()).padStart(2,'0');
+  const mi = String(dt.getMinutes()).padStart(2,'0');
+  return `${mm}/${dd} (週${dayNames[dt.getDay()]}) ${hh}:${mi}`;
+}
+function dateStrToKey(dateStr){ const [y,m,d] = dateStr.split('-'); return `${m}-${d}`; }
+
+function renderSlots(){
+  const d = dateList.find(x=>x.key===activeDateKey);
+  document.getElementById('scheduleDateLabel').textContent = `${d.month}月${d.num}日（週${d.day}）`;
+  const list = document.getElementById('slotList');
+  const daySlots = allSlots
+    .filter(s => s.dateKey === activeDateKey)
+    .sort((a,b) => (a.timestamp?.seconds||0) - (b.timestamp?.seconds||0));
+
+  if(daySlots.length === 0){
+    list.innerHTML = `<div class="empty-state"><i class="fa-regular fa-calendar"></i><p>這天還沒有安排任何時段<br>點右下角「＋」新增可預約時段</p></div>`;
+    return;
+  }
+
+  list.innerHTML = daySlots.map(s => `
+    <div class="slot-card ${s.status}" data-id="${s.id}">
+      <div class="slot-stripe"></div>
+      <div class="slot-body">
+        <div class="slot-avatar">${s.status==='full' ? (s.studentName ? s.studentName[0] : '✓') : '<i class="fa-regular fa-clock"></i>'}</div>
+        <div class="slot-text">
+          <div class="slot-time">${s.time||''}</div>
+          <div class="slot-detail">${s.courseType||''}${s.location? ' · '+s.location : ''}${s.status==='full' && s.studentName ? ' · '+s.studentName : ''}</div>
+        </div>
+      </div>
+      <button class="slot-action" data-action="${s.status==='open' ? 'close' : 'remove'}"><i class="fa-solid ${s.status==='open' ? 'fa-lock' : 'fa-trash'}"></i>${s.status==='open' ? '關閉' : '刪除'}</button>
+    </div>
+  `).join('');
+
+  list.querySelectorAll('.slot-action').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      const id = btn.closest('.slot-card').dataset.id;
+      if(btn.dataset.action === 'close'){
+        confirmAction('關閉此時段','關閉後學員將無法再預約此時段，確定要關閉嗎？', ()=>{
+          db.collection('coaches').doc(currentUid).collection('slots').doc(id).update({status:'closed'})
+            .then(()=>showToast('已關閉時段'));
+        });
+      } else {
+        confirmAction('刪除此時段','刪除後無法復原，確定要刪除嗎？', ()=>{
+          db.collection('coaches').doc(currentUid).collection('slots').doc(id).delete()
+            .then(()=>showToast('已刪除時段'));
+        });
+      }
+    });
+  });
+}
+
+function openAddSlot(){
+  const d = dateList.find(x=>x.key===activeDateKey);
+  setSheet(`
+    <div class="sheet-title">新增可預約時段</div>
+    <div class="form-row"><label>日期</label><input type="date" class="form-input" id="slotDate" value="${d.iso}"></div>
+    <div class="form-row"><label>開始時間</label><input type="time" class="form-input" id="slotTime" value="09:00"></div>
+    <div class="form-row"><label>課程種類</label>
+      <select class="form-input" id="slotCourse">${courseTypes.map(c=>`<option value="${c}">${c}</option>`).join('')}</select>
+    </div>
+    <div class="form-row"><label>上課地點</label>
+      <select class="form-input" id="slotLocation">${locations.map(l=>`<option value="${l}">${l}</option>`).join('')}</select>
+    </div>
+    <div class="sheet-actions">
+      <button class="sheet-btn ghost" id="cancelSlotBtn">取消</button>
+      <button class="sheet-btn primary" id="saveSlotBtn">確認新增</button>
+    </div>
+  `);
+  openSheet();
+  document.getElementById('cancelSlotBtn').onclick = closeSheet;
+  document.getElementById('saveSlotBtn').onclick = ()=>{
+    const dateStr = document.getElementById('slotDate').value;
+    const timeStr = document.getElementById('slotTime').value;
+    const course = document.getElementById('slotCourse').value;
+    const location = document.getElementById('slotLocation').value;
+    if(!dateStr || !timeStr) return showToast('請完整選擇日期與時間');
+
+    const dt = new Date(`${dateStr}T${timeStr}:00`);
+    db.collection('coaches').doc(currentUid).collection('slots').add({
+      timestamp: firebase.firestore.Timestamp.fromDate(dt),
+      dateKey: dateStrToKey(dateStr),
+      time: formatDisplayTime(dt),
+      courseType: course,
+      location: location,
+      status: 'open',
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(()=>{
+      closeSheet(); showToast('✅ 已新增時段');
+    }).catch(err=>{
+      showToast('❌ 新增失敗: ' + err.message);
+    });
+  };
+}
 
 /* 雲端資料庫連動：手動新增學員 */
 function openAddStudent(){
@@ -527,11 +730,105 @@ function renderStudents(filter=''){
 }
 
 function renderBars(){ const el = document.getElementById('weekBars'); const max = Math.max(...weekBarData.map(d=>d.value),1); el.innerHTML = weekBarData.map((d,i)=>{ const h = d.value===0 ? 4 : Math.max(6,(d.value/max)*70); return `<div class="bar-col ${i===1?'today':''}"><div class="bar-fill" style="height:${h}px;"></div><span>${d.label}</span></div>`; }).join(''); }
-function renderLedger(){ const el = document.getElementById('ledgerList'); el.innerHTML = `<div style="text-align:center; padding:20px; color:var(--text-faint); font-size:12px;">暫無最新記帳明細</div>`; }
-function openAddLedger(){ showToast('記帳功能預留'); }
+function renderLedger(){
+  const el = document.getElementById('ledgerList');
+  if(!ledgerEntries || ledgerEntries.length === 0){
+    el.innerHTML = `<div style="text-align:center; padding:20px; color:var(--text-faint); font-size:12px;">暫無最新記帳明細</div>`;
+    return;
+  }
+  el.innerHTML = ledgerEntries.slice(0,15).map(l => `
+    <div class="student-card">
+      <div class="student-avatar" style="color:${l.type==='income' ? 'var(--accent-green)' : 'var(--accent-red)'};">
+        <i class="fa-solid ${l.type==='income' ? 'fa-arrow-down' : 'fa-arrow-up'}"></i>
+      </div>
+      <div class="student-info"><h3>${l.note || (l.type==='income' ? '收入' : '支出')}</h3><p>${l.type==='income' ? '+' : '-'}NT$${Number(l.amount||0).toLocaleString()}</p></div>
+    </div>
+  `).join('');
+}
+
+function openAddLedger(){
+  setSheet(`
+    <div class="sheet-title">新增記帳</div>
+    <div class="form-row"><label>類型</label>
+      <select class="form-input" id="ledgerType"><option value="income">收入</option><option value="expense">支出</option></select>
+    </div>
+    <div class="form-row"><label>金額 (NT$)</label><input type="number" class="form-input" id="ledgerAmount" placeholder="例如：1500"></div>
+    <div class="form-row"><label>備註</label><input type="text" class="form-input" id="ledgerNote" placeholder="例如：王小明 單堂課費"></div>
+    <div class="sheet-actions">
+      <button class="sheet-btn ghost" id="cancelLedgerBtn">取消</button>
+      <button class="sheet-btn primary" id="saveLedgerBtn">確認新增</button>
+    </div>
+  `);
+  openSheet();
+  document.getElementById('cancelLedgerBtn').onclick = closeSheet;
+  document.getElementById('saveLedgerBtn').onclick = ()=>{
+    const type = document.getElementById('ledgerType').value;
+    const amount = Number(document.getElementById('ledgerAmount').value);
+    const note = document.getElementById('ledgerNote').value.trim();
+    if(!amount || amount <= 0) return showToast('請輸入正確金額');
+
+    db.collection('coaches').doc(currentUid).collection('ledger').add({
+      type, amount, note,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(()=>{
+      closeSheet(); showToast('✅ 已新增記帳');
+    }).catch(err=>{
+      showToast('❌ 新增失敗: ' + err.message);
+    });
+  };
+}
 function renderWeekList(){ const el = document.getElementById('weekGrid'); el.innerHTML = `<div class="week-card"><div class="week-empty-hint">固定排程系統已就緒</div></div>`; }
 function renderManageList(c,a){ const el = document.getElementById(c); el.innerHTML = `<span style="font-size:12px; color:var(--text-muted);">${a.join('、')}</span>`; }
-function openEditProfile(){ showToast('資料修改功能'); }
+function openEditProfile(forceOpen){
+  setSheet(`
+    <div class="sheet-title">編輯個人資料</div>
+    <div class="form-row"><label>教練姓名</label><input type="text" class="form-input" id="profName" value="${coachProfile.name||''}" placeholder="例如：Daisy"></div>
+    <div class="form-row"><label>專長標籤（用「、」分隔）</label><input type="text" class="form-input" id="profSpecialties" value="${(coachProfile.specialties||[]).join('、')}" placeholder="例如：重量訓練、有氧體能"></div>
+    <div class="form-row">
+      <label>專屬約課代號（英數字與連字號，需唯一）</label>
+      <input type="text" class="form-input" id="profSlug" value="${coachProfile.slug||''}" placeholder="例如：daisy">
+      <p style="font-size:11px;color:var(--text-faint);margin-top:6px;line-height:1.5;">此代號會出現在您的約課網址中（例如 ?coach=daisy）。若代號已被其他教練使用，系統會提示您更換。</p>
+    </div>
+    <div class="sheet-actions">
+      <button class="sheet-btn ghost" id="cancelProfBtn">${forceOpen ? '稍後再說' : '取消'}</button>
+      <button class="sheet-btn primary" id="saveProfBtn">儲存變更</button>
+    </div>
+  `);
+  openSheet();
+  document.getElementById('cancelProfBtn').onclick = closeSheet;
+  document.getElementById('saveProfBtn').onclick = ()=>{
+    const name = document.getElementById('profName').value.trim();
+    const specialtiesRaw = document.getElementById('profSpecialties').value.trim();
+    const specialties = specialtiesRaw ? specialtiesRaw.split(/[,、]/).map(s=>s.trim()).filter(Boolean) : [];
+    const slug = slugify(document.getElementById('profSlug').value);
+
+    if(!name) return showToast('請輸入教練姓名');
+    if(!slug) return showToast('請輸入有效的英數字代號（例如 daisy）');
+
+    const saveBtn = document.getElementById('saveProfBtn');
+    saveBtn.disabled = true; saveBtn.textContent = '儲存中...';
+
+    checkSlugAvailable(slug).then(available=>{
+      if(!available){
+        saveBtn.disabled = false; saveBtn.textContent = '儲存變更';
+        showToast(`❌ 代號「${slug}」已被使用，請換一個試試，例如 ${slug}2 或 ${slug}-tw`);
+        return;
+      }
+      const oldSlug = coachProfile.slug;
+      reserveSlug(slug, oldSlug)
+        .then(()=> db.collection('coaches').doc(currentUid).update({ name, specialties }))
+        .then(()=>{ closeSheet(); showToast('✅ 個人資料已更新'); })
+        .catch(err=>{
+          saveBtn.disabled = false; saveBtn.textContent = '儲存變更';
+          if(err.message === 'SLUG_TAKEN'){
+            showToast(`❌ 代號「${slug}」剛被別人使用了，請換一個`);
+          } else {
+            showToast('❌ 儲存失敗: ' + err.message);
+          }
+        });
+    });
+  };
+}
 
 function setSheet(html){ document.getElementById('sheetBody').innerHTML = `<div class="sheet-handle"></div>${html}`; }
 function openSheet(){ document.getElementById('sheetOverlay').classList.add('show'); }
