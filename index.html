@@ -258,13 +258,28 @@ body{
 .income-summary-card{margin:14px 20px 4px 20px;background:var(--bg-card);border:1px solid var(--border-color);border-radius:16px;padding:14px 16px;flex-shrink:0;}
 .income-summary-header{display:flex;justify-content:space-between;align-items:center;font-size:11.5px;color:var(--text-muted);font-weight:700;margin-bottom:10px;}
 .income-summary-header b{color:var(--pink-light);font-size:14px;}
-.income-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 0;}
+.income-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 10px;padding:9px 0;}
 .income-row + .income-row{border-top:1px solid var(--border-soft);}
-.income-label{font-size:12px;color:var(--text-main);flex:1;min-width:0;}
+.income-row-main{display:flex;flex-direction:column;gap:2px;flex:1;min-width:130px;}
+.income-label{font-size:12.5px;color:var(--text-main);font-weight:700;}
+.income-auto-note{font-size:10px;color:var(--text-faint);}
 .income-input-wrap{display:flex;align-items:center;gap:5px;background:var(--bg-elevated);border:1px solid var(--border-soft);border-radius:10px;padding:6px 10px;flex-shrink:0;}
 .income-input-wrap span{font-size:11px;color:var(--text-faint);}
-.income-input{width:88px;background:transparent;border:none;outline:none;color:var(--text-main);font-size:12.5px;text-align:right;}
+.income-input{width:80px;background:transparent;border:none;outline:none;color:var(--text-main);font-size:12.5px;text-align:right;}
+.income-subtotal{width:100%;text-align:right;font-size:11px;color:var(--pink-light);font-weight:700;}
 .empty-hint{text-align:center;color:var(--text-faint);font-size:11.5px;padding:10px 0;}
+
+/* ===== 目標編輯小圖示（本月已上課 / 本月銷售 hero card） ===== */
+.hc-edit-icon{margin-left:auto;cursor:pointer;color:var(--text-faint);font-size:10px;padding:4px;position:relative;z-index:2;}
+.hc-edit-icon:active{color:var(--pink-main);}
+
+/* ===== 設定頁收合面板 (Accordion) ===== */
+.accordion-section{background:var(--bg-card);border:1px solid var(--border-color);border-radius:16px;overflow:hidden;margin-bottom:12px;}
+.accordion-header{display:flex;align-items:center;gap:12px;padding:13px 14px;cursor:pointer;}
+.accordion-chev{color:var(--text-faint);font-size:12px;margin-left:auto;transition:transform .25s ease;flex-shrink:0;}
+.accordion-section.open .accordion-chev{transform:rotate(180deg);}
+.accordion-body{display:none;padding:0 14px 14px 14px;}
+.accordion-section.open .accordion-body{display:block;}
 
 /* ===== 日/週 檢視切換 ===== */
 .view-toggle-row{display:flex;gap:8px;padding:14px 20px 0 20px;flex-shrink:0;}
@@ -363,7 +378,6 @@ body.light-theme .coach-avatar{ color:#fff; }
     </div>
     <div class="header-actions">
       <div class="icon-btn" id="bell-btn"><i class="fa-regular fa-bell"></i><span class="badge">2</span></div>
-      <div class="icon-btn" id="gear-btn"><i class="fa-solid fa-gear"></i></div>
     </div>
   </div>
 
@@ -414,18 +428,18 @@ body.light-theme .coach-avatar{ color:#fff; }
     <div class="content-area" style="padding:0 0 100px 0;">
       <div class="hero-row">
         <div class="hero-card">
-          <div class="hc-label"><i class="fa-solid fa-clipboard-check"></i>本月已上課</div>
+          <div class="hc-label"><i class="fa-solid fa-clipboard-check"></i>本月已上課<i class="fa-solid fa-pen hc-edit-icon" id="editGoalBtn1"></i></div>
           <div class="hc-value"><span class="num" id="heroSessionsVal">0</span><small>堂</small></div>
           <div class="hc-sub trend"><i class="fa-solid fa-arrow-trend-up"></i>較上月 +4 堂</div>
           <div class="goal-bar"><div class="goal-bar-fill" id="heroSessionsBar" style="width:0%;"></div></div>
-          <div class="hc-goal" id="heroSessionsGoal"></div>
+          <div class="hc-goal" id="heroSessionsGoal">點擊筆型圖示設定本月目標</div>
         </div>
         <div class="hero-card">
-          <div class="hc-label"><i class="fa-solid fa-tags"></i>本月銷售</div>
+          <div class="hc-label"><i class="fa-solid fa-tags"></i>本月銷售<i class="fa-solid fa-pen hc-edit-icon" id="editGoalBtn2"></i></div>
           <div class="hc-value"><span class="num" id="heroSalesCountVal">0</span><small>堂</small></div>
           <div class="hc-sub money" id="heroSalesAmountVal">NT$0</div>
           <div class="goal-bar"><div class="goal-bar-fill" id="heroSalesBar" style="width:0%;"></div></div>
-          <div class="hc-goal" id="heroSalesGoal"></div>
+          <div class="hc-goal" id="heroSalesGoal">點擊筆型圖示設定本月目標</div>
         </div>
       </div>
       <div class="mini-stats">
@@ -470,32 +484,34 @@ body.light-theme .coach-avatar{ color:#fff; }
         </div>
       </div>
       <div class="settings-group">
-        <h3>可預約時段模版</h3>
-        <div class="week-list" id="weekGrid"></div>
-      </div>
-      <div class="settings-group">
-        <h3>課程種類</h3>
-        <div class="manage-card" id="courseTypeManage"></div>
-      </div>
-      <div class="settings-group">
-        <h3>授課地點</h3>
-        <div class="manage-card" id="locationManage"></div>
-      </div>
-      <div class="settings-group">
-        <h3>專長標籤管理</h3>
-        <div class="manage-card" id="specialtyManage"></div>
-      </div>
-      <div class="settings-group">
-        <h3>學員分類標籤</h3>
-        <div class="manage-card" id="studentTagManage"></div>
-      </div>
-      <div class="settings-group">
-        <h3>收入項目管理</h3>
-        <div class="manage-card" id="incomeItemManage"></div>
-      </div>
-      <div class="settings-group">
-        <h3>外觀主題</h3>
-        <div class="manage-card"><div class="theme-swatch-grid" id="themeSwatchGrid"></div></div>
+        <div class="accordion-section" data-acc="weekTemplate">
+          <div class="accordion-header"><div class="settings-icon"><i class="fa-solid fa-calendar-week"></i></div><div class="settings-main"><h4>可預約時段模版</h4><p>設定每週固定開放時段</p></div><i class="fa-solid fa-chevron-down accordion-chev"></i></div>
+          <div class="accordion-body"><div class="week-list" id="weekGrid"></div></div>
+        </div>
+        <div class="accordion-section" data-acc="courseTypes">
+          <div class="accordion-header"><div class="settings-icon"><i class="fa-solid fa-list"></i></div><div class="settings-main"><h4>課程種類</h4><p>新增、修改、刪除課程種類</p></div><i class="fa-solid fa-chevron-down accordion-chev"></i></div>
+          <div class="accordion-body"><div class="manage-card" id="courseTypeManage"></div></div>
+        </div>
+        <div class="accordion-section" data-acc="locations">
+          <div class="accordion-header"><div class="settings-icon"><i class="fa-solid fa-location-dot"></i></div><div class="settings-main"><h4>授課地點</h4><p>新增、修改、刪除授課地點</p></div><i class="fa-solid fa-chevron-down accordion-chev"></i></div>
+          <div class="accordion-body"><div class="manage-card" id="locationManage"></div></div>
+        </div>
+        <div class="accordion-section" data-acc="specialties">
+          <div class="accordion-header"><div class="settings-icon"><i class="fa-solid fa-star"></i></div><div class="settings-main"><h4>專長標籤管理</h4><p>編輯個人資料時可多選使用</p></div><i class="fa-solid fa-chevron-down accordion-chev"></i></div>
+          <div class="accordion-body"><div class="manage-card" id="specialtyManage"></div></div>
+        </div>
+        <div class="accordion-section" data-acc="studentTags">
+          <div class="accordion-header"><div class="settings-icon"><i class="fa-solid fa-user-tag"></i></div><div class="settings-main"><h4>學員分類標籤</h4><p>學員頁篩選按鈕依此自動產生</p></div><i class="fa-solid fa-chevron-down accordion-chev"></i></div>
+          <div class="accordion-body"><div class="manage-card" id="studentTagManage"></div></div>
+        </div>
+        <div class="accordion-section" data-acc="incomeItems">
+          <div class="accordion-header"><div class="settings-icon"><i class="fa-solid fa-sack-dollar"></i></div><div class="settings-main"><h4>收入項目管理</h4><p>記帳時可選擇，並自動累加至總表</p></div><i class="fa-solid fa-chevron-down accordion-chev"></i></div>
+          <div class="accordion-body"><div class="manage-card" id="incomeItemManage"></div></div>
+        </div>
+        <div class="accordion-section" data-acc="theme">
+          <div class="accordion-header"><div class="settings-icon"><i class="fa-solid fa-palette"></i></div><div class="settings-main"><h4>外觀主題</h4><p>切換整體配色風格</p></div><i class="fa-solid fa-chevron-down accordion-chev"></i></div>
+          <div class="accordion-body"><div class="manage-card"><div class="theme-swatch-grid" id="themeSwatchGrid"></div></div></div>
+        </div>
       </div>
       <div class="settings-group">
         <h3>其他</h3>
@@ -508,9 +524,10 @@ body.light-theme .coach-avatar{ color:#fff; }
   </div>
 
   <div class="bottom-nav">
-    <div class="nav-item active" data-view="schedule"><i class="fa-solid fa-calendar-days"></i><span>行程</span></div>
+    <div class="nav-item active" data-view="schedule"><i class="fa-solid fa-calendar-days"></i><span>行事曆</span></div>
     <div class="nav-item" data-view="students"><i class="fa-solid fa-user-group"></i><span>學員</span></div>
     <div class="nav-item" data-view="stats"><i class="fa-solid fa-wallet"></i><span>記帳</span></div>
+    <div class="nav-item" data-view="settings"><i class="fa-solid fa-gear"></i><span>設定</span></div>
   </div>
 
   <div class="sheet-overlay" id="sheetOverlay">
@@ -857,21 +874,81 @@ function computeTodayCount(){
   if(el) el.textContent = c;
 }
 
-function renderHeroStats(){
+/* 判斷一筆記帳是否屬於本月：優先採用交易日期，若無則退回建立時間 */
+function isThisMonth(l){
   const now = new Date();
-  const isThisMonth = (l) => l.createdAt && l.createdAt.toDate().getMonth()===now.getMonth() && l.createdAt.toDate().getFullYear()===now.getFullYear();
+  let d = null;
+  if(l.transactionDate){ d = new Date(l.transactionDate+'T00:00:00'); }
+  else if(l.createdAt && l.createdAt.toDate){ d = l.createdAt.toDate(); }
+  if(!d || isNaN(d.getTime())) return false;
+  return d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear();
+}
+/* 依收入項目自動加總本月的購課/記帳明細金額（核心補強：免除教練手動重複填寫總表） */
+function getLedgerAutoSumsByItem(){
+  const sums = {};
+  ledgerEntries.forEach(l=>{
+    if(l.type!=='income' || !isThisMonth(l)) return;
+    const key = l.incomeItem || '其他收入(未分類)';
+    sums[key] = (sums[key]||0) + Number(l.amount||0);
+  });
+  return sums;
+}
+/* 本月收入總金額 = 記帳明細自動累加 + 收入項目手動補登金額 */
+function computeMonthIncomeTotal(){
+  const autoSums = getLedgerAutoSumsByItem();
+  let total = 0;
+  Object.values(autoSums).forEach(v=> total += v);
+  incomeItems.forEach(item=>{ total += Number(monthlyIncomeData[item]||0); });
+  return total;
+}
+
+function renderHeroStats(){
   const monthIncomeEntries = ledgerEntries.filter(l => l.type==='income' && isThisMonth(l));
-  const monthIncome = monthIncomeEntries.reduce((sum,l)=>sum+Number(l.amount||0), 0);
+  const salesSessionsCount = monthIncomeEntries.reduce((sum,l)=>sum+Number(l.quantity||0), 0);
+  const monthIncomeTotal = computeMonthIncomeTotal();
   const completedSessions = allSlots.filter(s => s.status === 'full').length;
 
   const salesAmountEl = document.getElementById('heroSalesAmountVal');
   const salesCountEl = document.getElementById('heroSalesCountVal');
   const sessionsEl = document.getElementById('heroSessionsVal');
   const topSessionsEl = document.getElementById('monthlySessionsTop');
-  if(salesAmountEl) salesAmountEl.textContent = `NT$${monthIncome.toLocaleString()}`;
-  if(salesCountEl) salesCountEl.textContent = monthIncomeEntries.length;
+  if(salesAmountEl) salesAmountEl.textContent = `NT$${monthIncomeTotal.toLocaleString()}`;
+  if(salesCountEl) salesCountEl.textContent = salesSessionsCount;
   if(sessionsEl) sessionsEl.textContent = completedSessions;
   if(topSessionsEl) topSessionsEl.textContent = completedSessions;
+
+  const goalSessions = Number(coachProfile.goalSessions)||0;
+  const goalSales = Number(coachProfile.goalSalesAmount)||0;
+  const sessionsBar = document.getElementById('heroSessionsBar');
+  const salesBar = document.getElementById('heroSalesBar');
+  const sessionsGoalEl = document.getElementById('heroSessionsGoal');
+  const salesGoalEl = document.getElementById('heroSalesGoal');
+  if(sessionsBar) sessionsBar.style.width = goalSessions>0 ? Math.min(100,(completedSessions/goalSessions)*100)+'%' : '0%';
+  if(salesBar) salesBar.style.width = goalSales>0 ? Math.min(100,(monthIncomeTotal/goalSales)*100)+'%' : '0%';
+  if(sessionsGoalEl) sessionsGoalEl.textContent = goalSessions>0 ? `目標 ${goalSessions} 堂（點擊筆型圖示修改）` : '點擊筆型圖示設定本月目標';
+  if(salesGoalEl) salesGoalEl.textContent = goalSales>0 ? `目標 NT$${goalSales.toLocaleString()}（點擊筆型圖示修改）` : '點擊筆型圖示設定本月目標';
+}
+
+/* 修改「本月目標堂數」與「本月目標銷售金額」，即時連動 Goal Bar */
+function openGoalEdit(){
+  setSheet(`
+    <div class="sheet-title">設定本月目標</div>
+    <div class="form-row"><label>目標堂數</label><input type="number" class="form-input" id="goalSessionsInput" value="${coachProfile.goalSessions||''}" placeholder="例如：40"></div>
+    <div class="form-row"><label>目標銷售金額 (NT$)</label><input type="number" class="form-input" id="goalSalesInput" value="${coachProfile.goalSalesAmount||''}" placeholder="例如：60000"></div>
+    <div class="sheet-actions">
+      <button class="sheet-btn ghost" id="cancelGoalBtn">取消</button>
+      <button class="sheet-btn primary" id="saveGoalBtn">儲存</button>
+    </div>
+  `);
+  openSheet();
+  document.getElementById('cancelGoalBtn').onclick = closeSheet;
+  document.getElementById('saveGoalBtn').onclick = ()=>{
+    const goalSessions = Number(document.getElementById('goalSessionsInput').value)||0;
+    const goalSalesAmount = Number(document.getElementById('goalSalesInput').value)||0;
+    db.collection('coaches').doc(currentUid).update({ goalSessions, goalSalesAmount })
+      .then(()=>{ closeSheet(); showToast('✅ 已更新本月目標'); })
+      .catch(err=>showToast('❌ 儲存失敗: ' + err.message));
+  };
 }
 
 function renderTopStats(){ document.getElementById('todayCount').textContent = 0; document.getElementById('monthlySessionsTop').textContent = monthlyCompletedSessions; }
@@ -1032,10 +1109,20 @@ function renderWeekTimeline(){
 
 function openAddSlot(){
   const d = dateList.find(x=>x.key===activeDateKey);
+  const studentOptions = students.map(s=>`<option value="${escapeHtml(s.name)}">`).join('');
   setSheet(`
-    <div class="sheet-title">新增可預約時段</div>
+    <div class="sheet-title">新增排課</div>
+    <div class="view-toggle-row" style="padding:0 0 14px 0;">
+      <button type="button" class="view-toggle-btn active" id="slotModeOpenBtn">開放時段（供學員預約）</button>
+      <button type="button" class="view-toggle-btn" id="slotModeManualBtn">手動排課</button>
+    </div>
     <div class="form-row"><label>日期</label><input type="date" class="form-input" id="slotDate" value="${d.iso}"></div>
     <div class="form-row"><label>開始時間</label><input type="time" class="form-input" id="slotTime" value="09:00"></div>
+    <div class="form-row hidden" id="slotStudentRow">
+      <label>學員姓名（可從現有名單選取，或直接輸入新姓名）</label>
+      <input type="text" class="form-input" id="slotStudentName" list="slotStudentList" placeholder="輸入或選擇學員姓名">
+      <datalist id="slotStudentList">${studentOptions}</datalist>
+    </div>
     <div class="form-row"><label>課程種類</label>
       <select class="form-input" id="slotCourse">${courseTypes.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('')}</select>
     </div>
@@ -1048,6 +1135,14 @@ function openAddSlot(){
     </div>
   `);
   openSheet();
+
+  let slotMode = 'open';
+  const openBtn = document.getElementById('slotModeOpenBtn');
+  const manualBtn = document.getElementById('slotModeManualBtn');
+  const studentRow = document.getElementById('slotStudentRow');
+  openBtn.onclick = ()=>{ slotMode='open'; openBtn.classList.add('active'); manualBtn.classList.remove('active'); studentRow.classList.add('hidden'); };
+  manualBtn.onclick = ()=>{ slotMode='manual'; manualBtn.classList.add('active'); openBtn.classList.remove('active'); studentRow.classList.remove('hidden'); };
+
   document.getElementById('cancelSlotBtn').onclick = closeSheet;
   document.getElementById('saveSlotBtn').onclick = ()=>{
     const dateStr = document.getElementById('slotDate').value;
@@ -1057,16 +1152,29 @@ function openAddSlot(){
     if(!dateStr || !timeStr) return showToast('請完整選擇日期與時間');
 
     const dt = new Date(`${dateStr}T${timeStr}:00`);
-    db.collection('coaches').doc(currentUid).collection('slots').add({
+    const payload = {
       timestamp: firebase.firestore.Timestamp.fromDate(dt),
       dateKey: dateStrToKey(dateStr),
       time: formatDisplayTime(dt),
       courseType: course,
       location: location,
-      status: 'open',
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    }).then(()=>{
-      closeSheet(); showToast('✅ 已新增時段');
+    };
+
+    if(slotMode === 'manual'){
+      const studentName = document.getElementById('slotStudentName').value.trim();
+      if(!studentName) return showToast('請輸入或選擇學員姓名');
+      const matched = students.find(s=>s.name===studentName);
+      payload.status = 'full';
+      payload.studentName = studentName;
+      payload.studentPhone = matched ? (matched.phone||'') : '';
+      payload.bookedAt = firebase.firestore.FieldValue.serverTimestamp();
+    } else {
+      payload.status = 'open';
+    }
+
+    db.collection('coaches').doc(currentUid).collection('slots').add(payload).then(()=>{
+      closeSheet(); showToast(slotMode==='manual' ? '✅ 已手動新增課程' : '✅ 已新增開放時段');
     }).catch(err=>{
       showToast('❌ 新增失敗: ' + err.message);
     });
@@ -1176,17 +1284,26 @@ function renderLedger(){
     el.innerHTML = `<div style="text-align:center; padding:20px; color:var(--text-faint); font-size:12px;">暫無最新記帳明細</div>`;
     return;
   }
-  el.innerHTML = ledgerEntries.slice(0,15).map(l => `
+  el.innerHTML = ledgerEntries.slice(0,15).map(l => {
+    const isIncome = l.type==='income';
+    const title = isIncome
+      ? (l.studentName ? `${escapeHtml(l.studentName)} · ${escapeHtml(l.incomeItem||'收入')}` : escapeHtml(l.incomeItem || '收入'))
+      : escapeHtml(l.note || '支出');
+    const qtyPart = (isIncome && l.quantity) ? `${l.quantity}堂 x NT$${Number(l.unitPrice||0).toLocaleString()} = ` : '';
+    const sub = isIncome
+      ? `${qtyPart}+NT$${Number(l.amount||0).toLocaleString()}${l.transactionDate ? ' · '+escapeHtml(l.transactionDate) : ''}`
+      : `-NT$${Number(l.amount||0).toLocaleString()}${l.note ? '' : ''}`;
+    return `
     <div class="student-card">
-      <div class="student-avatar" style="color:${l.type==='income' ? 'var(--accent-green)' : 'var(--accent-red)'};">
-        <i class="fa-solid ${l.type==='income' ? 'fa-arrow-down' : 'fa-arrow-up'}"></i>
+      <div class="student-avatar" style="color:${isIncome ? 'var(--accent-green)' : 'var(--accent-red)'};">
+        <i class="fa-solid ${isIncome ? 'fa-arrow-down' : 'fa-arrow-up'}"></i>
       </div>
-      <div class="student-info"><h3>${escapeHtml(l.note || (l.type==='income' ? '收入' : '支出'))}</h3><p>${l.type==='income' ? '+' : '-'}NT$${Number(l.amount||0).toLocaleString()}</p></div>
-    </div>
-  `).join('');
+      <div class="student-info"><h3>${title}</h3><p>${sub}</p></div>
+    </div>`;
+  }).join('');
 }
 
-/* ===== 本月收入總表：教練依自訂收入項目手動填金額，自動加總 ===== */
+/* ===== 本月收入總表：記帳明細依收入項目「自動累加」，教練僅需為現金等未入帳項目「手動補登」差額 ===== */
 function renderIncomeSummary(){
   const el = document.getElementById('incomeSummaryList');
   const totalEl = document.getElementById('incomeSummaryTotal');
@@ -1196,19 +1313,29 @@ function renderIncomeSummary(){
     totalEl.textContent = 'NT$0';
     return;
   }
-  el.innerHTML = incomeItems.map(item=>`
+  const autoSums = getLedgerAutoSumsByItem();
+  el.innerHTML = incomeItems.map(item=>{
+    const auto = Number(autoSums[item]||0);
+    const manual = Number(monthlyIncomeData[item]||0);
+    const subtotal = auto + manual;
+    return `
     <div class="income-row">
-      <span class="income-label">${escapeHtml(item)}</span>
-      <div class="income-input-wrap"><span>NT$</span><input type="number" class="income-input" data-item="${escapeHtml(item)}" value="${monthlyIncomeData[item] || ''}" placeholder="0"></div>
-    </div>
-  `).join('');
+      <div class="income-row-main">
+        <span class="income-label">${escapeHtml(item)}</span>
+        <span class="income-auto-note">已自動累加 NT$${auto.toLocaleString()}（來自記帳明細）</span>
+      </div>
+      <div class="income-input-wrap"><span>+NT$</span><input type="number" class="income-input" data-item="${escapeHtml(item)}" value="${monthlyIncomeData[item] || ''}" placeholder="手動補登"></div>
+      <div class="income-subtotal">小計 NT$${subtotal.toLocaleString()}</div>
+    </div>`;
+  }).join('');
   el.querySelectorAll('.income-input').forEach(inp=>{
     inp.addEventListener('change', ()=>{
       const item = inp.dataset.item;
       const val = Number(inp.value) || 0;
       monthlyIncomeData[item] = val;
       saveMonthlyIncome();
-      renderIncomeSummaryTotal();
+      renderIncomeSummary();
+      renderHeroStats();
     });
   });
   renderIncomeSummaryTotal();
@@ -1216,8 +1343,7 @@ function renderIncomeSummary(){
 function renderIncomeSummaryTotal(){
   const totalEl = document.getElementById('incomeSummaryTotal');
   if(!totalEl) return;
-  const total = incomeItems.reduce((sum,item)=>sum+Number(monthlyIncomeData[item]||0),0);
-  totalEl.textContent = `NT$${total.toLocaleString()}`;
+  totalEl.textContent = `NT$${computeMonthIncomeTotal().toLocaleString()}`;
 }
 function saveMonthlyIncome(){
   if(!currentUid) return;
@@ -1227,34 +1353,93 @@ function saveMonthlyIncome(){
 }
 
 function openAddLedger(){
+  const todayIso = new Date().toISOString().slice(0,10);
+  const studentOptions = students.map(s=>`<option value="${escapeHtml(s.name)}">`).join('');
+  const itemOptions = incomeItems.length
+    ? incomeItems.map(it=>`<option value="${escapeHtml(it)}">${escapeHtml(it)}</option>`).join('')
+    : '<option value="">請先至設定頁新增收入項目</option>';
+
   setSheet(`
-    <div class="sheet-title">新增記帳（成交 / 購買課明細）</div>
-    <div class="form-row"><label>類型</label>
-      <select class="form-input" id="ledgerType"><option value="income">收入</option><option value="expense">支出</option></select>
+    <div class="sheet-title">新增記帳</div>
+    <div class="view-toggle-row" style="padding:0 0 14px 0;">
+      <button type="button" class="view-toggle-btn active" id="ledgerModeIncomeBtn">收入（購課明細）</button>
+      <button type="button" class="view-toggle-btn" id="ledgerModeExpenseBtn">支出</button>
     </div>
-    <div class="form-row"><label>金額 (NT$)</label><input type="number" class="form-input" id="ledgerAmount" placeholder="例如：1500"></div>
-    <div class="form-row"><label>備註</label><input type="text" class="form-input" id="ledgerNote" placeholder="例如：王小明 單堂課費"></div>
+    <div id="ledgerIncomeFields">
+      <div class="form-row"><label>學員姓名</label>
+        <input type="text" class="form-input" id="ledgerStudentName" list="ledgerStudentList" placeholder="輸入或選擇學員姓名">
+        <datalist id="ledgerStudentList">${studentOptions}</datalist>
+      </div>
+      <div class="form-row"><label>交易日期</label><input type="date" class="form-input" id="ledgerDate" value="${todayIso}"></div>
+      <div class="form-row"><label>收入項目</label><select class="form-input" id="ledgerItem">${itemOptions}</select></div>
+      <div class="form-row"><label>購買堂數</label><input type="number" class="form-input" id="ledgerQty" value="1" min="0"></div>
+      <div class="form-row"><label>單價 (NT$)</label><input type="number" class="form-input" id="ledgerUnitPrice" placeholder="例如：1500"></div>
+      <div class="form-row"><label>總金額 (NT$，自動計算)</label><input type="number" class="form-input" id="ledgerTotal" readonly style="opacity:0.7;"></div>
+    </div>
+    <div id="ledgerExpenseFields" class="hidden">
+      <div class="form-row"><label>支出日期</label><input type="date" class="form-input" id="ledgerExpenseDate" value="${todayIso}"></div>
+      <div class="form-row"><label>金額 (NT$)</label><input type="number" class="form-input" id="ledgerExpenseAmount" placeholder="例如：500"></div>
+    </div>
+    <div class="form-row"><label>備註（選填）</label><input type="text" class="form-input" id="ledgerNote" placeholder="例如：加購課程 / 場地費"></div>
     <div class="sheet-actions">
       <button class="sheet-btn ghost" id="cancelLedgerBtn">取消</button>
       <button class="sheet-btn primary" id="saveLedgerBtn">確認新增</button>
     </div>
   `);
   openSheet();
+
+  let ledgerMode = 'income';
+  const incomeFieldsEl = document.getElementById('ledgerIncomeFields');
+  const expenseFieldsEl = document.getElementById('ledgerExpenseFields');
+  const incomeBtn = document.getElementById('ledgerModeIncomeBtn');
+  const expenseBtn = document.getElementById('ledgerModeExpenseBtn');
+  incomeBtn.onclick = ()=>{ ledgerMode='income'; incomeBtn.classList.add('active'); expenseBtn.classList.remove('active'); incomeFieldsEl.classList.remove('hidden'); expenseFieldsEl.classList.add('hidden'); };
+  expenseBtn.onclick = ()=>{ ledgerMode='expense'; expenseBtn.classList.add('active'); incomeBtn.classList.remove('active'); expenseFieldsEl.classList.remove('hidden'); incomeFieldsEl.classList.add('hidden'); };
+
+  const qtyInput = document.getElementById('ledgerQty');
+  const priceInput = document.getElementById('ledgerUnitPrice');
+  const totalInput = document.getElementById('ledgerTotal');
+  const recompute = ()=>{ const q = Number(qtyInput.value)||0; const p = Number(priceInput.value)||0; totalInput.value = (q*p) || ''; };
+  qtyInput.addEventListener('input', recompute);
+  priceInput.addEventListener('input', recompute);
+  recompute();
+
   document.getElementById('cancelLedgerBtn').onclick = closeSheet;
   document.getElementById('saveLedgerBtn').onclick = ()=>{
-    const type = document.getElementById('ledgerType').value;
-    const amount = Number(document.getElementById('ledgerAmount').value);
-    const note = document.getElementById('ledgerNote').value.trim();
-    if(!amount || amount <= 0) return showToast('請輸入正確金額');
+    if(ledgerMode === 'income'){
+      const studentName = document.getElementById('ledgerStudentName').value.trim();
+      const transactionDate = document.getElementById('ledgerDate').value;
+      const incomeItem = document.getElementById('ledgerItem').value;
+      const quantity = Number(qtyInput.value)||0;
+      const unitPrice = Number(priceInput.value)||0;
+      const amount = quantity*unitPrice;
+      const note = document.getElementById('ledgerNote').value.trim();
+      if(!incomeItem) return showToast('請先至設定頁「收入項目管理」新增並選擇收入項目');
+      if(!amount || amount <= 0) return showToast('請輸入正確的購買堂數與單價');
 
-    db.collection('coaches').doc(currentUid).collection('ledger').add({
-      type, amount, note,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    }).then(()=>{
-      closeSheet(); showToast('✅ 已新增記帳');
-    }).catch(err=>{
-      showToast('❌ 新增失敗: ' + err.message);
-    });
+      db.collection('coaches').doc(currentUid).collection('ledger').add({
+        type: 'income', studentName, transactionDate, incomeItem, quantity, unitPrice, amount, note,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      }).then(()=>{
+        closeSheet(); showToast('✅ 已新增購課明細，並自動累加至本月收入總表');
+      }).catch(err=>{
+        showToast('❌ 新增失敗: ' + err.message);
+      });
+    } else {
+      const transactionDate = document.getElementById('ledgerExpenseDate').value;
+      const amount = Number(document.getElementById('ledgerExpenseAmount').value);
+      const note = document.getElementById('ledgerNote').value.trim();
+      if(!amount || amount <= 0) return showToast('請輸入正確金額');
+
+      db.collection('coaches').doc(currentUid).collection('ledger').add({
+        type: 'expense', amount, note, transactionDate,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      }).then(()=>{
+        closeSheet(); showToast('✅ 已新增支出');
+      }).catch(err=>{
+        showToast('❌ 新增失敗: ' + err.message);
+      });
+    }
   };
 }
 function renderWeekList(){ const el = document.getElementById('weekGrid'); el.innerHTML = `<div class="week-card"><div class="week-empty-hint">固定排程系統已就緒</div></div>`; }
@@ -1342,8 +1527,12 @@ document.getElementById('fabAdd').addEventListener('click', openAddSlot);
 document.getElementById('fabAddLedger').addEventListener('click', openAddLedger);
 document.getElementById('addStudentBtn').addEventListener('click', openAddStudent);
 document.getElementById('sheetOverlay').addEventListener('click',(e)=>{ if(e.target.id==='sheetOverlay') closeSheet(); });
-document.getElementById('gear-btn').addEventListener('click',()=>switchView('settings'));
 document.getElementById('studentSearch').addEventListener('input',(e)=>renderStudents(e.target.value));
+document.querySelectorAll('.accordion-header').forEach(h=>{
+  h.addEventListener('click', ()=>{ h.closest('.accordion-section').classList.toggle('open'); });
+});
+document.getElementById('editGoalBtn1').addEventListener('click', (e)=>{ e.stopPropagation(); openGoalEdit(); });
+document.getElementById('editGoalBtn2').addEventListener('click', (e)=>{ e.stopPropagation(); openGoalEdit(); });
 </script>
 </body>
 </html>
