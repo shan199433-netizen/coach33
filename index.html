@@ -161,6 +161,7 @@ body{
 .student-info h3{font-size:13.5px;font-weight:700;}
 .student-info p{font-size:11px;color:var(--text-muted);margin-top:2px;}
 .hero-row{display:flex;gap:10px;margin:14px 20px 4px 20px;flex-shrink:0;}
+.hero-row.goal-row{margin-top:10px;}
 .hero-card{ flex:1;min-width:0;background:linear-gradient(160deg,var(--bg-card),var(--bg-elevated)); border:1px solid var(--border-color);border-radius:20px;padding:16px 16px;position:relative;overflow:hidden; }
 .hero-card::after{ content:'';position:absolute;top:-34px;right:-34px;width:110px;height:110px;border-radius:50%; background:radial-gradient(circle,rgba(255,151,183,0.18),transparent 70%); }
 .hero-card .hc-label{font-size:11px;color:var(--text-muted);display:flex;align-items:center;gap:6px;position:relative;z-index:1;}
@@ -220,6 +221,9 @@ body{
 .form-row label{font-size:11.5px;color:var(--text-muted);font-weight:600;margin-bottom:7px;display:block;}
 .form-input{ width:100%;background:var(--bg-elevated);border:1px solid var(--border-soft);border-radius:12px; padding:11px 13px;color:var(--text-main);font-size:13px;outline:none; }
 .form-input:focus{border-color:var(--pink-main);}
+.time-select-row{display:flex;align-items:center;gap:8px;}
+.time-select-row .form-input{width:auto;flex:1;text-align:center;}
+.time-select-row .time-colon{font-weight:800;color:var(--text-muted);}
 .sheet-actions{display:flex;gap:10px;margin-top:6px;}
 .sheet-btn{ flex:1;padding:13px;border-radius:14px;font-size:13.5px;font-weight:700;cursor:pointer;border:none; display:flex;align-items:center;justify-content:center;gap:7px; }
 .sheet-btn.ghost{background:var(--bg-elevated);color:var(--text-muted);border:1px solid var(--border-soft);}
@@ -307,7 +311,12 @@ body{
 .detail-value{font-size:13px;color:var(--text-main);background:var(--bg-elevated);border:1px solid var(--border-soft);border-radius:12px;padding:10px 12px;}
 
 /* ===== 專屬學員詳細記錄面板樣式 ===== */
-.student-record-box{margin-top:12px;max-height:160px;overflow-y:auto;background:var(--bg-elevated);border:1px solid var(--border-soft);border-radius:10px;padding:8px;}
+.remaining-lessons-box{ background:linear-gradient(135deg,rgba(255,151,183,0.16),rgba(255,92,144,0.08)); border:1px solid var(--pink-deep);border-radius:16px;padding:14px 16px;margin-bottom:16px; }
+.remaining-lessons-box .rl-label{font-size:11.5px;color:var(--pink-light);font-weight:700;display:flex;align-items:center;gap:6px;}
+.remaining-lessons-box .rl-value{font-size:26px;font-weight:800;margin-top:4px;}
+.remaining-lessons-box .rl-value small{font-size:12px;font-weight:600;color:var(--text-muted);margin-left:3px;}
+.remaining-lessons-box .rl-sub{font-size:10.5px;color:var(--text-faint);margin-top:4px;}
+.student-record-box{margin-top:0;max-height:220px;overflow-y:auto;background:var(--bg-elevated);border:1px solid var(--border-soft);border-radius:10px;padding:8px;}
 .record-item{font-size:11.5px;padding:6px 4px;border-bottom:1px solid rgba(255,255,255,0.04);display:flex;justify-content:space-between;}
 .record-item:last-child{border-bottom:none;}
 
@@ -430,38 +439,65 @@ body.light-theme .coach-avatar{ color:#fff; }
 
   <div class="view" id="view-stats">
     <div class="content-area" style="padding:0 0 100px 0;">
+      <!-- 純數據統計：本月已上課堂數、本月銷售，不夾雜目標數值/進度條 -->
       <div class="hero-row">
         <div class="hero-card">
-          <div class="hc-label"><i class="fa-solid fa-clipboard-check"></i>本月已上課<i class="fa-solid fa-pen hc-edit-icon" id="editGoalBtn1"></i></div>
+          <div class="hc-label"><i class="fa-solid fa-clipboard-check"></i>本月已上課</div>
           <div class="hc-value"><span class="num" id="heroSessionsVal">0</span><small>堂</small></div>
           <div class="hc-sub trend"><i class="fa-solid fa-arrow-trend-up"></i>較上月 +4 堂</div>
+        </div>
+        <div class="hero-card">
+          <div class="hc-label"><i class="fa-solid fa-tags"></i>本月銷售</div>
+          <div class="hc-value"><span class="num" id="heroSalesCountVal">0</span><small>堂</small></div>
+          <div class="hc-sub money" id="heroSalesAmountVal">NT$0</div>
+        </div>
+      </div>
+
+      <!-- 目標欄位獨立分離為全新區塊 -->
+      <div class="hero-row goal-row">
+        <div class="hero-card">
+          <div class="hc-label"><i class="fa-solid fa-bullseye"></i>本月目標上課數<i class="fa-solid fa-pen hc-edit-icon" id="editGoalBtn1"></i></div>
+          <div class="hc-value"><span class="num" id="goalSessionsVal">--</span><small>堂</small></div>
           <div class="goal-bar"><div class="goal-bar-fill" id="heroSessionsBar" style="width:0%;"></div></div>
           <div class="hc-goal" id="heroSessionsGoal">點擊筆型圖示設定本月目標</div>
         </div>
         <div class="hero-card">
-          <div class="hc-label"><i class="fa-solid fa-tags"></i>本月銷售<i class="fa-solid fa-pen hc-edit-icon" id="editGoalBtn2"></i></div>
-          <div class="hc-value"><span class="num" id="heroSalesCountVal">0</span><small>堂</small></div>
-          <div class="hc-sub money" id="heroSalesAmountVal">NT$0</div>
+          <div class="hc-label"><i class="fa-solid fa-sack-dollar"></i>目標業績（銷售金額）<i class="fa-solid fa-pen hc-edit-icon" id="editGoalBtn2"></i></div>
+          <div class="hc-value" id="goalSalesVal">--</div>
           <div class="goal-bar"><div class="goal-bar-fill" id="heroSalesBar" style="width:0%;"></div></div>
           <div class="hc-goal" id="heroSalesGoal">點擊筆型圖示設定本月目標</div>
         </div>
       </div>
+
       <div class="mini-stats">
         <div class="mini-stat"><div class="v num">6</div><div class="l">待完成堂數</div></div>
         <div class="mini-stat"><div class="v num">1,314</div><div class="l">平均堂費</div></div>
       </div>
 
-      <div class="income-summary-card" id="incomeSummaryCard">
-        <div class="income-summary-header"><span>本月收入總表</span><span>總計 <b id="incomeSummaryTotal">NT$0</b></span></div>
-        <div id="incomeSummaryList"></div>
+      <!-- 本月收入總表：改為收合介面 -->
+      <div class="accordion-section" id="incomeSummarySection" style="margin:14px 20px 4px 20px;">
+        <div class="accordion-header">
+          <div class="settings-icon"><i class="fa-solid fa-table-list"></i></div>
+          <div class="settings-main"><h4>本月收入總表</h4><p>總計 <b id="incomeSummaryTotal" style="color:var(--pink-light);">NT$0</b></p></div>
+          <i class="fa-solid fa-chevron-down accordion-chev"></i>
+        </div>
+        <div class="accordion-body"><div id="incomeSummaryList"></div></div>
       </div>
 
       <div class="bar-chart">
         <div class="chart-title">近 7 日營收（NT$）</div>
         <div class="bars" id="weekBars"></div>
       </div>
-      <div class="section-header" style="margin:18px 20px 8px 20px;"><span>最近紀錄</span><span class="muted">成交 / 購買課明細</span></div>
-      <div class="ledger-list" id="ledgerList"></div>
+
+      <!-- 「最近紀錄」更名為「成交購課明細」，去除冗字註解，並改為收合介面 -->
+      <div class="accordion-section" id="ledgerSection" style="margin:14px 20px 4px 20px;">
+        <div class="accordion-header">
+          <div class="settings-icon"><i class="fa-solid fa-receipt"></i></div>
+          <div class="settings-main"><h4>成交購課明細</h4></div>
+          <i class="fa-solid fa-chevron-down accordion-chev"></i>
+        </div>
+        <div class="accordion-body"><div class="ledger-list" id="ledgerList"></div></div>
+      </div>
     </div>
     <button class="fab" id="fabAddLedger"><i class="fa-solid fa-plus"></i></button>
   </div>
@@ -900,6 +936,11 @@ function renderHeroStats(){
   if(salesBar) salesBar.style.width = goalSales>0 ? Math.min(100,(monthIncomeTotal/goalSales)*100)+'%' : '0%';
   if(sessionsGoalEl) sessionsGoalEl.textContent = goalSessions>0 ? `目標 ${goalSessions} 堂（點擊筆型圖示修改）` : '點擊筆型圖示設定本月目標';
   if(salesGoalEl) salesGoalEl.textContent = goalSales>0 ? `目標 NT$${goalSales.toLocaleString()}（點擊筆型圖示修改）` : '點擊筆型圖示設定本月目標';
+
+  const goalSessionsValEl = document.getElementById('goalSessionsVal');
+  const goalSalesValEl = document.getElementById('goalSalesVal');
+  if(goalSessionsValEl) goalSessionsValEl.textContent = goalSessions>0 ? goalSessions : '--';
+  if(goalSalesValEl) goalSalesValEl.textContent = goalSales>0 ? `NT$${goalSales.toLocaleString()}` : '--';
 }
 
 function openGoalEdit(){
@@ -934,6 +975,22 @@ function formatDisplayTime(dt){
   return `${mm}/${dd} (週${dayNames[dt.getDay()]}) ${hh}:${mi}`;
 }
 function dateStrToKey(dateStr){ const [y,m,d] = dateStr.split('-'); return `${m}-${d}`; }
+
+// 24小時制數字下拉選單（時：00~23 / 分：00,15,30,45），全面不出現上午/下午
+function buildHourOptions(defaultHour){
+  let html = '';
+  for(let h=0; h<24; h++){
+    const v = String(h).padStart(2,'0');
+    html += `<option value="${v}" ${h===defaultHour?'selected':''}>${v}</option>`;
+  }
+  return html;
+}
+function buildMinuteOptions(defaultMinute){
+  return [0,15,30,45].map(m=>{
+    const v = String(m).padStart(2,'0');
+    return `<option value="${v}" ${m===defaultMinute?'selected':''}>${v}</option>`;
+  }).join('');
+}
 
 function renderSlots(){
   const d = dateList.find(x=>x.key===activeDateKey);
@@ -1061,7 +1118,6 @@ function renderWeekTimeline(){
       }
 
       return `<div class="wt-block ${s.status}" style="top:${top}px;height:${height}px;" data-id="${s.id}">
-        <span class="wt-block-time">${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}</span>
         <span class="wt-block-label">${displayLabel}</span>
       </div>`;
     }).join('');
@@ -1095,8 +1151,14 @@ function openAddSlot(){
       <button type="button" class="view-toggle-btn" id="slotModeManualBtn">手動排課</button>
     </div>
     <div class="form-row"><label>日期</label><input type="date" class="form-input" id="slotDate" value="${d.iso}"></div>
-    <!-- 24小時制自行選填時間 -->
-    <div class="form-row"><label>開始時間 (24小時制)</label><input type="time" class="form-input" id="slotTime" value="09:00"></div>
+    <!-- 24小時制數字下拉選單，無上午/下午 -->
+    <div class="form-row"><label>開始時間 (24小時制)</label>
+      <div class="time-select-row">
+        <select class="form-input" id="slotHour">${buildHourOptions(9)}</select>
+        <span class="time-colon">:</span>
+        <select class="form-input" id="slotMinute">${buildMinuteOptions(0)}</select>
+      </div>
+    </div>
     <div class="form-row hidden" id="slotStudentRow">
       <label>學員姓名（打字可自動搜尋現有名單，若查無直接鍵入將同步新建學員）</label>
       <input type="text" class="form-input" id="slotStudentName" list="slotStudentList" placeholder="請鍵入姓氏進行篩選，例如：陳">
@@ -1145,7 +1207,7 @@ function openAddSlot(){
   document.getElementById('cancelSlotBtn').onclick = closeSheet;
   document.getElementById('saveSlotBtn').onclick = ()=>{
     const dateStr = document.getElementById('slotDate').value;
-    const timeStr = document.getElementById('slotTime').value;
+    const timeStr = `${document.getElementById('slotHour').value}:${document.getElementById('slotMinute').value}`;
     const course = document.getElementById('slotCourse').value;
     const location = document.getElementById('slotLocation').value; // 空字串即代表不指定上課地點 (可填可不填)
     if(!dateStr || !timeStr) return showToast('請完整選擇日期與時間');
@@ -1214,9 +1276,12 @@ function openStudentForm(student){
   // 抓取個別學員紀錄明細
   let purchaseRecordsHtml = '<div style="font-size:11.5px;color:var(--text-faint);">暫無購課明細</div>';
   let classRecordsHtml = '<div style="font-size:11.5px;color:var(--text-faint);">暫無授課時段紀錄</div>';
+  let purchaseCount = 0, classCount = 0, totalPurchasedLessons = 0, remainingLessons = 0;
 
   if(isEdit) {
      const pList = ledgerEntries.filter(l => l.type==='income' && l.studentName === student.name);
+     purchaseCount = pList.length;
+     totalPurchasedLessons = pList.reduce((sum,l)=> sum + Number(l.quantity||1), 0);
      if(pList.length > 0) {
         purchaseRecordsHtml = pList.map(l => `
            <div class="record-item">
@@ -1227,6 +1292,7 @@ function openStudentForm(student){
      }
 
      const cList = allSlots.filter(s => s.studentName === student.name);
+     classCount = cList.length;
      if(cList.length > 0) {
         classRecordsHtml = cList.map(s => `
            <div class="record-item">
@@ -1235,23 +1301,43 @@ function openStudentForm(student){
            </div>
         `).join('');
      }
+
+     // 剩餘堂數 = 歷史購課總堂數 - 已上課/已預約總堂數
+     remainingLessons = totalPurchasedLessons - classCount;
   }
 
   setSheet(`
     <div class="sheet-title">${isEdit ? '學員詳情與歷史紀錄' : '手動建立學員'}</div>
+
+    ${isEdit ? `
+    <div class="remaining-lessons-box">
+      <div class="rl-label"><i class="fa-solid fa-layer-group"></i>剩餘堂數</div>
+      <div class="rl-value"><span class="num" style="${remainingLessons<0?'color:var(--accent-red);':''}">${remainingLessons}</span><small>堂</small></div>
+      <div class="rl-sub">已購 ${totalPurchasedLessons} 堂　－　已上課/已預約 ${classCount} 堂</div>
+    </div>
+    ` : ''}
+
     <div class="form-row"><label>學員姓名</label><input type="text" class="form-input" id="stuName" value="${isEdit ? escapeHtml(student.name) : ''}" placeholder="請輸入學員姓名"></div>
     <div class="form-row"><label>手機號碼</label><input type="tel" class="form-input" id="stuPhone" value="${isEdit ? escapeHtml(student.phone||'') : ''}" placeholder="例如：0912345678"></div>
     <div class="form-row"><label>學員分類標籤</label><div class="chip-toggle-group" id="stuTagChips">${chipsHtml}</div></div>
     
     ${isEdit ? `
-    <!-- 新增歷史購課紀錄與上課紀錄區塊 -->
-    <div class="form-row" style="margin-top:16px;">
-       <label style="color:var(--pink-main);"><i class="fa-solid fa-file-invoice-dollar"></i> 所有購課紀錄</label>
-       <div class="student-record-box">${purchaseRecordsHtml}</div>
+    <!-- 歷史購課紀錄與上課紀錄改為收合式介面，避免畫面過長 -->
+    <div class="accordion-section" style="margin-top:16px;">
+      <div class="accordion-header">
+        <div class="settings-icon"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+        <div class="settings-main"><h4>所有購課紀錄</h4><p>共 ${purchaseCount} 筆</p></div>
+        <i class="fa-solid fa-chevron-down accordion-chev"></i>
+      </div>
+      <div class="accordion-body"><div class="student-record-box">${purchaseRecordsHtml}</div></div>
     </div>
-    <div class="form-row">
-       <label style="color:var(--pink-main);"><i class="fa-solid fa-calendar-check"></i> 所有上課歷史/預約紀錄</label>
-       <div class="student-record-box">${classRecordsHtml}</div>
+    <div class="accordion-section">
+      <div class="accordion-header">
+        <div class="settings-icon"><i class="fa-solid fa-calendar-check"></i></div>
+        <div class="settings-main"><h4>所有上課歷史/預約紀錄</h4><p>共 ${classCount} 筆</p></div>
+        <i class="fa-solid fa-chevron-down accordion-chev"></i>
+      </div>
+      <div class="accordion-body"><div class="student-record-box">${classRecordsHtml}</div></div>
     </div>
     ` : ''}
 
@@ -1262,6 +1348,9 @@ function openStudentForm(student){
     ${isEdit ? `<div style="margin-top:10px;"><button class="sheet-btn danger" style="width:100%;" id="deleteStuBtn"><i class="fa-solid fa-trash"></i>&nbsp;刪除此學員</button></div>` : ''}
   `);
   openSheet();
+  document.querySelectorAll('#sheetBody .accordion-header').forEach(h=>{
+    h.addEventListener('click', ()=>{ h.closest('.accordion-section').classList.toggle('open'); });
+  });
   document.getElementById('cancelStuBtn').onclick = closeSheet;
 
   document.querySelectorAll('#stuTagChips .chip-toggle').forEach(chip=>{
