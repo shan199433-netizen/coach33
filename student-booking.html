@@ -16,6 +16,7 @@
   --accent:#e2f063; /* 亮黃綠色 */
   --text-main:#ffffff;
   --text-muted:#8a8d98;
+  --danger:#ff6b6b;
 }
 body {
   background-color: var(--bg-base);
@@ -44,6 +45,19 @@ h2 { font-family: 'Manrope'; margin-top: 0; }
   border: none; border-radius: 14px; font-weight: 700; font-size: 16px; cursor: pointer;
   box-shadow: 0 8px 24px rgba(226,240,99,0.2);
 }
+.btn-submit:disabled{ opacity:0.4; cursor:not-allowed; box-shadow:none; }
+.hidden{ display:none !important; }
+.inline-banner{
+  background:rgba(255,107,107,0.12); border:1px solid rgba(255,107,107,0.35);
+  color:#ffb3b3; padding:12px 14px; border-radius:12px; font-size:14px; margin-bottom:18px; line-height:1.5;
+}
+.welcome-row{
+  display:flex; align-items:center; justify-content:space-between;
+  background:rgba(226,240,99,0.08); border:1px solid rgba(226,240,99,0.25);
+  padding:12px 14px; border-radius:12px; margin-bottom:20px; font-size:14px;
+}
+.welcome-row a{ color:var(--accent); text-decoration:underline; cursor:pointer; }
+.loading-text{ color:var(--text-muted); font-size:14px; }
 /* Toast 提示框 */
 #toast{ position:fixed; bottom:30px; left:50%; transform:translateX(-50%) translateY(100px); background:rgba(255,255,255,0.95); color:#000; padding:12px 24px; border-radius:30px; font-weight:600; font-size:14px; box-shadow:0 10px 30px rgba(0,0,0,0.3); transition:transform 0.4s cubic-bezier(0.175,0.885,0.32,1.275); z-index:9999; pointer-events:none; text-align:center; min-width:200px; }
 #toast.show{ transform:translateX(-50%) translateY(0); }
@@ -53,34 +67,47 @@ h2 { font-family: 'Manrope'; margin-top: 0; }
 
 <div class="booking-container">
   <h2 id="coachNameTitle">📅 線上預約課程</h2>
-  <p style="color:var(--text-muted); font-size:14px; margin-bottom:30px;">請選擇您想預約的時段，並填寫基本聯絡資料。</p>
-  
-  <form id="bookingForm">
-    <div class="form-group">
-      <label><i class="fa-regular fa-calendar-days"></i> 選擇可用課堂時段</label>
-      <select id="slotSelect" required>
-        <option value="">-- 請選擇時段 --</option>
-        </select>
-    </div>
-    
+  <p style="color:var(--text-muted); font-size:14px; margin-bottom:20px;" id="pageSubtitle">請先確認您的學員身分，即可查看可預約時段。</p>
+
+  <div id="loadErrorBanner" class="inline-banner hidden"></div>
+
+  <!-- 步驟一：身分驗證（姓名 + 電話），須為教練名單中已存在的學員 -->
+  <form id="identityForm">
+    <div id="identityErrorBanner" class="inline-banner hidden"></div>
     <div class="form-group">
       <label><i class="fa-regular fa-user"></i> 學員真實姓名</label>
-      <input type="text" id="studentName" placeholder="請輸入您的本名" required>
+      <input type="text" id="identityName" placeholder="請輸入您的本名" required>
     </div>
-    
     <div class="form-group">
-      <label><i class="fa-solid fa-mobile-screen-button"></i> 手機號碼（主要聯絡電話）</label>
-      <input type="tel" id="studentPhone" placeholder="例如：0912345678" pattern="[0-9]{10}" required>
+      <label><i class="fa-solid fa-mobile-screen-button"></i> 手機號碼</label>
+      <input type="tel" id="identityPhone" placeholder="例如：0912345678" pattern="[0-9]{8,10}" required>
     </div>
-    
-    <button type="submit" class="btn-submit">確認送出預約</button>
+    <button type="submit" class="btn-submit" id="identitySubmitBtn">確認身分</button>
   </form>
+
+  <!-- 步驟二：驗證成功後才顯示的預約表單 -->
+  <div id="bookingSection" class="hidden">
+    <div class="welcome-row">
+      <span id="welcomeText">您好！</span>
+      <a id="switchIdentityLink">非本人？重新輸入</a>
+    </div>
+
+    <form id="bookingForm">
+      <div class="form-group">
+        <label><i class="fa-regular fa-calendar-days"></i> 選擇可用課堂時段</label>
+        <select id="slotSelect" required>
+          <option value="">-- 載入中 --</option>
+        </select>
+      </div>
+      <button type="submit" class="btn-submit">確認送出預約</button>
+    </form>
+  </div>
 </div>
 
 <div id="toast"></div>
 
 <script>
-// 初始化 Firebase (請替換為你自己的 Firebase 配置)
+// 初始化 Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyBntQjf3bfUMup3Wue1zO4dqcyrRDjKTf8",
   authDomain: "cocah-7dc25.firebaseapp.com",
@@ -88,50 +115,159 @@ const firebaseConfig = {
   storageBucket: "cocah-7dc25.firebasestorage.app",
   messagingSenderId: "258674160798",
   appId: "1:258674160798:web:29e01d9b1f2dba7964b78f"
-};firebase.initializeApp(firebaseConfig);
+};
+firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// 💡 關鍵：從網址列解析教練的「專屬代號 slug」(?coach=daisy)，而非直接使用 uid
+// 💡 從網址列解析教練的「專屬代號 slug」(?coach=daisy)，而非直接使用 uid
 const urlParams = new URLSearchParams(window.location.search);
 const coachSlug = urlParams.get('coach');
 let coachUid = null;
+let verifiedStudent = null; // { id, name, phone }
+const STORAGE_KEY = coachSlug ? `booking_identity_${coachSlug}` : null;
+
+const loadErrorBanner = document.getElementById('loadErrorBanner');
+const identityErrorBanner = document.getElementById('identityErrorBanner');
 
 if (!coachSlug) {
-  alert('⚠️ 預約網址無效，請重新向教練索取正確的約課連結。');
+  showLoadError('⚠️ 預約網址無效，請重新向教練索取正確的約課連結。');
 } else {
   resolveCoachAndLoad();
 }
 
-// 0. 先用代號查出真正的教練 uid，這樣每位教練都能用自己的代號，不會互相衝突
+// 0. 先用代號查出真正的教練 uid
 function resolveCoachAndLoad(){
   db.collection('coachSlugs').doc(coachSlug).get().then(doc => {
     if(!doc.exists){
-      alert('⚠️ 找不到這位教練，請確認連結是否正確，或重新向教練索取。');
+      showLoadError('⚠️ 找不到這位教練，請確認連結是否正確，或重新向教練索取。');
       return;
     }
     coachUid = doc.data().uid;
     loadCoachData();
-    loadAvailableSlots();
+    tryRestoreIdentity();
   }).catch(err=>{
     console.error('查詢教練代號失敗:', err);
-    alert('⚠️ 載入失敗，請稍後再試一次。');
+    showLoadError('⚠️ 載入失敗，可能是網路問題或權限設定尚未開放，請稍後再試，或請教練確認 Firestore 權限設定。');
   });
 }
 
-// 1. 載入教練名稱（增加親切感）
+// 1. 載入教練名稱
 function loadCoachData() {
   db.collection('coaches').doc(coachUid).get().then(doc => {
     if (doc.exists && doc.data().name) {
       document.getElementById('coachNameTitle').innerText = `📅 預約 ${doc.data().name} 的課程`;
     }
+  }).catch(err=>{
+    console.error('載入教練資料失敗:', err);
   });
 }
 
-// 2. 抓取該教練目前所有狀態為 "open" (尚未被預約) 的時段
+// 若此裝置先前已驗證過身分，直接帶入不用重填
+function tryRestoreIdentity(){
+  if(!STORAGE_KEY) return;
+  try{
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+    if(saved && saved.name && saved.phone){
+      document.getElementById('identityName').value = saved.name;
+      document.getElementById('identityPhone').value = saved.phone;
+      verifyIdentity(saved.name, saved.phone, true);
+    }
+  }catch(e){ /* 忽略壞掉的快取 */ }
+}
+
+function showLoadError(msg){
+  loadErrorBanner.innerText = msg;
+  loadErrorBanner.classList.remove('hidden');
+  document.getElementById('identityForm').classList.add('hidden');
+}
+
+function showIdentityError(msg){
+  identityErrorBanner.innerText = msg;
+  identityErrorBanner.classList.remove('hidden');
+}
+
+function clearIdentityError(){
+  identityErrorBanner.classList.add('hidden');
+}
+
+// 2. 身分驗證表單送出
+document.getElementById('identityForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  const name = document.getElementById('identityName').value.trim();
+  const phone = document.getElementById('identityPhone').value.trim();
+  verifyIdentity(name, phone, false);
+});
+
+// 核心驗證：必須在教練的學員名單（students 集合）中已經存在，才能繼續預約
+function verifyIdentity(name, phone, silent){
+  clearIdentityError();
+  const btn = document.getElementById('identitySubmitBtn');
+  btn.disabled = true; btn.innerText = '確認中...';
+
+  db.collection('coaches').doc(coachUid).collection('students')
+    .where('phone', '==', phone).get()
+    .then(snapshot => {
+      btn.disabled = false; btn.innerText = '確認身分';
+
+      if(snapshot.empty){
+        if(!silent){
+          showIdentityError('❌ 查無此學員資料，請確認手機號碼是否正確，或請先聯繫教練將您加入學員名單後再預約。');
+        }
+        return;
+      }
+
+      // 電話相符即視為同一位學員（姓名僅供顯示核對，不一致時仍以電話為準並提醒）
+      let matched = null;
+      snapshot.forEach(doc => {
+        const d = doc.data();
+        if(!matched && d.name && name && d.name.trim() === name.trim()){
+          matched = { id: doc.id, name: d.name, phone: d.phone };
+        }
+      });
+      if(!matched){
+        const first = snapshot.docs[0];
+        matched = { id: first.id, name: first.data().name, phone: first.data().phone };
+      }
+
+      verifiedStudent = matched;
+      if(STORAGE_KEY){
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ name: matched.name, phone: matched.phone }));
+      }
+      enterBookingStep();
+    })
+    .catch(err=>{
+      btn.disabled = false; btn.innerText = '確認身分';
+      console.error('驗證學員身分失敗:', err);
+      if(!silent){
+        showIdentityError('⚠️ 驗證失敗，可能是網路問題或權限設定尚未開放，請稍後再試，或請教練確認 Firestore 權限設定。');
+      }
+    });
+}
+
+function enterBookingStep(){
+  document.getElementById('identityForm').classList.add('hidden');
+  document.getElementById('pageSubtitle').classList.add('hidden');
+  document.getElementById('bookingSection').classList.remove('hidden');
+  document.getElementById('welcomeText').innerText = `您好，${verifiedStudent.name}！`;
+  loadAvailableSlots();
+}
+
+document.getElementById('switchIdentityLink').addEventListener('click', function(){
+  verifiedStudent = null;
+  if(STORAGE_KEY) localStorage.removeItem(STORAGE_KEY);
+  document.getElementById('bookingSection').classList.add('hidden');
+  document.getElementById('pageSubtitle').classList.remove('hidden');
+  document.getElementById('identityForm').classList.remove('hidden');
+  document.getElementById('identityName').value = '';
+  document.getElementById('identityPhone').value = '';
+  clearIdentityError();
+});
+
+// 3. 抓取該教練目前所有狀態為 "open" 的時段（僅在身分驗證通過後才會呼叫）
 function loadAvailableSlots() {
   const selectEl = document.getElementById('slotSelect');
-  
-  // 假設你的時段存在：coaches/{coachUid}/slots
+  selectEl.innerHTML = '<option value="">-- 載入中 --</option>';
+
   db.collection('coaches').doc(coachUid).collection('slots')
     .where('status', '==', 'open')
     .orderBy('timestamp', 'asc')
@@ -141,81 +277,53 @@ function loadAvailableSlots() {
         selectEl.innerHTML = '<option value="">目前教練暫無開放空檔</option>';
         return;
       }
+      selectEl.innerHTML = '<option value="">-- 請選擇時段 --</option>';
       snapshot.forEach(doc => {
         const slot = doc.data();
         const option = document.createElement('option');
-        option.value = doc.id; // Firestore 的文件 ID
-        option.innerText = slot.time; // 例如顯示："2026/07/15 (三) 14:00 - 15:00"
+        option.value = doc.id;
+        option.innerText = slot.time;
         selectEl.appendChild(option);
       });
     }).catch(err => {
       console.error("載入時段失敗:", err);
+      selectEl.innerHTML = '<option value="">⚠️ 時段載入失敗</option>';
+      showToast('⚠️ 時段載入失敗，請重新整理或聯繫教練確認權限設定');
     });
 }
 
-// 3. 處理學員送出預約表單
+// 4. 處理學員送出預約表單（此時身分已驗證，不再需要重填姓名電話、也不再自動建立新學員）
 document.getElementById('bookingForm').addEventListener('submit', function(e) {
   e.preventDefault();
-  
+  if(!verifiedStudent){
+    showToast('❌ 請先完成身分確認');
+    return;
+  }
+
   const slotId = document.getElementById('slotSelect').value;
-  const sName = document.getElementById('studentName').value.trim();
-  const sPhone = document.getElementById('studentPhone').value.trim();
-  
   if(!slotId) {
     showToast('❌ 請先選擇上課時段');
     return;
   }
 
-  // A. 更新該時段的狀態為 "full"，並存入預約人資訊
   const slotRef = db.collection('coaches').doc(coachUid).collection('slots').doc(slotId);
-  
+
   slotRef.update({
     status: 'full',
-    studentName: sName,
-    studentPhone: sPhone,
+    studentId: verifiedStudent.id,
+    studentName: verifiedStudent.name,
+    studentPhone: verifiedStudent.phone,
     bookedAt: firebase.firestore.FieldValue.serverTimestamp()
   })
   .then(() => {
-    // B. 自動比對或建立學員檔案
-    checkAndCreateStudentProfile(sName, sPhone);
+    showToast('🎉 預約成功！教練已收到您的預約。');
+    setTimeout(() => { loadAvailableSlots(); }, 1500);
   })
   .catch(err => {
+    console.error('預約失敗:', err);
     showToast('❌ 預約失敗，該時段可能剛被別人搶先約走了！');
   });
 });
-
-// 4. 自動檢查並在教練名單建立學員資料
-function checkAndCreateStudentProfile(name, phone) {
-  const studentsRef = db.collection('coaches').doc(coachUid).collection('students');
-  
-  // 用手機號碼去查查這個教練是不是本來就有這個學員
-  studentsRef.where('phone', '==', phone).get().then(snapshot => {
-    if (snapshot.empty) {
-      // 找不到這支電話，代表是新同學！自動幫教練建立新學員檔案
-      studentsRef.add({
-        name: name,
-        phone: phone,
-        totalLessons: 0,  // 預設堂數
-        remainingLessons: 0,
-        notes: '★ 系統自動建立（學員經由 LINE 網址首次預約）',
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      }).then(() => {
-        completeBookingSuccess();
-      });
-    } else {
-      // 老同學約課，不重複建立檔案，直接完成
-      completeBookingSuccess();
-    }
-  });
-}
-
-function completeBookingSuccess() {
-  showToast('🎉 預約成功！教練已收到您的預約。');
-  // 3秒後重新整理網頁（清除已選時段），或可以導向成功感謝頁面
-  setTimeout(() => {
-    window.location.reload();
-  }, 2500);
-}
 
 function showToast(msg){
   const t = document.getElementById('toast');
