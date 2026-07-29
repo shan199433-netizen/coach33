@@ -74,7 +74,7 @@ body{
   background-size:14px 14px;
   color:var(--text-main);
   display:flex;justify-content:center;align-items:center;
-  min-height:100vh;overflow-x:hidden;
+  min-height:100vh;min-height:100dvh;overflow-x:hidden;
   transition:background .25s ease,color .25s ease;
 }
 
@@ -94,7 +94,7 @@ body{
 .auth-switch { color: var(--text-muted); font-size: 13px; margin-top: 18px; cursor: pointer; text-decoration: underline; }
 
 .phone-container{
-  width:100%;max-width:412px;height:100vh;max-height:890px;
+  width:100%;max-width:412px;height:100vh;height:100dvh;max-height:890px;
   background:var(--bg-base);
   position:relative;display:flex;flex-direction:column;overflow:hidden;
   box-shadow:0 20px 45px -10px rgba(53,50,44,0.35);
@@ -305,16 +305,16 @@ body{
 .week-nav-btn{width:30px;height:30px;border-radius:10px;background:var(--bg-card);border:2px solid var(--border-color);color:var(--text-main);font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
 .week-nav-btn:active{background:var(--pink-main);color:var(--text-main);}
 .week-nav-label{font-size:14px;font-weight:700;color:var(--pink-light);min-width:96px;text-align:center;}
-.week-timeline-header{display:flex;flex-shrink:0;padding:0 8px 0 8px;}
+.week-timeline-header{display:grid;grid-template-columns:32px repeat(7,1fr);flex-shrink:0;padding:0 8px 0 8px;}
 .wt-gutter-spacer{width:32px;flex-shrink:0;}
 .wt-day-header{flex:1;min-width:0;text-align:center;font-size:11px;color:var(--text-muted);font-weight:700;padding-bottom:5px;}
 .wt-day-header .num{display:block;font-size:13.5px;color:var(--text-main);margin-top:1px;}
 .wt-day-header.is-today{color:var(--pink-main);}
 .wt-day-header.is-today .num{color:var(--pink-main);}
-.week-timeline-scroll{flex:1;min-height:0;overflow:hidden;display:flex;padding:0 8px 0 8px;touch-action:pan-y;position:relative;}
+.week-timeline-scroll{flex:1;min-height:0;overflow:hidden;display:grid;grid-template-columns:32px repeat(7,1fr);padding:0 8px 0 8px;touch-action:pan-y;position:relative;}
 .wt-gutter{width:32px;flex-shrink:0;display:grid;grid-template-rows:repeat(18,1fr);}
 .wt-hour-label{font-size:10.5px;color:var(--text-faint);border-top:1px solid var(--border-soft);padding-top:1px;box-sizing:border-box;}
-.week-timeline-body{flex:1;display:flex;position:relative;min-width:0;height:100%;}
+.week-timeline-body{display:contents;}
 .wt-day-col{flex:1;min-width:0;position:relative;border-left:1px solid var(--border-soft);height:100%;background-image:repeating-linear-gradient(to bottom, transparent, transparent calc(100%/18 - 1px), var(--border-soft) calc(100%/18 - 1px), var(--border-soft) calc(100%/18));}
 
 .wt-block{ position:absolute;left:1.5px;right:1.5px;border-radius:5px;padding:2px 3px;overflow:visible;cursor:pointer;font-size:10.5px;line-height:1.2;color:var(--text-main);background:var(--status-open);border:1px solid var(--border-color);box-sizing:border-box;z-index:1; }
@@ -383,7 +383,7 @@ body{
   <div class="stats-bar">
     <div class="stat-pill">📆今日預約 <b class="num" id="todayCount">0</b> 堂</div>
     <div class="stat-pill">📋本月已上課 <b class="num" id="monthlySessionsTop">0</b> 堂</div>
-    <div class="live-badge"><div class="live-dot"></div>雲端資料連線中</div>
+    <div class="live-badge"><div class="live-dot"></div>雲端連線中</div>
   </div>
 
   <div class="view active" id="view-schedule">
