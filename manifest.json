@@ -1,6 +1,6 @@
 {
-  "name": "FitSync 教練同步控制台",
-  "short_name": "FitSync",
+  "name": "Coach控制台",
+  "short_name": "Coach控制台",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#faf7f0",

@@ -3,10 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>FitSync 教練同步控制台 (管理端)</title>
+<title>Coach控制台</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Coach控制台">
 <meta name="theme-color" content="#faf7f0">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta property="og:title" content="Coach控制台">
+<meta property="og:description" content="教練專屬的排課、學員與記帳管理後台">
+<meta property="og:image" content="https://shan199433-netizen.github.io/coach33/icon-512.png">
+<meta property="og:type" content="website">
 
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -706,11 +716,13 @@ function renderEditableList(containerId, arr, fieldName, placeholder){
   el.querySelectorAll('.del').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       const idx = Number(btn.dataset.idx);
-      confirmAction('刪除項目', `確定要刪除「${escapeHtml(arr[idx])}」嗎？`, ()=>{
+      const removedVal = arr[idx];
+      confirmAction('刪除項目', `確定要刪除「${escapeHtml(removedVal)}」嗎？`, ()=>{
         arr.splice(idx,1);
         persistListField(fieldName, arr);
         renderEditableList(containerId, arr, fieldName, placeholder);
         afterListChange(fieldName);
+        if(fieldName === 'studentTags'){ cascadeRemoveStudentTag(removedVal); }
       });
     });
   });
@@ -731,6 +743,15 @@ function persistListField(fieldName, arr){
   if(!currentUid) return;
   db.collection('coaches').doc(currentUid).update({ [fieldName]: arr })
     .catch(err=>showToast('❌ 儲存失敗: ' + err.message));
+}
+function cascadeRemoveStudentTag(removedTag){
+  if(!currentUid) return;
+  const affected = students.filter(s => (s.tags||[]).includes(removedTag));
+  affected.forEach(s => {
+    const newTags = (s.tags||[]).filter(t => t !== removedTag);
+    db.collection('coaches').doc(currentUid).collection('students').doc(s.id)
+      .update({ tags: newTags }).catch(()=>{});
+  });
 }
 function afterListChange(fieldName){
   if(fieldName === 'studentTags'){ renderStudentFilterChips(); renderStudents(document.getElementById('studentSearch') ? document.getElementById('studentSearch').value : ''); }
