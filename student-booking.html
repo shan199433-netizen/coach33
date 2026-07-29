@@ -90,6 +90,20 @@ h2 { margin-top: 0; font-weight:800; }
 }
 .welcome-row a{ color:var(--pink-deep); text-decoration:underline; cursor:pointer; font-weight:600; }
 .loading-text{ color:var(--text-muted); font-size:14px; }
+.my-booking-item{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  background:var(--bg-elevated); border:2px solid var(--border-soft); border-radius:12px;
+  padding:10px 12px; margin-bottom:8px; font-size:14px;
+}
+.my-booking-item .mb-time{ font-weight:700; color:var(--text-main); }
+.my-booking-item .mb-note{ font-size:12px; color:var(--text-muted); margin-top:2px; }
+.btn-cancel{
+  flex-shrink:0; padding:7px 12px; border-radius:10px; font-size:13px; font-weight:700;
+  background:var(--bg-surface); color:var(--danger); border:2px solid var(--danger); cursor:pointer;
+}
+.btn-cancel:active{ transform:translate(2px,2px); }
+.btn-cancel:disabled{ opacity:0.4; cursor:not-allowed; color:var(--text-muted); border-color:var(--border-soft); }
+.empty-hint{ color:var(--text-muted); font-size:13.5px; padding:6px 0; }
 /* Toast 提示框 */
 #toast{ position:fixed; bottom:30px; left:50%; transform:translateX(-50%) translateY(100px); background:var(--bg-surface); border:2.5px solid var(--border-color); color:var(--text-main); padding:12px 24px; border-radius:30px; font-weight:600; font-size:14px; box-shadow:var(--box-shadow-sm); transition:transform 0.4s cubic-bezier(0.175,0.885,0.32,1.275); z-index:9999; pointer-events:none; text-align:center; min-width:200px; }
 #toast.show{ transform:translateX(-50%) translateY(0); }
@@ -118,6 +132,12 @@ h2 { margin-top: 0; font-weight:800; }
     <div class="welcome-row">
       <span id="welcomeText">您好！</span>
       <a id="switchIdentityLink">非本人？重新輸入</a>
+    </div>
+
+    <!-- 我的預約：顯示已預約的時段，3 小時內開課的不能自行取消 -->
+    <div class="form-group" id="myBookingsWrap">
+      <label>🗓️ 我的預約</label>
+      <div id="myBookingsList" class="loading-text">載入中...</div>
     </div>
 
     <form id="bookingForm">
@@ -273,6 +293,7 @@ function enterBookingStep(){
   document.getElementById('bookingSection').classList.remove('hidden');
   document.getElementById('welcomeText').innerText = `您好，${verifiedStudent.name}！`;
   loadAvailableSlots();
+  loadMyBookings();
 }
 
 document.getElementById('switchIdentityLink').addEventListener('click', function(){
@@ -314,6 +335,83 @@ function loadAvailableSlots() {
     });
 }
 
+function escapeHtml(str){
+  const div = document.createElement('div');
+  div.textContent = str == null ? '' : String(str);
+  return div.innerHTML;
+}
+
+// 3.5 載入「我的預約」：已預約（status=full）且屬於這位學員的時段
+// 上課前 3 小時內不開放自行取消
+const CANCEL_CUTOFF_MS = 3 * 60 * 60 * 1000;
+
+function loadMyBookings(){
+  const listEl = document.getElementById('myBookingsList');
+  listEl.innerHTML = '載入中...';
+  listEl.className = 'loading-text';
+
+  db.collection('coaches').doc(coachUid).collection('slots')
+    .where('studentId', '==', verifiedStudent.id)
+    .get()
+    .then(snapshot => {
+      const now = Date.now();
+      const myBookings = [];
+      snapshot.forEach(doc => {
+        const s = doc.data();
+        if(s.status === 'full'){ myBookings.push({ id: doc.id, ...s }); }
+      });
+      myBookings.sort((a,b) => (a.timestamp?.seconds||0) - (b.timestamp?.seconds||0));
+
+      listEl.className = '';
+      if(myBookings.length === 0){
+        listEl.innerHTML = '<div class="empty-hint">目前沒有已預約的時段</div>';
+        return;
+      }
+
+      listEl.innerHTML = myBookings.map(s => {
+        const classTimeMs = (s.timestamp?.seconds||0) * 1000;
+        const tooLateToCancel = classTimeMs - now < CANCEL_CUTOFF_MS;
+        return `
+          <div class="my-booking-item">
+            <div>
+              <div class="mb-time">${escapeHtml(s.time||'')}${s.courseType ? '（' + escapeHtml(s.courseType) + '）' : ''}</div>
+              ${tooLateToCancel ? '<div class="mb-note">距離上課不足 3 小時，如需取消請直接聯繫教練</div>' : ''}
+            </div>
+            <button class="btn-cancel" data-id="${s.id}" ${tooLateToCancel ? 'disabled' : ''}>取消</button>
+          </div>
+        `;
+      }).join('');
+
+      listEl.querySelectorAll('.btn-cancel').forEach(btn => {
+        btn.addEventListener('click', () => cancelMyBooking(btn.dataset.id));
+      });
+    })
+    .catch(err => {
+      console.error('載入我的預約失敗:', err);
+      listEl.innerHTML = '<div class="empty-hint">⚠️ 載入失敗，請重新整理再試一次</div>';
+    });
+}
+
+function cancelMyBooking(slotId){
+  if(!confirm('確定要取消這堂預約嗎？取消後此時段會開放給其他學員預約。')) return;
+
+  const slotRef = db.collection('coaches').doc(coachUid).collection('slots').doc(slotId);
+  slotRef.update({
+    status: 'open',
+    studentId: firebase.firestore.FieldValue.delete(),
+    studentName: firebase.firestore.FieldValue.delete(),
+    studentPhone: firebase.firestore.FieldValue.delete(),
+    bookedAt: firebase.firestore.FieldValue.delete()
+  }).then(() => {
+    showToast('✅ 已取消預約');
+    loadMyBookings();
+    loadAvailableSlots();
+  }).catch(err => {
+    console.error('取消預約失敗:', err);
+    showToast('❌ 取消失敗，請稍後再試或聯繫教練');
+  });
+}
+
 // 4. 處理學員送出預約表單（此時身分已驗證，不再需要重填姓名電話、也不再自動建立新學員）
 document.getElementById('bookingForm').addEventListener('submit', function(e) {
   e.preventDefault();
@@ -339,7 +437,7 @@ document.getElementById('bookingForm').addEventListener('submit', function(e) {
   })
   .then(() => {
     showToast('🎉 預約成功！教練已收到您的預約。');
-    setTimeout(() => { loadAvailableSlots(); }, 1500);
+    setTimeout(() => { loadAvailableSlots(); loadMyBookings(); }, 1500);
   })
   .catch(err => {
     console.error('預約失敗:', err);
