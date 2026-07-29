@@ -148,6 +148,8 @@ body{
 .slot-card.open .slot-stripe{background:var(--status-open);}
 .slot-card.full .slot-stripe{background:var(--status-full);}
 .slot-card.closed .slot-stripe{background:var(--status-closed);}
+.slot-card.is-past{opacity:0.55;}
+.past-tag{font-size:11px;font-weight:600;color:var(--text-faint);background:var(--bg-elevated);border:1px solid var(--border-soft);border-radius:8px;padding:1px 6px;margin-left:5px;vertical-align:middle;}
 .slot-body{flex:1;padding:12px 12px;display:flex;align-items:center;gap:10px;min-width:0;}
 .slot-avatar{ width:36px;height:36px;border-radius:11px;flex-shrink:0; display:flex;align-items:center;justify-content:center;font-size:15.5px;font-weight:700; background:var(--bg-elevated);color:var(--text-muted);border:1px solid var(--border-soft); }
 .slot-card.full .slot-avatar{background:rgba(185,220,180,0.35);color:#5c8a52;border-color:rgba(53,50,44,0.2);}
@@ -244,6 +246,8 @@ body{
 .toast{ position:absolute;bottom:96px;left:50%;transform:translateX(-50%) translateY(20px); background:var(--bg-card);border:2.5px solid var(--border-color);color:var(--text-main); padding:11px 18px;border-radius:14px;font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px; box-shadow:var(--box-shadow-sm);opacity:0;pointer-events:none;transition:all .28s cubic-bezier(.34,1.56,.64,1);z-index:200; white-space:nowrap; }
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 .toast i{color:var(--accent-green);}
+.toast-undo-btn{ flex-shrink:0;background:var(--pink-main);color:var(--text-main);border:2px solid var(--border-color); border-radius:9px;padding:5px 10px;font-size:12.5px;font-weight:700;cursor:pointer;pointer-events:auto; }
+.toast-undo-btn:active{transform:scale(0.94);}
 
 .edit-row{display:flex;align-items:center;gap:8px;padding:9px 0;}
 .edit-row + .edit-row{border-top:1px solid var(--border-soft);}
@@ -544,7 +548,7 @@ body{
     <div class="sheet" id="sheetBody"></div>
   </div>
 
-  <div class="toast" id="toast">✅<span id="toastText">已完成</span></div>
+  <div class="toast" id="toast">✅<span id="toastText">已完成</span><button class="toast-undo-btn hidden" id="toastUndoBtn">復原</button></div>
 </div>
 
 <script>
@@ -972,19 +976,23 @@ function renderSlots(){
     return;
   }
 
-  list.innerHTML = daySlots.map(s => `
-    <div class="slot-card ${s.status}" data-id="${s.id}">
+  const now = Date.now();
+  list.innerHTML = daySlots.map(s => {
+    const isPast = s.timestamp && s.timestamp.seconds && (s.timestamp.seconds*1000) < now;
+    return `
+    <div class="slot-card ${s.status}${isPast ? ' is-past' : ''}" data-id="${s.id}">
       <div class="slot-stripe"></div>
       <div class="slot-body">
         <div class="slot-avatar">${s.status==='full' ? (s.studentName ? escapeHtml(s.studentName[0]) : '✓') : '⏰'}</div>
         <div class="slot-text">
-          <div class="slot-time">${s.time||''}</div>
+          <div class="slot-time">${s.time||''}${isPast ? ' <span class=\"past-tag\">已過去</span>' : ''}</div>
           <div class="slot-detail">${s.courseType||''}${s.location? ' · '+s.location : ''}${s.status==='full' && s.studentName ? ' · '+s.studentName : ''}</div>
         </div>
       </div>
       <button class="slot-action" data-action="${s.status==='open' ? 'close' : s.status==='full' ? 'cancel' : 'reopen'}">${s.status==='open' ? '🔒關閉' : s.status==='full' ? '↩️取消預約' : '🔓重新開放'}</button>
     </div>
-  `).join('');
+  `;
+  }).join('');
 
   list.querySelectorAll('.slot-action').forEach(btn=>{
     btn.addEventListener('click', (e)=>{
@@ -1048,10 +1056,24 @@ function openSlotDetail(slot){
     document.getElementById('detailCancelBtn').onclick = ()=>{ closeSheet(); cancelSlotBooking(slot.id); };
   }
   document.getElementById('detailDeleteBtn').onclick = ()=>{
-    confirmAction('刪除此時段','刪除後無法復原，確定要刪除嗎？', ()=>{
-      db.collection('coaches').doc(currentUid).collection('slots').doc(slot.id).delete().then(()=>showToast('已刪除時段'));
+    confirmAction('刪除此時段','刪除後可於 6 秒內點擊復原，超過時間將無法復原，確定要刪除嗎？', ()=>{
+      deleteSlotWithUndo(slot.id);
     });
   };
+}
+
+// 刪除時段但保留復原機會：先記錄原始資料，實際刪除後若使用者按下復原，
+// 用同一個文件 ID 把資料寫回去，確保刪除前後的關聯（如週檢視、學員紀錄）都能一致還原
+function deleteSlotWithUndo(id){
+  const slot = allSlots.find(s=>s.id===id);
+  if(!slot) return;
+  const { id: _drop, ...data } = slot;
+  db.collection('coaches').doc(currentUid).collection('slots').doc(id).delete().then(()=>{
+    showUndoToast('已刪除時段', ()=>{
+      db.collection('coaches').doc(currentUid).collection('slots').doc(id).set(data)
+        .then(()=>showToast('已復原時段'));
+    });
+  });
 }
 
 function switchScheduleMode(mode){
@@ -1281,13 +1303,22 @@ function openAddSlot(){
       const endH = parseInt(document.getElementById('slotEndHour').value);
       if(startH >= endH) return showToast('結束小時必須大於開始小時');
 
+      const dateKey = dateStrToKey(dateStr);
+      // 用目前已同步的 allSlots 比對「同一天、同一個時間點」是否已經有時段，避免重複按到造成重複開放
+      const existingTimesMs = new Set(
+        allSlots.filter(s=>s.dateKey===dateKey && s.timestamp && s.timestamp.seconds)
+          .map(s=>s.timestamp.seconds*1000)
+      );
+
+      let skippedCount = 0;
       for(let h = startH; h < endH; h++) {
         const timeStr = `${String(h).padStart(2,'0')}:00`;
         const dt = new Date(`${dateStr}T${timeStr}:00`);
+        if(existingTimesMs.has(dt.getTime())){ skippedCount++; continue; }
         const newDocRef = ref.doc();
         batch.set(newDocRef, {
           timestamp: firebase.firestore.Timestamp.fromDate(dt),
-          dateKey: dateStrToKey(dateStr),
+          dateKey: dateKey,
           time: formatDisplayTime(dt),
           courseType: '預約空檔',
           location: location || '',
@@ -1295,8 +1326,15 @@ function openAddSlot(){
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
       }
+
+      const addedCount = (endH - startH) - skippedCount;
+      if(addedCount === 0){
+        closeSheet(); showToast('這些時段都已經開放過了，未新增任何時段');
+        return;
+      }
       await batch.commit();
-      closeSheet(); showToast('✅ 已成功批次開放時段');
+      closeSheet();
+      showToast(skippedCount > 0 ? `✅ 已開放 ${addedCount} 個時段（跳過 ${skippedCount} 個已存在的時段）` : '✅ 已成功批次開放時段');
     } else {
       const hStr = document.getElementById('singleHour').value;
       const mStr = document.getElementById('singleMinute').value;
@@ -1306,10 +1344,11 @@ function openAddSlot(){
 
       const dt = new Date(`${dateStr}T${hStr}:${mStr}:00`);
       const matched = students.find(s=>s.name===studentName);
+      const dateKeyM = dateStrToKey(dateStr);
 
       const buildPayload = (studentId)=>({
         timestamp: firebase.firestore.Timestamp.fromDate(dt),
-        dateKey: dateStrToKey(dateStr),
+        dateKey: dateKeyM,
         time: formatDisplayTime(dt),
         courseType: course,
         location: location || '',
@@ -1321,24 +1360,39 @@ function openAddSlot(){
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       });
 
-      // 若學員不存在，先建立學員資料，取得新的 studentId 後再一併寫入時段，
-      // 確保學員端「我的預約」（用 studentId 比對）也能看到教練手動排的課
-      if(!matched) {
-        db.collection("coaches").doc(currentUid).collection("students").add({
-          name: studentName, phone: '', tags: [], totalLessons: 1, notes: '手動排課自動關聯建立', createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        }).then(newStudentRef=>{
-          return ref.add(buildPayload(newStudentRef.id));
-        }).then(()=>{
-          closeSheet(); showToast('✅ 已手動新增排課');
-        }).catch(err=>{
-          showToast('❌ 新增失敗: ' + err.message);
-        });
+      const doManualSave = ()=>{
+        // 若學員不存在，先建立學員資料，取得新的 studentId 後再一併寫入時段，
+        // 確保學員端「我的預約」（用 studentId 比對）也能看到教練手動排的課
+        if(!matched) {
+          db.collection("coaches").doc(currentUid).collection("students").add({
+            name: studentName, phone: '', tags: [], totalLessons: 1, notes: '手動排課自動關聯建立', createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          }).then(newStudentRef=>{
+            return ref.add(buildPayload(newStudentRef.id));
+          }).then(()=>{
+            closeSheet(); showToast('✅ 已手動新增排課');
+          }).catch(err=>{
+            showToast('❌ 新增失敗: ' + err.message);
+          });
+        } else {
+          ref.add(buildPayload(matched.id)).then(()=>{
+            closeSheet(); showToast('✅ 已手動新增排課');
+          }).catch(err=>{
+            showToast('❌ 新增失敗: ' + err.message);
+          });
+        }
+      };
+
+      // 檢查同一天、同一時間點是否已經有其他時段（不論開放中或已預約），
+      // 有的話先提醒教練確認，避免不小心把同一時段排給兩位學員；若是刻意排團體課可直接確認繼續
+      const conflictSlot = allSlots.find(s =>
+        s.dateKey === dateKeyM && s.status !== 'closed' &&
+        s.timestamp && s.timestamp.seconds*1000 === dt.getTime()
+      );
+      if(conflictSlot){
+        const conflictDesc = conflictSlot.status==='full' ? `已預約給「${conflictSlot.studentName||'學員'}」` : '目前開放中尚未被預約';
+        confirmAction('時段衝突提醒', `${formatDisplayTime(dt)} 這個時間已經有其他排課（${conflictDesc}），確定要在同一時段再新增一筆嗎？`, doManualSave);
       } else {
-        ref.add(buildPayload(matched.id)).then(()=>{
-          closeSheet(); showToast('✅ 已手動新增排課');
-        }).catch(err=>{
-          showToast('❌ 新增失敗: ' + err.message);
-        });
+        doManualSave();
       }
     }
   };
@@ -1478,12 +1532,25 @@ function openStudentForm(student){
 
   if(isEdit){
     document.getElementById('deleteStuBtn').onclick = ()=>{
-      confirmAction('刪除學員', `確定要刪除學員「${escapeHtml(student.name)}」嗎？刪除後無法復原。`, ()=>{
-        db.collection("coaches").doc(currentUid).collection("students").doc(student.id).delete()
-          .then(()=>{ closeSheet(); showToast('已刪除學員'); });
+      confirmAction('刪除學員', `確定要刪除學員「${escapeHtml(student.name)}」嗎？刪除後可於 6 秒內點擊復原，超過時間將無法復原。`, ()=>{
+        deleteStudentWithUndo(student.id);
+        closeSheet();
       });
     };
   }
+}
+
+// 刪除學員但保留復原機會，作法同 deleteSlotWithUndo：實際刪除後用同一個文件 ID 寫回原始資料
+function deleteStudentWithUndo(id){
+  const student = students.find(s=>s.id===id);
+  if(!student) return;
+  const { id: _drop, ...data } = student;
+  db.collection('coaches').doc(currentUid).collection('students').doc(id).delete().then(()=>{
+    showUndoToast('已刪除學員', ()=>{
+      db.collection('coaches').doc(currentUid).collection('students').doc(id).set(data)
+        .then(()=>showToast('已復原學員'));
+    });
+  });
 }
 
 function renderStudents(filter=''){
@@ -1762,7 +1829,32 @@ function openEditProfile(forceOpen){
 function setSheet(html){ document.getElementById('sheetBody').innerHTML = `<div class="sheet-handle"></div>${html}`; }
 function openSheet(){ document.getElementById('sheetOverlay').classList.add('show'); }
 function closeSheet(){ document.getElementById('sheetOverlay').classList.remove('show'); }
-function showToast(text){ const t = document.getElementById('toast'); document.getElementById('toastText').textContent = text; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2000); }
+let undoToastTimer = null;
+function showToast(text){
+  const t = document.getElementById('toast');
+  document.getElementById('toastText').textContent = text;
+  const undoBtn = document.getElementById('toastUndoBtn');
+  undoBtn.classList.add('hidden');
+  undoBtn.onclick = null;
+  if(undoToastTimer) clearTimeout(undoToastTimer);
+  t.classList.add('show');
+  undoToastTimer = setTimeout(()=>t.classList.remove('show'),2000);
+}
+// 用於刪除等危險操作：多顯示幾秒並附上「復原」按鈕，避免手滑造成無法挽回的刪除
+function showUndoToast(text, undoFn){
+  const t = document.getElementById('toast');
+  document.getElementById('toastText').textContent = text;
+  const undoBtn = document.getElementById('toastUndoBtn');
+  undoBtn.classList.remove('hidden');
+  undoBtn.onclick = ()=>{
+    undoFn();
+    t.classList.remove('show');
+    if(undoToastTimer) clearTimeout(undoToastTimer);
+  };
+  if(undoToastTimer) clearTimeout(undoToastTimer);
+  t.classList.add('show');
+  undoToastTimer = setTimeout(()=>{ t.classList.remove('show'); undoBtn.classList.add('hidden'); undoBtn.onclick = null; }, 6000);
+}
 function confirmAction(t,d,c){ setSheet(`<div class="sheet-title">${escapeHtml(t)}</div><div class="sheet-sub">${escapeHtml(d)}</div><div class="sheet-actions"><button class="sheet-btn ghost" onclick="closeSheet()">取消</button><button class="sheet-btn danger" id="okConfirmBtn">確認</button></div>`); openSheet(); document.getElementById('okConfirmBtn').onclick = ()=>{ closeSheet(); c(); }; }
 
 function updateNotificationBadge(){

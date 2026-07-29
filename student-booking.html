@@ -238,9 +238,17 @@ function clearIdentityError(){
 }
 
 // 2. 身分驗證表單送出（手機號碼或姓名擇一輸入即可）
+// 將全形數字/英文/空白轉為半形，並去除頭尾空白，避免手機輸入法自動轉全形導致比對失敗
+function normalizeIdentity(str){
+  return String(str||'')
+    .replace(/[\uFF01-\uFF5E]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0xFEE0))
+    .replace(/\u3000/g, ' ')
+    .trim();
+}
+
 document.getElementById('identityForm').addEventListener('submit', function(e){
   e.preventDefault();
-  const value = document.getElementById('identityInput').value.trim();
+  const value = normalizeIdentity(document.getElementById('identityInput').value);
   verifyIdentity(value, false);
 });
 
