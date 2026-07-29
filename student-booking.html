@@ -4,6 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>預約您的專屬課程</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="線上預約">
+<meta name="theme-color" content="#faf7f0">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta property="og:title" content="📅 線上預約課程">
+<meta property="og:description" content="點此輸入手機號碼或姓名，立即查看可預約的課堂時段">
+<meta property="og:image" content="https://shan199433-netizen.github.io/coach33/icon-512.png">
+<meta property="og:type" content="website">
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
@@ -92,16 +103,12 @@ h2 { margin-top: 0; font-weight:800; }
 
   <div id="loadErrorBanner" class="inline-banner hidden"></div>
 
-  <!-- 步驟一：身分驗證（姓名 + 電話），須為教練名單中已存在的學員 -->
+  <!-- 步驟一：身分驗證，輸入手機號碼或姓名擇一即可，須為教練名單中已存在的學員 -->
   <form id="identityForm">
     <div id="identityErrorBanner" class="inline-banner hidden"></div>
     <div class="form-group">
-      <label>🙋 學員真實姓名</label>
-      <input type="text" id="identityName" placeholder="請輸入您的本名" required>
-    </div>
-    <div class="form-group">
-      <label>📱 手機號碼</label>
-      <input type="tel" id="identityPhone" placeholder="例如：0912345678" pattern="[0-9]{8,10}" required>
+      <label>🙋 手機號碼或姓名（擇一輸入）</label>
+      <input type="text" id="identityInput" placeholder="輸入手機號碼或姓名皆可" required>
     </div>
     <button type="submit" class="btn-submit" id="identitySubmitBtn">確認身分</button>
   </form>
@@ -188,10 +195,9 @@ function tryRestoreIdentity(){
   if(!STORAGE_KEY) return;
   try{
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
-    if(saved && saved.name && saved.phone){
-      document.getElementById('identityName').value = saved.name;
-      document.getElementById('identityPhone').value = saved.phone;
-      verifyIdentity(saved.name, saved.phone, true);
+    if(saved && saved.phone){
+      document.getElementById('identityInput').value = saved.phone;
+      verifyIdentity(saved.phone, true);
     }
   }catch(e){ /* 忽略壞掉的快取 */ }
 }
@@ -211,44 +217,40 @@ function clearIdentityError(){
   identityErrorBanner.classList.add('hidden');
 }
 
-// 2. 身分驗證表單送出
+// 2. 身分驗證表單送出（手機號碼或姓名擇一輸入即可）
 document.getElementById('identityForm').addEventListener('submit', function(e){
   e.preventDefault();
-  const name = document.getElementById('identityName').value.trim();
-  const phone = document.getElementById('identityPhone').value.trim();
-  verifyIdentity(name, phone, false);
+  const value = document.getElementById('identityInput').value.trim();
+  verifyIdentity(value, false);
 });
 
 // 核心驗證：必須在教練的學員名單（students 集合）中已經存在，才能繼續預約
-function verifyIdentity(name, phone, silent){
+// value 可能是電話或姓名，會先比對電話，查無結果再比對姓名
+function verifyIdentity(value, silent){
   clearIdentityError();
+  if(!value){ return; }
   const btn = document.getElementById('identitySubmitBtn');
   btn.disabled = true; btn.innerText = '確認中...';
 
-  db.collection('coaches').doc(coachUid).collection('students')
-    .where('phone', '==', phone).get()
+  const studentsRef = db.collection('coaches').doc(coachUid).collection('students');
+
+  studentsRef.where('phone', '==', value).get()
+    .then(snapshot => {
+      if(!snapshot.empty) return snapshot;
+      return studentsRef.where('name', '==', value).get();
+    })
     .then(snapshot => {
       btn.disabled = false; btn.innerText = '確認身分';
 
       if(snapshot.empty){
         if(!silent){
-          showIdentityError('❌ 查無此學員資料，請確認手機號碼是否正確，或請先聯繫教練將您加入學員名單後再預約。');
+          showIdentityError('❌ 查無此學員資料，請確認手機號碼或姓名是否正確，或請先聯繫教練將您加入學員名單後再預約。');
         }
         return;
       }
 
-      // 電話相符即視為同一位學員（姓名僅供顯示核對，不一致時仍以電話為準並提醒）
-      let matched = null;
-      snapshot.forEach(doc => {
-        const d = doc.data();
-        if(!matched && d.name && name && d.name.trim() === name.trim()){
-          matched = { id: doc.id, name: d.name, phone: d.phone };
-        }
-      });
-      if(!matched){
-        const first = snapshot.docs[0];
-        matched = { id: first.id, name: first.data().name, phone: first.data().phone };
-      }
+      const first = snapshot.docs[0];
+      const matched = { id: first.id, name: first.data().name, phone: first.data().phone };
 
       verifiedStudent = matched;
       if(STORAGE_KEY){
@@ -279,8 +281,7 @@ document.getElementById('switchIdentityLink').addEventListener('click', function
   document.getElementById('bookingSection').classList.add('hidden');
   document.getElementById('pageSubtitle').classList.remove('hidden');
   document.getElementById('identityForm').classList.remove('hidden');
-  document.getElementById('identityName').value = '';
-  document.getElementById('identityPhone').value = '';
+  document.getElementById('identityInput').value = '';
   clearIdentityError();
 });
 
