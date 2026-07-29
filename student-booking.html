@@ -316,15 +316,22 @@ function loadAvailableSlots() {
     .orderBy('timestamp', 'asc')
     .get()
     .then(snapshot => {
-      if(snapshot.empty) {
+      const now = Date.now();
+      const futureSlots = [];
+      snapshot.forEach(doc => {
+        const slot = doc.data();
+        const slotMs = (slot.timestamp?.seconds||0) * 1000;
+        if(slotMs >= now){ futureSlots.push({ id: doc.id, ...slot }); }
+      });
+
+      if(futureSlots.length === 0) {
         selectEl.innerHTML = '<option value="">目前教練暫無開放空檔</option>';
         return;
       }
       selectEl.innerHTML = '<option value="">-- 請選擇時段 --</option>';
-      snapshot.forEach(doc => {
-        const slot = doc.data();
+      futureSlots.forEach(slot => {
         const option = document.createElement('option');
-        option.value = doc.id;
+        option.value = slot.id;
         option.innerText = slot.time;
         selectEl.appendChild(option);
       });
