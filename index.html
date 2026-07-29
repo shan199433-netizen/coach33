@@ -501,6 +501,7 @@ body{
         </div>
       </div>
       <div class="settings-group">
+        <h3>課程設定</h3>
         <div class="accordion-section" data-acc="courseTypes">
           <div class="accordion-header"><div class="settings-icon">📚</div><div class="settings-main"><h4>課程種類</h4><p>新增、修改、刪除課程種類</p></div><span class="accordion-chev">▾</span></div>
           <div class="accordion-body"><div class="manage-card" id="courseTypeManage"></div></div>
@@ -509,6 +510,9 @@ body{
           <div class="accordion-header"><div class="settings-icon">📍</div><div class="settings-main"><h4>授課地點</h4><p>新增、修改、刪除授課地點</p></div><span class="accordion-chev">▾</span></div>
           <div class="accordion-body"><div class="manage-card" id="locationManage"></div></div>
         </div>
+      </div>
+      <div class="settings-group">
+        <h3>學員與收費</h3>
         <div class="accordion-section" data-acc="studentTags">
           <div class="accordion-header"><div class="settings-icon">🏷️</div><div class="settings-main"><h4>學員分類標籤</h4><p>學員頁篩選按鈕依此自動產生</p></div><span class="accordion-chev">▾</span></div>
           <div class="accordion-body"><div class="manage-card" id="studentTagManage"></div></div>
@@ -751,6 +755,17 @@ function cascadeRemoveStudentTag(removedTag){
     const newTags = (s.tags||[]).filter(t => t !== removedTag);
     db.collection('coaches').doc(currentUid).collection('students').doc(s.id)
       .update({ tags: newTags }).catch(()=>{});
+  });
+}
+function cleanupOrphanedStudentTags(){
+  if(!currentUid) return;
+  students.forEach(s => {
+    const orphaned = (s.tags||[]).filter(t => !studentTags.includes(t));
+    if(orphaned.length){
+      const cleanTags = (s.tags||[]).filter(t => studentTags.includes(t));
+      db.collection('coaches').doc(currentUid).collection('students').doc(s.id)
+        .update({ tags: cleanTags }).catch(()=>{});
+    }
   });
 }
 function afterListChange(fieldName){
@@ -1423,6 +1438,7 @@ function openStudentForm(student){
 }
 
 function renderStudents(filter=''){
+  cleanupOrphanedStudentTags();
   const list = document.getElementById('studentList');
   const filtered = students.filter(s=>{
     const matchesSearch = s.name.includes(filter) || (s.phone && s.phone.includes(filter));
@@ -1436,7 +1452,7 @@ function renderStudents(filter=''){
       <div class="student-info">
         <h3>${escapeHtml(s.name)}</h3>
         <p>📞 ${escapeHtml(s.phone || '未登錄電話')}</p>
-        ${(s.tags && s.tags.length) ? `<div class="student-tags">${s.tags.map(t=>`<span class="tag-badge">${escapeHtml(t)}</span>`).join('')}</div>` : ''}
+        ${(()=>{ const validTags=(s.tags||[]).filter(t=>studentTags.includes(t)); return validTags.length ? `<div class="student-tags">${validTags.map(t=>`<span class="tag-badge">${escapeHtml(t)}</span>`).join('')}</div>` : ''; })()}
       </div>
     </div>
   `).join('');
