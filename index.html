@@ -583,7 +583,6 @@ let students = [];
 let allSlots = [];
 let ledgerEntries = [];
 let slugPromptShown = false;
-let monthlyCompletedSessions = 18;
 
 function escapeHtml(str){
   return String(str==null?'':str).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
@@ -620,7 +619,7 @@ function handleAuthSubmit() {
         db.collection("coaches").doc(cred.user.uid).set({
           name: '未命名教練', email: email,
           courseTypes: DEFAULT_COURSE_TYPES, locations: DEFAULT_LOCATIONS,
-          studentTags: DEFAULT_STUDENT_TAGS, incomeItems: DEFAULT_INCOME_ITEMS, theme: 'default'
+          studentTags: DEFAULT_STUDENT_TAGS, incomeItems: DEFAULT_INCOME_ITEMS
         });
         alert('教練帳號註冊成功！');
       }).catch(err => alert('註冊失敗: ' + err.message));
@@ -933,7 +932,7 @@ function openGoalEdit(){
   };
 }
 
-function renderTopStats(){ document.getElementById('todayCount').textContent = 0; document.getElementById('monthlySessionsTop').textContent = monthlyCompletedSessions; }
+function renderTopStats(){ document.getElementById('todayCount').textContent = 0; }
 function renderDateScroller(){ const el = document.getElementById('dateScroller'); el.innerHTML = dateList.map(d=>{ return `<div class="date-card ${d.key===activeDateKey?'active':''}" data-key="${d.key}"><span class="day">${d.day}</span><span class="dnum num">${d.num}</span></div>`; }).join(''); el.querySelectorAll('.date-card').forEach(c=>{ c.addEventListener('click',()=>{ activeDateKey = c.dataset.key; renderDateScroller(); renderSlots(); }); }); }
 function formatDisplayTime(dt){
   const dayNames = ['日','一','二','三','四','五','六'];
@@ -983,7 +982,7 @@ function renderSlots(){
           <div class="slot-detail">${s.courseType||''}${s.location? ' · '+s.location : ''}${s.status==='full' && s.studentName ? ' · '+s.studentName : ''}</div>
         </div>
       </div>
-      <button class="slot-action" data-action="${s.status==='open' ? 'close' : 'remove'}">${s.status==='open' ? '🔒' : '🗑️'}${s.status==='open' ? '關閉' : '刪除'}</button>
+      <button class="slot-action" data-action="${s.status==='open' ? 'close' : s.status==='full' ? 'cancel' : 'reopen'}">${s.status==='open' ? '🔒關閉' : s.status==='full' ? '↩️取消預約' : '🔓重新開放'}</button>
     </div>
   `).join('');
 
@@ -996,10 +995,12 @@ function renderSlots(){
           db.collection('coaches').doc(currentUid).collection('slots').doc(id).update({status:'closed'})
             .then(()=>showToast('已關閉時段'));
         });
+      } else if(btn.dataset.action === 'cancel'){
+        cancelSlotBooking(id);
       } else {
-        confirmAction('刪除此時段','刪除後無法復原，確定要刪除嗎？', ()=>{
-          db.collection('coaches').doc(currentUid).collection('slots').doc(id).delete()
-            .then(()=>showToast('已刪除時段'));
+        confirmAction('重新開放此時段','重新開放後學員可再次預約此時段，確定要重新開放嗎？', ()=>{
+          db.collection('coaches').doc(currentUid).collection('slots').doc(id).update({status:'open'})
+            .then(()=>showToast('已重新開放時段'));
         });
       }
     });
@@ -1013,6 +1014,20 @@ function renderSlots(){
   });
 }
 
+// 取消已預約的時段：退回 open 並清除學員相關欄位（與學員端自行取消的邏輯一致），
+// 保留時段本身讓學員之後仍能重新預約，而不是整筆刪除
+function cancelSlotBooking(id){
+  confirmAction('取消此預約','取消後時段會退回「可預約」狀態，學員需要教練另行通知，確定要取消嗎？', ()=>{
+    db.collection('coaches').doc(currentUid).collection('slots').doc(id).update({
+      status: 'open',
+      studentId: firebase.firestore.FieldValue.delete(),
+      studentName: firebase.firestore.FieldValue.delete(),
+      studentPhone: firebase.firestore.FieldValue.delete(),
+      bookedAt: firebase.firestore.FieldValue.delete()
+    }).then(()=>showToast('已取消預約，時段重新開放'));
+  });
+}
+
 function openSlotDetail(slot){
   setSheet(`
     <div class="sheet-title">時段詳情</div>
@@ -1023,11 +1038,15 @@ function openSlotDetail(slot){
     ${slot.status==='full' ? `<div class="form-row"><label>預約學員</label><div class="detail-value">${escapeHtml(slot.studentName||'-')} ${escapeHtml(slot.studentPhone||'')}</div></div>` : ''}
     <div class="sheet-actions">
       <button class="sheet-btn ghost" id="detailCloseBtn">關閉視窗</button>
-      <button class="sheet-btn danger" id="detailDeleteBtn">刪除時段</button>
+      ${slot.status==='full' ? `<button class="sheet-btn primary" id="detailCancelBtn">↩️&nbsp;取消預約</button>` : ''}
     </div>
+    <div style="margin-top:10px;"><button class="sheet-btn danger" style="width:100%;" id="detailDeleteBtn">🗑️&nbsp;刪除時段</button></div>
   `);
   openSheet();
   document.getElementById('detailCloseBtn').onclick = closeSheet;
+  if(slot.status==='full'){
+    document.getElementById('detailCancelBtn').onclick = ()=>{ closeSheet(); cancelSlotBooking(slot.id); };
+  }
   document.getElementById('detailDeleteBtn').onclick = ()=>{
     confirmAction('刪除此時段','刪除後無法復原，確定要刪除嗎？', ()=>{
       db.collection('coaches').doc(currentUid).collection('slots').doc(slot.id).delete().then(()=>showToast('已刪除時段'));
@@ -1287,29 +1306,40 @@ function openAddSlot(){
 
       const dt = new Date(`${dateStr}T${hStr}:${mStr}:00`);
       const matched = students.find(s=>s.name===studentName);
-      
-      const payload = {
+
+      const buildPayload = (studentId)=>({
         timestamp: firebase.firestore.Timestamp.fromDate(dt),
         dateKey: dateStrToKey(dateStr),
         time: formatDisplayTime(dt),
         courseType: course,
         location: location || '',
         status: 'full',
+        studentId: studentId,
         studentName: studentName,
         studentPhone: matched ? (matched.phone||'') : '',
         bookedAt: firebase.firestore.FieldValue.serverTimestamp(),
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      };
-
-      if(!matched) {
-         db.collection("coaches").doc(currentUid).collection("students").add({
-            name: studentName, phone: '', tags: [], totalLessons: 1, notes: '手動排課自動關聯建立', createdAt: firebase.firestore.FieldValue.serverTimestamp()
-         });
-      }
-
-      ref.add(payload).then(()=>{
-        closeSheet(); showToast('✅ 已手動新增排課');
       });
+
+      // 若學員不存在，先建立學員資料，取得新的 studentId 後再一併寫入時段，
+      // 確保學員端「我的預約」（用 studentId 比對）也能看到教練手動排的課
+      if(!matched) {
+        db.collection("coaches").doc(currentUid).collection("students").add({
+          name: studentName, phone: '', tags: [], totalLessons: 1, notes: '手動排課自動關聯建立', createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        }).then(newStudentRef=>{
+          return ref.add(buildPayload(newStudentRef.id));
+        }).then(()=>{
+          closeSheet(); showToast('✅ 已手動新增排課');
+        }).catch(err=>{
+          showToast('❌ 新增失敗: ' + err.message);
+        });
+      } else {
+        ref.add(buildPayload(matched.id)).then(()=>{
+          closeSheet(); showToast('✅ 已手動新增排課');
+        }).catch(err=>{
+          showToast('❌ 新增失敗: ' + err.message);
+        });
+      }
     }
   };
 }
