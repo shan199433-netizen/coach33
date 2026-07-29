@@ -355,6 +355,7 @@ body{
     <h3 id="auth-title" style="margin-bottom:16px; font-size:16px;">教練管理系統</h3>
     <input type="email" id="auth-email" placeholder="輸入電子郵件 (Email)">
     <input type="password" id="auth-password" placeholder="輸入密碼 (Password)">
+    <div class="auth-switch" onclick="handleForgotPassword()" style="margin-top:-4px; margin-bottom:14px; text-align:right; font-size:12.5px;">忘記密碼？</div>
     <button class="auth-btn" id="auth-submit-btn" onclick="handleAuthSubmit()">登入後台</button>
     <div id="auth-switch-text" class="auth-switch" onclick="toggleAuthMode()">還沒有帳號？註冊新教練帳號</div>
   </div>
@@ -599,6 +600,14 @@ function toggleAuthMode() {
   document.getElementById('auth-switch-text').innerText = isSignUpMode ? `已有帳號？點此返回登入` : `還沒有帳號？註冊新教練帳號`;
 }
 
+function handleForgotPassword() {
+  const email = document.getElementById('auth-email').value.trim();
+  if(!email) return alert('請先在上方輸入您註冊時使用的 Email，再點選「忘記密碼？」');
+  auth.sendPasswordResetEmail(email)
+    .then(() => alert('重設密碼信已寄出！請至該信箱收信，並依照信中連結重新設定密碼。'))
+    .catch(err => alert('寄送失敗: ' + err.message));
+}
+
 function handleAuthSubmit() {
   const email = document.getElementById('auth-email').value;
   const password = document.getElementById('auth-password').value;
@@ -779,6 +788,7 @@ function syncCoachCloudData() {
       students = [];
       snapshot.forEach(doc => students.push({id: doc.id, ...doc.data()}));
       renderStudents(document.getElementById('studentSearch') ? document.getElementById('studentSearch').value : '');
+      updateNotificationBadge();
     });
 
   db.collection("coaches").doc(currentUid).onSnapshot(doc => {
@@ -825,6 +835,7 @@ function syncCoachCloudData() {
       snapshot.forEach(doc => ledgerEntries.push({id: doc.id, ...doc.data()}));
       renderLedger();
       renderHeroStats();
+      updateNotificationBadge();
     });
 
   db.collection("coaches").doc(currentUid).collection("monthlyIncome").doc(currentMonthKey())
@@ -1318,6 +1329,14 @@ function renderStudentFilterChips(){
   });
 }
 
+function computeRemainingLessons(studentName){
+  const totalPurchasedLessons = ledgerEntries
+    .filter(l => l.type==='income' && l.studentName === studentName)
+    .reduce((sum,l)=> sum + Number(l.quantity||1), 0);
+  const classCount = allSlots.filter(s => s.studentName === studentName).length;
+  return { totalPurchasedLessons, classCount, remainingLessons: totalPurchasedLessons - classCount };
+}
+
 function openAddStudent(){ openStudentForm(null); }
 function openEditStudent(id){ const s = students.find(x=>x.id===id); if(s) openStudentForm(s); }
 
@@ -1354,7 +1373,7 @@ function openStudentForm(student){
         `).join('');
      }
 
-     remainingLessons = totalPurchasedLessons - classCount;
+     remainingLessons = totalPurchasedLessons - classCount; // 與 computeRemainingLessons() 邏輯一致
   }
 
   setSheet(`
@@ -1720,12 +1739,22 @@ function updateNotificationBadge(){
   const badgeEl = document.querySelector('#bell-btn .badge');
   if(!badgeEl) return;
   const openCount = (allSlots||[]).filter(s => s.status === 'open').length;
-  if(openCount > 0){
-    badgeEl.textContent = openCount > 99 ? '99+' : String(openCount);
+  const lowLessonCount = getLowLessonStudents().length;
+  const total = openCount + lowLessonCount;
+  if(total > 0){
+    badgeEl.textContent = total > 99 ? '99+' : String(total);
     badgeEl.style.display = 'flex';
   } else {
     badgeEl.style.display = 'none';
   }
+}
+
+// 剩餘堂數 <= 2 且曾經購課過的學員（避免從未購課的新學員也被列入提醒）
+function getLowLessonStudents(){
+  return (students||[])
+    .map(s => ({ student: s, info: computeRemainingLessons(s.name) }))
+    .filter(x => x.info.totalPurchasedLessons > 0 && x.info.remainingLessons <= 2)
+    .sort((a,b) => a.info.remainingLessons - b.info.remainingLessons);
 }
 
 function openNotifications(){
@@ -1736,12 +1765,20 @@ function openNotifications(){
     .slice(0, 8);
 
   const openCount = (allSlots||[]).filter(s => s.status === 'open').length;
+  const lowLessonStudents = getLowLessonStudents();
 
   let itemsHtml = '';
+  if(lowLessonStudents.length){
+    itemsHtml += lowLessonStudents.map(x => `
+      <div class="record-item">
+        <span>⚠️ ${escapeHtml(x.student.name)} 剩餘堂數只剩 <b style="color:var(--accent-red);">${x.info.remainingLessons}</b> 堂，該提醒續約了</span>
+      </div>
+    `).join('');
+  }
   if(openCount > 0){
     itemsHtml += `<div class="record-item"><span>🟢 目前有 <b>${openCount}</b> 個開放時段尚未被預約</span></div>`;
   }
-  if(recentBookings.length === 0 && openCount === 0){
+  if(recentBookings.length === 0 && openCount === 0 && lowLessonStudents.length === 0){
     itemsHtml += `<div class="empty-hint">目前沒有新的通知</div>`;
   } else if(recentBookings.length){
     itemsHtml += recentBookings.map(s => `
