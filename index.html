@@ -97,12 +97,10 @@ body{
   width:100%;max-width:412px;height:100vh;height:100dvh;
   background:var(--bg-base);
   position:relative;display:flex;flex-direction:column;overflow:hidden;
-  box-shadow:0 20px 45px -10px rgba(53,50,44,0.35);
-  border:1px solid var(--border-soft);
 }
 
 @media (min-width:450px){
-  .phone-container{border-radius:44px;height:874px;max-height:890px;border:8px solid var(--border-color);}
+  .phone-container{border-radius:44px;height:874px;max-height:890px;border:8px solid var(--border-color);box-shadow:0 20px 45px -10px rgba(53,50,44,0.35);}
   .header{border-radius:36px 36px 0 0;}
 }
 
@@ -178,6 +176,15 @@ body{
 .student-info{flex:1;min-width:0;}
 .student-info h3{font-size:15px;font-weight:700;}
 .student-info p{font-size:12.5px;color:var(--text-muted);margin-top:2px;}
+.month-switch-row{display:flex;align-items:center;gap:8px;margin:14px 20px 2px 20px;flex-shrink:0;}
+.month-nav-btn{width:30px;height:30px;border-radius:10px;background:var(--bg-card);border:2px solid var(--border-color);color:var(--text-main);font-size:16px;font-weight:800;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;box-shadow:var(--box-shadow-sm);}
+.month-nav-btn:active{background:var(--pink-main);transform:translate(1px,1px);box-shadow:none;}
+.month-nav-btn:disabled{opacity:0.35;cursor:default;}
+.month-nav-btn:disabled:active{background:var(--bg-card);transform:none;}
+.month-switch-label{font-size:15px;font-weight:800;color:var(--text-main);flex:1;text-align:center;}
+.month-today-btn{flex-shrink:0;background:var(--pink-main);color:var(--text-main);border:2px solid var(--border-color);border-radius:10px;padding:6px 11px;font-size:12.5px;font-weight:700;cursor:pointer;}
+.month-today-btn:active{transform:scale(0.94);}
+
 .hero-row{display:flex;gap:10px;margin:14px 20px 4px 20px;flex-shrink:0;}
 .hero-row.goal-row{margin-top:10px;}
 .hero-card{ flex:1;min-width:0;background:var(--bg-card); border:2px solid var(--border-color);border-radius:20px;padding:16px 16px;position:relative;overflow:hidden; }
@@ -424,14 +431,19 @@ input.form-input[type="date"]::-webkit-calendar-picker-indicator{ padding:0;marg
 
   <div class="view" id="view-stats">
     <div class="content-area" style="padding:0 0 100px 0;">
+      <div class="month-switch-row">
+        <button class="month-nav-btn" id="statsMonthPrevBtn">‹</button>
+        <span class="month-switch-label" id="statsMonthLabel">本月</span>
+        <button class="month-nav-btn" id="statsMonthNextBtn">›</button>
+        <button class="month-today-btn" id="statsMonthTodayBtn" style="display:none;">回到本月</button>
+      </div>
       <div class="hero-row">
         <div class="hero-card">
-          <div class="hc-label">📋本月已上課</div>
+          <div class="hc-label">📋已上課</div>
           <div class="hc-value"><span class="num" id="heroSessionsVal">0</span><small>堂</small></div>
-          <div class="hc-sub trend">📈較上月 +4 堂</div>
         </div>
         <div class="hero-card">
-          <div class="hc-label">🏷️本月銷售</div>
+          <div class="hc-label">🏷️銷售</div>
           <div class="hc-value"><span class="num" id="heroSalesCountVal">0</span><small>堂</small></div>
           <div class="hc-sub money" id="heroSalesAmountVal">NT$0</div>
         </div>
@@ -577,6 +589,10 @@ let studentTags = DEFAULT_STUDENT_TAGS.slice();
 let incomeItems = DEFAULT_INCOME_ITEMS.slice();
 let monthlyIncomeData = {};
 let monthlyGoalsData = {};
+let selectedMonthDate = new Date(); // 目前選擇要檢視的月份（預設為真實的本月），只影響「月統計」相關畫面，不影響資料本身
+let unsubMonthlyIncome = null;
+let unsubMonthlyGoals = null;
+let unsubLedger = null;
 let activeStudentFilter = '全部';
 let coachProfile = { name:'', specialties:[] };
 let students = [];
@@ -810,7 +826,7 @@ function renderCourseTypeManage(){
     });
   });
 
-  el.querySelectorAll('.course-type-row .color-swatch-row').forEach(row=>{
+  el.querySelectorAll('.color-swatch-row[data-idx]').forEach(row=>{
     row.querySelectorAll('.color-dot').forEach(dot=>{
       dot.addEventListener('click', ()=>{
         const idx = Number(row.dataset.idx);
@@ -936,28 +952,8 @@ function syncCoachCloudData() {
       updateNotificationBadge();
     });
 
-  db.collection("coaches").doc(currentUid).collection("ledger")
-    .orderBy('createdAt','desc').limit(100)
-    .onSnapshot((snapshot) => {
-      ledgerEntries = [];
-      snapshot.forEach(doc => ledgerEntries.push({id: doc.id, ...doc.data()}));
-      renderLedger();
-      renderHeroStats();
-      updateNotificationBadge();
-    });
-
-  db.collection("coaches").doc(currentUid).collection("monthlyIncome").doc(currentMonthKey())
-    .onSnapshot(doc => {
-      monthlyIncomeData = doc.exists ? (doc.data()||{}) : {};
-      renderIncomeSummary();
-    });
-
-  // 本月目標獨立存放於每月一份的文件（key 為年-月），避免跨月沿用到上個月設定的目標
-  db.collection("coaches").doc(currentUid).collection("monthlyGoals").doc(currentMonthKey())
-    .onSnapshot(doc => {
-      monthlyGoalsData = doc.exists ? (doc.data()||{}) : {};
-      renderHeroStats();
-    });
+  subscribeMonthlyDocsForSelectedMonth();
+  renderStatsMonthLabel();
 
   renderWeekTimeline(); renderLedger();
   renderTopStats();
@@ -970,18 +966,17 @@ function computeTodayCount(){
   if(el) el.textContent = c;
 }
 
-function isThisMonth(l){
-  const now = new Date();
+function isSelectedMonthEntry(l){
   let d = null;
   if(l.transactionDate){ d = new Date(l.transactionDate+'T00:00:00'); }
   else if(l.createdAt && l.createdAt.toDate){ d = l.createdAt.toDate(); }
   if(!d || isNaN(d.getTime())) return false;
-  return d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear();
+  return d.getMonth()===selectedMonthDate.getMonth() && d.getFullYear()===selectedMonthDate.getFullYear();
 }
 function getLedgerAutoSumsByItem(){
   const sums = {};
   ledgerEntries.forEach(l=>{
-    if(l.type!=='income' || !isThisMonth(l)) return;
+    if(l.type!=='income' || !isSelectedMonthEntry(l)) return;
     const key = l.incomeItem || '其他收入(未分類)';
     sums[key] = (sums[key]||0) + Number(l.amount||0);
   });
@@ -995,21 +990,99 @@ function computeMonthIncomeTotal(){
   return total;
 }
 
-function isThisMonthDate(d){
+function isSelectedMonthDate(d){
+  return d && !isNaN(d.getTime()) && d.getMonth()===selectedMonthDate.getMonth() && d.getFullYear()===selectedMonthDate.getFullYear();
+}
+function selectedMonthKey(){ return currentMonthKey(selectedMonthDate); }
+function isSelectedMonthTheRealCurrentMonth(){
   const now = new Date();
-  return d && !isNaN(d.getTime()) && d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear();
+  return now.getMonth()===selectedMonthDate.getMonth() && now.getFullYear()===selectedMonthDate.getFullYear();
+}
+
+function renderStatsMonthLabel(){
+  const label = document.getElementById('statsMonthLabel');
+  if(label) label.textContent = `${selectedMonthDate.getFullYear()}年${String(selectedMonthDate.getMonth()+1).padStart(2,'0')}月`;
+  const todayBtn = document.getElementById('statsMonthTodayBtn');
+  if(todayBtn) todayBtn.style.display = isSelectedMonthTheRealCurrentMonth() ? 'none' : 'inline-flex';
+  const nextBtn = document.getElementById('statsMonthNextBtn');
+  if(nextBtn) nextBtn.disabled = isSelectedMonthTheRealCurrentMonth();
+}
+
+// 切換要檢視的月份：舊月份的資料完全保留在雲端，只是切換「目前要看哪個月」，
+// 因此每次切換都要重新訂閱該月份專屬的 monthlyIncome / monthlyGoals 文件
+function changeSelectedMonth(delta){
+  const next = new Date(selectedMonthDate.getFullYear(), selectedMonthDate.getMonth()+delta, 1);
+  const now = new Date();
+  if(next.getFullYear() > now.getFullYear() || (next.getFullYear()===now.getFullYear() && next.getMonth() > now.getMonth())){
+    return; // 不開放檢視尚未發生的未來月份
+  }
+  selectedMonthDate = next;
+  onSelectedMonthChanged();
+}
+function goToCurrentMonth(){
+  selectedMonthDate = new Date();
+  onSelectedMonthChanged();
+}
+function onSelectedMonthChanged(){
+  renderStatsMonthLabel();
+  subscribeMonthlyDocsForSelectedMonth();
+  renderLedger();
+  renderHeroStats();
+}
+function monthDateRangeStrings(d){
+  const y = d.getFullYear(), m = d.getMonth();
+  const first = `${y}-${String(m+1).padStart(2,'0')}-01`;
+  const lastDay = new Date(y, m+1, 0).getDate();
+  const last = `${y}-${String(m+1).padStart(2,'0')}-${String(lastDay).padStart(2,'0')}`;
+  return { first, last };
+}
+
+function subscribeMonthlyDocsForSelectedMonth(){
+  if(!currentUid) return;
+  if(unsubMonthlyIncome) unsubMonthlyIncome();
+  if(unsubMonthlyGoals) unsubMonthlyGoals();
+  if(unsubLedger) unsubLedger();
+  const key = selectedMonthKey();
+  unsubMonthlyIncome = db.collection("coaches").doc(currentUid).collection("monthlyIncome").doc(key)
+    .onSnapshot(doc => {
+      monthlyIncomeData = doc.exists ? (doc.data()||{}) : {};
+      renderIncomeSummary();
+      renderHeroStats();
+    });
+  unsubMonthlyGoals = db.collection("coaches").doc(currentUid).collection("monthlyGoals").doc(key)
+    .onSnapshot(doc => {
+      monthlyGoalsData = doc.exists ? (doc.data()||{}) : {};
+      renderHeroStats();
+    });
+
+  // 依「交易日期」的區間查詢該月份的記帳明細，而不是撈全部歷史紀錄裡最新的100筆再篩選，
+  // 這樣不管切到多久以前的月份，只要曾經記錄過就一定看得到，不會被筆數上限擋住
+  const { first, last } = monthDateRangeStrings(selectedMonthDate);
+  unsubLedger = db.collection("coaches").doc(currentUid).collection("ledger")
+    .where('transactionDate','>=', first)
+    .where('transactionDate','<=', last)
+    .onSnapshot(snapshot => {
+      ledgerEntries = [];
+      snapshot.forEach(doc => ledgerEntries.push({id: doc.id, ...doc.data()}));
+      renderLedger();
+      renderHeroStats();
+      renderIncomeSummary();
+      updateNotificationBadge();
+    }, err => {
+      console.error('ledger query error', err);
+    });
 }
 
 function renderHeroStats(){
   const now = new Date();
-  const monthIncomeEntries = ledgerEntries.filter(l => l.type==='income' && isThisMonth(l));
+  const monthIncomeEntries = ledgerEntries.filter(l => l.type==='income' && isSelectedMonthEntry(l));
   const salesSessionsCount = monthIncomeEntries.reduce((sum,l)=>sum+Number(l.quantity||0), 0);
   const monthIncomeTotal = computeMonthIncomeTotal();
 
-  // 一律以時段的真實時間戳(含年份)判斷是否屬於「本月」，避免把上個月／未來月份的時段誤算進本月已上課
-  const monthFullSlots = allSlots.filter(s => s.status === 'full' && s.timestamp && s.timestamp.toDate && isThisMonthDate(s.timestamp.toDate()));
-  const completedSessions = monthFullSlots.filter(s => s.timestamp.toDate() <= now).length; // 本月已上課：時間已過去的預約
-  const pendingSessions = monthFullSlots.filter(s => s.timestamp.toDate() > now).length; // 待完成堂數：本月已預約但尚未上課
+  // 一律以時段的真實時間戳(含年份)判斷是否屬於「目前選擇的月份」，避免把其他月份的時段混進來
+  const monthFullSlots = allSlots.filter(s => s.status === 'full' && s.timestamp && s.timestamp.toDate && isSelectedMonthDate(s.timestamp.toDate()));
+  const completedSessions = monthFullSlots.filter(s => s.timestamp.toDate() <= now).length; // 已上課：時間已過去的預約（過去月份會全部落在這裡）
+  const pendingSessions = monthFullSlots.filter(s => s.timestamp.toDate() > now).length; // 待完成堂數：該月已預約但尚未上課（只有本月才可能>0）
   const avgFee = salesSessionsCount>0 ? Math.round(monthIncomeTotal/salesSessionsCount) : 0;
 
   const salesAmountEl = document.getElementById('heroSalesAmountVal');
@@ -1045,8 +1118,9 @@ function renderHeroStats(){
 }
 
 function openGoalEdit(){
+  const label = `${selectedMonthDate.getFullYear()}年${String(selectedMonthDate.getMonth()+1).padStart(2,'0')}月`;
   setSheet(`
-    <div class="sheet-title">設定本月目標</div>
+    <div class="sheet-title">設定 ${label} 目標</div>
     <div class="form-row"><label>目標堂數</label><input type="number" class="form-input" id="goalSessionsInput" value="${monthlyGoalsData.goalSessions||''}" placeholder="例如：40"></div>
     <div class="form-row"><label>目標銷售金額 (NT$)</label><input type="number" class="form-input" id="goalSalesInput" value="${monthlyGoalsData.goalSalesAmount||''}" placeholder="例如：60000"></div>
     <div class="sheet-actions">
@@ -1059,9 +1133,9 @@ function openGoalEdit(){
   document.getElementById('saveGoalBtn').onclick = ()=>{
     const goalSessions = Number(document.getElementById('goalSessionsInput').value)||0;
     const goalSalesAmount = Number(document.getElementById('goalSalesInput').value)||0;
-    db.collection('coaches').doc(currentUid).collection('monthlyGoals').doc(currentMonthKey())
+    db.collection('coaches').doc(currentUid).collection('monthlyGoals').doc(selectedMonthKey())
       .set({ goalSessions, goalSalesAmount }, {merge:true})
-      .then(()=>{ closeSheet(); showToast('✅ 已更新本月目標'); })
+      .then(()=>{ closeSheet(); showToast(`✅ 已更新${label}目標`); })
       .catch(err=>showToast('❌ 儲存失敗: ' + err.message));
   };
 }
@@ -1225,14 +1299,15 @@ function renderWeekTimeline(){
       if(dt.getHours() < 6) return '';
       const top = ((dt.getHours() - 6) + dt.getMinutes()/60) / HOURS * 100;
       const height = (100 / HOURS);
-      const courseColor = s.courseType ? getCourseColor(s.courseType) : 'transparent';
+      const courseColor = (s.status !== 'open' && s.courseType && s.courseType !== '預約空檔') ? getCourseColor(s.courseType) : null;
+      const borderStyle = courseColor ? `border-left-color:${courseColor};` : '';
 
       let displayLabel = escapeHtml(s.courseType||'');
       if(s.status === 'full' && s.studentName) {
         displayLabel = `<b>${escapeHtml(s.studentName)}</b><br>${escapeHtml(s.courseType||'')}`;
       }
 
-      return `<div class="wt-block ${s.status}" style="top:${top}%;height:calc(${height}% - 2px);border-left-color:${courseColor};" data-id="${s.id}">
+      return `<div class="wt-block ${s.status}" style="top:${top}%;height:calc(${height}% - 2px);${borderStyle}" data-id="${s.id}">
         <span class="wt-block-label">${displayLabel}</span>
       </div>`;
     }).join('');
@@ -1731,11 +1806,12 @@ function renderStudents(filter=''){
 
 function renderLedger(){
   const el = document.getElementById('ledgerList');
-  if(!ledgerEntries || ledgerEntries.length === 0){
-    el.innerHTML = `<div style="text-align:center; padding:20px; color:var(--text-faint); font-size:13.5px;">暫無最新記帳明細</div>`;
+  const monthEntries = ledgerEntries.filter(isSelectedMonthEntry);
+  if(!monthEntries.length){
+    el.innerHTML = `<div style="text-align:center; padding:20px; color:var(--text-faint); font-size:13.5px;">這個月還沒有記帳明細</div>`;
     return;
   }
-  el.innerHTML = ledgerEntries.slice(0,15).map(l => {
+  el.innerHTML = monthEntries.slice(0,30).map(l => {
     const isIncome = l.type==='income';
     const title = isIncome
       ? (l.studentName ? `${escapeHtml(l.studentName)} · ${escapeHtml(l.incomeItem||'收入')}` : escapeHtml(l.incomeItem || '收入'))
@@ -1833,7 +1909,7 @@ function renderIncomeSummaryTotal(){
 }
 function saveMonthlyIncome(){
   if(!currentUid) return;
-  const key = currentMonthKey();
+  const key = selectedMonthKey();
   db.collection('coaches').doc(currentUid).collection('monthlyIncome').doc(key).set(monthlyIncomeData, {merge:true})
     .catch(err=>showToast('❌ 儲存失敗: ' + err.message));
 }
@@ -2150,6 +2226,9 @@ document.getElementById('fabAdd').addEventListener('click', ()=>openAddSlot());
 document.getElementById('bell-btn').addEventListener('click', openNotifications);
 document.getElementById('fabAddLedger').addEventListener('click', ()=>openAddLedger());
 document.getElementById('addStudentBtn').addEventListener('click', openAddStudent);
+document.getElementById('statsMonthPrevBtn').addEventListener('click', ()=>changeSelectedMonth(-1));
+document.getElementById('statsMonthNextBtn').addEventListener('click', ()=>changeSelectedMonth(1));
+document.getElementById('statsMonthTodayBtn').addEventListener('click', goToCurrentMonth);
 document.getElementById('sheetOverlay').addEventListener('click',(e)=>{ if(e.target.id==='sheetOverlay') closeSheet(); });
 document.getElementById('studentSearch').addEventListener('input',(e)=>renderStudents(e.target.value));
 document.querySelectorAll('.accordion-header').forEach(h=>{
