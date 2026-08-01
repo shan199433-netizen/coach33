@@ -94,7 +94,7 @@ body{
 .auth-switch { color: var(--text-muted); font-size: 13px; margin-top: 18px; cursor: pointer; text-decoration: underline; }
 
 .phone-container{
-  width:100%;max-width:412px;height:100vh;height:100dvh;max-height:890px;
+  width:100%;max-width:412px;height:100vh;height:100dvh;
   background:var(--bg-base);
   position:relative;display:flex;flex-direction:column;overflow:hidden;
   box-shadow:0 20px 45px -10px rgba(53,50,44,0.35);
@@ -102,19 +102,19 @@ body{
 }
 
 @media (min-width:450px){
-  .phone-container{border-radius:44px;height:874px;border:8px solid var(--border-color);}
+  .phone-container{border-radius:44px;height:874px;max-height:890px;border:8px solid var(--border-color);}
   .header{border-radius:36px 36px 0 0;}
 }
 
 .hidden { display: none !important; }
 
-.header{ padding:18px 20px 14px 20px; display:flex;justify-content:space-between;align-items:center; background:var(--overlay-strong); z-index:30;border-bottom:2.5px solid var(--border-color); flex-shrink:0; }
-.coach-profile{display:flex;align-items:center;gap:12px;}
-.coach-avatar{ width:46px;height:46px;border-radius:15px; background:var(--pink-main);border:2px solid var(--border-color); display:flex;justify-content:center;align-items:center;color:var(--text-main);font-size:19px; box-shadow:var(--box-shadow-sm);flex-shrink:0; }
-.coach-info h1{font-size:15px;font-weight:700;letter-spacing:-0.2px;}
-.coach-info p{font-size:13px;color:var(--pink-light);display:flex;align-items:center;gap:5px;margin-top:2px;}
-.header-actions{display:flex;gap:9px;}
-.icon-btn{ position:relative;width:38px;height:38px;border-radius:12px; background:var(--bg-card);border:2px solid var(--border-color);color:var(--text-muted); display:flex;justify-content:center;align-items:center;cursor:pointer; transition:all .18s ease;font-size:15px; }
+.header{ padding:calc(10px + env(safe-area-inset-top,0px)) 20px 8px 20px; display:flex;justify-content:space-between;align-items:center; background:var(--overlay-strong); z-index:30;border-bottom:2.5px solid var(--border-color); flex-shrink:0; }
+.coach-profile{display:flex;align-items:center;gap:10px;}
+.coach-avatar{ width:38px;height:38px;border-radius:13px; background:var(--pink-main);border:2px solid var(--border-color); display:flex;justify-content:center;align-items:center;color:var(--text-main);font-size:16px; box-shadow:var(--box-shadow-sm);flex-shrink:0; }
+.coach-info h1{font-size:14px;font-weight:700;letter-spacing:-0.2px;}
+.coach-info p{font-size:12px;color:var(--pink-light);display:flex;align-items:center;gap:5px;margin-top:1px;}
+.header-actions{display:flex;gap:8px;}
+.icon-btn{ position:relative;width:32px;height:32px;border-radius:11px; background:var(--bg-card);border:2px solid var(--border-color);color:var(--text-muted); display:flex;justify-content:center;align-items:center;cursor:pointer; transition:all .18s ease;font-size:13px; }
 .icon-btn:active{background:var(--pink-main);color:var(--text-main);transform:translate(2px,2px);}
 .icon-btn.gear-active{background:var(--pink-main);color:var(--text-main);}
 .icon-btn .badge{ position:absolute;top:-4px;right:-4px;min-width:16px;height:16px;padding:0 4px; background:var(--pink-deep);border-radius:8px;font-size:11px;font-weight:700; display:flex;align-items:center;justify-content:center; border:2px solid var(--bg-base); }
@@ -215,10 +215,10 @@ body{
 .link-row input{ flex:1;background:transparent;border:none;outline:none;color:var(--text-muted);font-size:13px;min-width:0; }
 .copy-btn{ flex-shrink:0;background:var(--pink-main);color:var(--text-main);border:2px solid var(--border-color);border-radius:10px; padding:8px 13px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px; }
 .copy-btn:active{transform:scale(0.95);}
-.bottom-nav{ position:absolute;bottom:0;left:0;width:100%;height:80px;background:var(--overlay-nav); border-top:2.5px solid var(--border-color); display:flex;justify-content:space-around;align-items:center;z-index:25;padding-bottom:6px;flex-shrink:0; }
-.nav-item{ display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--text-muted); cursor:pointer;font-size:13.5px;font-weight:700;transition:color .2s,background .2s;width:70px;padding:7px 4px;border-radius:16px; }
-.nav-icon{font-size:23px;line-height:1;transition:transform .15s;}
-.nav-label{font-size:13.5px;letter-spacing:.2px;}
+.bottom-nav{ position:absolute;bottom:0;left:0;width:100%;height:60px;background:var(--overlay-nav); border-top:2.5px solid var(--border-color); display:flex;justify-content:space-around;align-items:center;z-index:25;padding-bottom:calc(4px + env(safe-area-inset-bottom,0px));flex-shrink:0; }
+.nav-item{ display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--text-muted); cursor:pointer;font-size:11.5px;font-weight:700;transition:color .2s,background .2s;width:62px;padding:5px 4px;border-radius:14px; }
+.nav-icon{font-size:19px;line-height:1;transition:transform .15s;}
+.nav-label{font-size:11.5px;letter-spacing:.2px;}
 .nav-item.active{color:var(--pink-light);background:rgba(246,191,174,0.3);}
 .nav-item.active .nav-icon{transform:translateY(-1px) scale(1.05);}
 .nav-item:active .nav-icon{transform:scale(0.88);}
@@ -231,8 +231,11 @@ body{
 .sheet-sub{font-size:13.5px;color:var(--text-muted);margin-bottom:18px;line-height:1.5;}
 .form-row{margin-bottom:14px;}
 .form-row label{font-size:13px;color:var(--text-muted);font-weight:600;margin-bottom:7px;display:block;}
-.form-input{ width:100%;background:var(--bg-elevated);border:2px solid var(--border-soft);border-radius:12px; padding:11px 13px;color:var(--text-main);font-size:14.5px;outline:none; }
+.form-input{ width:100%;min-width:0;background:var(--bg-elevated);border:2px solid var(--border-soft);border-radius:12px; padding:11px 13px;color:var(--text-main);font-size:14.5px;outline:none;box-sizing:border-box; }
 .form-input:focus{border-color:var(--pink-deep);}
+input.form-input[type="date"],input.form-input[type="time"]{ appearance:none;-webkit-appearance:none;color-scheme:light;padding-right:8px; }
+input.form-input[type="date"]::-webkit-date-and-time-value{ text-align:left;margin:0; }
+input.form-input[type="date"]::-webkit-calendar-picker-indicator{ padding:0;margin-left:6px; }
 .time-select-row{display:flex;align-items:center;gap:8px;}
 .time-select-row .form-input{width:auto;flex:1;text-align:center;}
 .time-select-row .time-colon{font-weight:800;color:var(--text-muted);}
@@ -258,6 +261,13 @@ body{
 .edit-icon-btn.add{background:var(--pink-main);color:var(--text-main);border-color:var(--border-color);}
 .edit-icon-btn.add:active{transform:scale(0.92);}
 .edit-empty-hint{font-size:13px;color:var(--text-faint);padding:4px 0 9px 0;}
+
+.course-type-row{align-items:center;}
+.course-color-dot{flex-shrink:0;width:22px;height:22px;border-radius:8px;border:2px solid var(--border-color);cursor:pointer;box-shadow:var(--box-shadow-sm);}
+.color-swatch-row{display:flex;gap:6px;padding:0 0 10px 30px;flex-wrap:wrap;}
+.color-swatch-row .color-dot{width:20px;height:20px;border-radius:7px;border:2px solid var(--border-color);cursor:pointer;flex-shrink:0;}
+.color-swatch-row .color-dot.active{box-shadow:0 0 0 2px var(--bg-card),0 0 0 4px var(--text-main);}
+.color-swatch-row .color-dot:active{transform:scale(0.9);}
 
 .chip-toggle-group{display:flex;flex-wrap:wrap;gap:8px;}
 .chip-toggle{ padding:8px 14px;border-radius:20px;background:var(--bg-elevated);border:2px solid var(--border-soft); color:var(--text-muted);font-size:13.5px;font-weight:600;cursor:pointer;transition:all .15s; }
@@ -298,8 +308,8 @@ body{
 .view-toggle-btn{flex:1;padding:9px;border-radius:12px;background:var(--bg-card);border:2px solid var(--border-color);color:var(--text-muted);font-size:13.5px;font-weight:700;cursor:pointer;}
 .view-toggle-btn.active{background:var(--pink-main);color:var(--text-main);border-color:var(--border-color);box-shadow:var(--box-shadow-sm);}
 
-#dayViewGroup{flex:1;display:flex;flex-direction:column;min-height:0;}
-.week-timeline-wrap{flex:1;display:none;flex-direction:column;min-height:0;padding:8px 0 100px 0;overflow:hidden;}
+.week-timeline-wrap{flex:1;display:flex;flex-direction:column;min-height:0;padding:8px 0 100px 0;overflow:hidden;}
+.wt-day-col.press-active{background-color:rgba(242,165,140,0.16);}
 .week-nav-row{display:flex;align-items:center;justify-content:center;gap:8px;flex-shrink:0;padding:0 8px 4px 8px;}
 .week-nav-btn{width:24px;height:24px;border-radius:8px;background:var(--bg-card);border:1.5px solid var(--border-color);color:var(--text-main);font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
 .week-nav-btn:active{background:var(--pink-main);color:var(--text-main);}
@@ -316,7 +326,7 @@ body{
 .week-timeline-body{display:contents;}
 .wt-day-col{flex:1;min-width:0;position:relative;border-left:1px solid var(--border-soft);height:100%;background-image:repeating-linear-gradient(to bottom, transparent, transparent calc(100%/18 - 1px), var(--border-soft) calc(100%/18 - 1px), var(--border-soft) calc(100%/18));}
 
-.wt-block{ position:absolute;left:1.5px;right:1.5px;border-radius:5px;padding:2px 3px;overflow:visible;cursor:pointer;font-size:10.5px;line-height:1.2;color:var(--text-main);background:var(--status-open);border:1px solid var(--border-color);box-sizing:border-box;z-index:1; }
+.wt-block{ position:absolute;left:1.5px;right:1.5px;border-radius:5px;padding:2px 3px 2px 5px;overflow:visible;cursor:pointer;font-size:10.5px;line-height:1.2;color:var(--text-main);background:var(--status-open);border:1px solid var(--border-color);border-left-width:4px;box-sizing:border-box;z-index:1; }
 .wt-block.full{background:var(--status-full);}
 .wt-block.closed{background:var(--status-closed);color:var(--text-muted);}
 .wt-block-time{display:block;font-weight:800;font-size:9.5px;white-space:nowrap;}
@@ -386,23 +396,10 @@ body{
   </div>
 
   <div class="view active" id="view-schedule">
-    <div class="view-toggle-row">
-      <button class="view-toggle-btn active" data-mode="day">日檢視</button>
-      <button class="view-toggle-btn" data-mode="week">週檢視</button>
-    </div>
-    <div id="dayViewGroup">
-      <div class="date-scroller" id="dateScroller"></div>
-      <div class="content-area">
-        <div class="section-header">
-          <span>時段清單</span>
-          <span class="muted" id="scheduleDateLabel">07月14日（週二）</span>
-        </div>
-        <div id="slotList"></div>
-      </div>
-    </div>
     <div class="week-timeline-wrap" id="weekTimelineWrap">
       <div class="week-nav-row" id="weekNavRow">
         <span class="week-nav-label" id="weekNavLabel">本週</span>
+        <span style="font-size:11px;color:var(--text-faint);margin-left:8px;">長按空白時段即可新增排課</span>
       </div>
       <div class="week-timeline-header" id="weekTimelineHeader"></div>
       <div class="week-timeline-scroll" id="weekTimelineScroll">
@@ -456,8 +453,8 @@ body{
       </div>
 
       <div class="mini-stats">
-        <div class="mini-stat"><div class="v num">6</div><div class="l">待完成堂數</div></div>
-        <div class="mini-stat"><div class="v num">1,314</div><div class="l">平均堂費</div></div>
+        <div class="mini-stat"><div class="v num" id="pendingSessionsVal">0</div><div class="l">待完成堂數</div></div>
+        <div class="mini-stat"><div class="v num">NT$<span id="avgFeeVal">0</span></div><div class="l">平均堂費</div></div>
       </div>
 
       <div class="accordion-section" id="incomeSummarySection" style="margin:14px 20px 4px 20px;">
@@ -556,6 +553,7 @@ const DEFAULT_COURSE_TYPES = ['重量訓練','核心雕塑','有氧體能','體�
 const DEFAULT_LOCATIONS = ['A教室（信義館）','B教室（大安館）'];
 const DEFAULT_STUDENT_TAGS = ['男生','女生','共課'];
 const DEFAULT_INCOME_ITEMS = ['單堂課費','方案購課','其他收入'];
+const COURSE_COLOR_PALETTE = ['#f6bfae','#f2a58c','#e0708f','#8fbf86','#7fb2cf','#b79cd9','#e2b33c','#b5aa96'];
 
 function buildDateList(){
   const dayNames = ['日','一','二','三','四','五','六'];
@@ -573,12 +571,13 @@ function buildDateList(){
 const dateList = buildDateList();
 let activeDateKey = dateList[0].key;
 let courseTypes = DEFAULT_COURSE_TYPES.slice();
+let courseTypeColors = {};
 let locations = DEFAULT_LOCATIONS.slice();
 let studentTags = DEFAULT_STUDENT_TAGS.slice();
 let incomeItems = DEFAULT_INCOME_ITEMS.slice();
 let monthlyIncomeData = {};
+let monthlyGoalsData = {};
 let activeStudentFilter = '全部';
-let scheduleMode = 'day';
 let coachProfile = { name:'', specialties:[] };
 let students = [];
 let allSlots = [];
@@ -757,6 +756,115 @@ function persistListField(fieldName, arr){
   db.collection('coaches').doc(currentUid).update({ [fieldName]: arr })
     .catch(err=>showToast('❌ 儲存失敗: ' + err.message));
 }
+
+// 取得課程種類對應的顏色：若教練尚未手動指定過，依序套用預設色盤，讓每個種類仍有各自的顏色可辨識
+function getCourseColor(name){
+  if(courseTypeColors[name]) return courseTypeColors[name];
+  const idx = courseTypes.indexOf(name);
+  return COURSE_COLOR_PALETTE[(idx>=0?idx:0) % COURSE_COLOR_PALETTE.length];
+}
+function persistCourseTypeColors(){
+  if(!currentUid) return;
+  db.collection('coaches').doc(currentUid).update({ courseTypeColors }).catch(()=>{});
+}
+
+let newCourseTypeColor = COURSE_COLOR_PALETTE[0];
+
+function renderCourseTypeManage(){
+  const el = document.getElementById('courseTypeManage');
+  if(!el) return;
+  const swatchesHtml = (selected)=> COURSE_COLOR_PALETTE.map(c=>`<span class="color-dot${c===selected?' active':''}" data-color="${c}" style="background:${c};"></span>`).join('');
+
+  const rows = courseTypes.map((item,i)=>{
+    const color = getCourseColor(item);
+    return `
+    <div class="edit-row course-type-row" data-idx="${i}">
+      <span class="course-color-dot" data-idx="${i}" style="background:${color};" title="選擇分類顏色"></span>
+      <input type="text" class="edit-input rename-input" value="${escapeHtml(item)}" data-idx="${i}">
+      <button class="edit-icon-btn del" data-idx="${i}" title="刪除">🗑️</button>
+    </div>
+    <div class="color-swatch-row" data-idx="${i}">${swatchesHtml(color)}</div>
+    `;
+  }).join('');
+
+  el.innerHTML = (courseTypes.length ? rows : `<div class="edit-empty-hint">目前尚無項目，請於下方新增</div>`) + `
+    <div class="edit-row add-row">
+      <span class="course-color-dot" id="newCourseColorDot" style="background:${newCourseTypeColor};" title="選擇新分類顏色"></span>
+      <input type="text" class="edit-input new-item-input" placeholder="新增課程種類">
+      <button class="edit-icon-btn add" title="新增">➕</button>
+    </div>
+    <div class="color-swatch-row" id="newCourseColorRow">${swatchesHtml(newCourseTypeColor)}</div>
+  `;
+
+  el.querySelectorAll('.rename-input').forEach(inp=>{
+    inp.addEventListener('change', ()=>{
+      const idx = Number(inp.dataset.idx);
+      const val = inp.value.trim();
+      if(!val){ inp.value = courseTypes[idx]; return; }
+      const oldName = courseTypes[idx];
+      courseTypes[idx] = val;
+      if(courseTypeColors[oldName] && oldName!==val){ courseTypeColors[val] = courseTypeColors[oldName]; delete courseTypeColors[oldName]; }
+      persistListField('courseTypes', courseTypes);
+      persistCourseTypeColors();
+      renderWeekTimeline();
+    });
+  });
+
+  el.querySelectorAll('.course-type-row .color-swatch-row').forEach(row=>{
+    row.querySelectorAll('.color-dot').forEach(dot=>{
+      dot.addEventListener('click', ()=>{
+        const idx = Number(row.dataset.idx);
+        const name = courseTypes[idx];
+        const color = dot.dataset.color;
+        courseTypeColors[name] = color;
+        persistCourseTypeColors();
+        renderCourseTypeManage();
+        renderWeekTimeline();
+      });
+    });
+  });
+
+  el.querySelectorAll('.del').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const idx = Number(btn.dataset.idx);
+      const removedVal = courseTypes[idx];
+      confirmAction('刪除項目', `確定要刪除「${escapeHtml(removedVal)}」嗎？`, ()=>{
+        courseTypes.splice(idx,1);
+        delete courseTypeColors[removedVal];
+        persistListField('courseTypes', courseTypes);
+        persistCourseTypeColors();
+        renderCourseTypeManage();
+      });
+    });
+  });
+
+  const newColorRow = document.getElementById('newCourseColorRow');
+  const newColorDot = document.getElementById('newCourseColorDot');
+  if(newColorRow){
+    newColorRow.querySelectorAll('.color-dot').forEach(dot=>{
+      dot.addEventListener('click', ()=>{
+        newCourseTypeColor = dot.dataset.color;
+        if(newColorDot) newColorDot.style.background = newCourseTypeColor;
+        newColorRow.querySelectorAll('.color-dot').forEach(d=>d.classList.toggle('active', d.dataset.color===newCourseTypeColor));
+      });
+    });
+  }
+
+  const addBtn = el.querySelector('.add');
+  const addInput = el.querySelector('.new-item-input');
+  const doAdd = ()=>{
+    const val = addInput.value.trim();
+    if(!val) return;
+    courseTypes.push(val);
+    courseTypeColors[val] = newCourseTypeColor;
+    persistListField('courseTypes', courseTypes);
+    persistCourseTypeColors();
+    newCourseTypeColor = COURSE_COLOR_PALETTE[0];
+    renderCourseTypeManage();
+  };
+  addBtn.addEventListener('click', doAdd);
+  addInput.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); doAdd(); } });
+}
 function cascadeRemoveStudentTag(removedTag){
   if(!currentUid) return;
   const affected = students.filter(s => (s.tags||[]).includes(removedTag));
@@ -798,11 +906,12 @@ function syncCoachCloudData() {
       updateBookingLink();
 
       courseTypes = (coachProfile.courseTypes && coachProfile.courseTypes.length) ? coachProfile.courseTypes : DEFAULT_COURSE_TYPES.slice();
+      courseTypeColors = coachProfile.courseTypeColors || {};
       locations = (coachProfile.locations && coachProfile.locations.length) ? coachProfile.locations : DEFAULT_LOCATIONS.slice();
       studentTags = (coachProfile.studentTags && coachProfile.studentTags.length) ? coachProfile.studentTags : DEFAULT_STUDENT_TAGS.slice();
       incomeItems = (coachProfile.incomeItems && coachProfile.incomeItems.length) ? coachProfile.incomeItems : DEFAULT_INCOME_ITEMS.slice();
 
-      renderEditableList('courseTypeManage', courseTypes, 'courseTypes', '新增課程種類');
+      renderCourseTypeManage();
       renderEditableList('locationManage', locations, 'locations', '新增授課地點');
       renderEditableList('studentTagManage', studentTags, 'studentTags', '新增學員分類標籤');
       renderEditableList('incomeItemManage', incomeItems, 'incomeItems', '新增收入項目');
@@ -821,8 +930,7 @@ function syncCoachCloudData() {
     .onSnapshot((snapshot) => {
       allSlots = [];
       snapshot.forEach(doc => allSlots.push({id: doc.id, ...doc.data()}));
-      renderSlots();
-      if(scheduleMode=='week') renderWeekTimeline();
+      renderWeekTimeline();
       computeTodayCount();
       renderHeroStats();
       updateNotificationBadge();
@@ -844,7 +952,14 @@ function syncCoachCloudData() {
       renderIncomeSummary();
     });
 
-  renderDateScroller(); renderSlots(); renderLedger();
+  // 本月目標獨立存放於每月一份的文件（key 為年-月），避免跨月沿用到上個月設定的目標
+  db.collection("coaches").doc(currentUid).collection("monthlyGoals").doc(currentMonthKey())
+    .onSnapshot(doc => {
+      monthlyGoalsData = doc.exists ? (doc.data()||{}) : {};
+      renderHeroStats();
+    });
+
+  renderWeekTimeline(); renderLedger();
   renderTopStats();
 }
 
@@ -880,11 +995,22 @@ function computeMonthIncomeTotal(){
   return total;
 }
 
+function isThisMonthDate(d){
+  const now = new Date();
+  return d && !isNaN(d.getTime()) && d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear();
+}
+
 function renderHeroStats(){
+  const now = new Date();
   const monthIncomeEntries = ledgerEntries.filter(l => l.type==='income' && isThisMonth(l));
   const salesSessionsCount = monthIncomeEntries.reduce((sum,l)=>sum+Number(l.quantity||0), 0);
   const monthIncomeTotal = computeMonthIncomeTotal();
-  const completedSessions = allSlots.filter(s => s.status === 'full').length;
+
+  // 一律以時段的真實時間戳(含年份)判斷是否屬於「本月」，避免把上個月／未來月份的時段誤算進本月已上課
+  const monthFullSlots = allSlots.filter(s => s.status === 'full' && s.timestamp && s.timestamp.toDate && isThisMonthDate(s.timestamp.toDate()));
+  const completedSessions = monthFullSlots.filter(s => s.timestamp.toDate() <= now).length; // 本月已上課：時間已過去的預約
+  const pendingSessions = monthFullSlots.filter(s => s.timestamp.toDate() > now).length; // 待完成堂數：本月已預約但尚未上課
+  const avgFee = salesSessionsCount>0 ? Math.round(monthIncomeTotal/salesSessionsCount) : 0;
 
   const salesAmountEl = document.getElementById('heroSalesAmountVal');
   const salesCountEl = document.getElementById('heroSalesCountVal');
@@ -895,15 +1021,21 @@ function renderHeroStats(){
   if(sessionsEl) sessionsEl.textContent = completedSessions;
   if(topSessionsEl) topSessionsEl.textContent = completedSessions;
 
-  const goalSessions = Number(coachProfile.goalSessions)||0;
-  const goalSales = Number(coachProfile.goalSalesAmount)||0;
+  const pendingEl = document.getElementById('pendingSessionsVal');
+  const avgFeeEl = document.getElementById('avgFeeVal');
+  if(pendingEl) pendingEl.textContent = pendingSessions;
+  if(avgFeeEl) avgFeeEl.textContent = avgFee.toLocaleString();
+
+  // 本月目標改為每月獨立文件(monthlyGoals)，不再沿用上個月手動輸入過的數字
+  const goalSessions = Number(monthlyGoalsData.goalSessions)||0;
+  const goalSales = Number(monthlyGoalsData.goalSalesAmount)||0;
   const sessionsBar = document.getElementById('heroSessionsBar');
   const salesBar = document.getElementById('heroSalesBar');
   const sessionsGoalEl = document.getElementById('heroSessionsGoal');
   const salesGoalEl = document.getElementById('heroSalesGoal');
   if(sessionsBar) sessionsBar.style.width = goalSessions>0 ? Math.min(100,(completedSessions/goalSessions)*100)+'%' : '0%';
   if(salesBar) salesBar.style.width = goalSales>0 ? Math.min(100,(monthIncomeTotal/goalSales)*100)+'%' : '0%';
-  if(sessionsGoalEl) sessionsGoalEl.textContent = goalSessions>0 ? `目標 ${goalSessions} 堂（點擊筆型圖示修改）` : '點擊筆型圖示設定本月目標';
+  if(sessionsGoalEl) sessionsGoalEl.textContent = goalSessions>0 ? `目標 ${goalSessions} 堂` : '點擊筆型圖示設定本月目標';
   if(salesGoalEl) salesGoalEl.textContent = goalSales>0 ? `目標 NT$${goalSales.toLocaleString()}` : '設定目標後自動累加進度';
 
   const goalSessionsValEl = document.getElementById('goalSessionsVal');
@@ -915,8 +1047,8 @@ function renderHeroStats(){
 function openGoalEdit(){
   setSheet(`
     <div class="sheet-title">設定本月目標</div>
-    <div class="form-row"><label>目標堂數</label><input type="number" class="form-input" id="goalSessionsInput" value="${coachProfile.goalSessions||''}" placeholder="例如：40"></div>
-    <div class="form-row"><label>目標銷售金額 (NT$)</label><input type="number" class="form-input" id="goalSalesInput" value="${coachProfile.goalSalesAmount||''}" placeholder="例如：60000"></div>
+    <div class="form-row"><label>目標堂數</label><input type="number" class="form-input" id="goalSessionsInput" value="${monthlyGoalsData.goalSessions||''}" placeholder="例如：40"></div>
+    <div class="form-row"><label>目標銷售金額 (NT$)</label><input type="number" class="form-input" id="goalSalesInput" value="${monthlyGoalsData.goalSalesAmount||''}" placeholder="例如：60000"></div>
     <div class="sheet-actions">
       <button class="sheet-btn ghost" id="cancelGoalBtn">取消</button>
       <button class="sheet-btn primary" id="saveGoalBtn">儲存</button>
@@ -927,14 +1059,14 @@ function openGoalEdit(){
   document.getElementById('saveGoalBtn').onclick = ()=>{
     const goalSessions = Number(document.getElementById('goalSessionsInput').value)||0;
     const goalSalesAmount = Number(document.getElementById('goalSalesInput').value)||0;
-    db.collection('coaches').doc(currentUid).update({ goalSessions, goalSalesAmount })
+    db.collection('coaches').doc(currentUid).collection('monthlyGoals').doc(currentMonthKey())
+      .set({ goalSessions, goalSalesAmount }, {merge:true})
       .then(()=>{ closeSheet(); showToast('✅ 已更新本月目標'); })
       .catch(err=>showToast('❌ 儲存失敗: ' + err.message));
   };
 }
 
 function renderTopStats(){ document.getElementById('todayCount').textContent = 0; }
-function renderDateScroller(){ const el = document.getElementById('dateScroller'); el.innerHTML = dateList.map(d=>{ return `<div class="date-card ${d.key===activeDateKey?'active':''}" data-key="${d.key}"><span class="day">${d.day}</span><span class="dnum num">${d.num}</span></div>`; }).join(''); el.querySelectorAll('.date-card').forEach(c=>{ c.addEventListener('click',()=>{ activeDateKey = c.dataset.key; renderDateScroller(); renderSlots(); }); }); }
 function formatDisplayTime(dt){
   const dayNames = ['日','一','二','三','四','五','六'];
   const mm = String(dt.getMonth()+1).padStart(2,'0');
@@ -960,65 +1092,6 @@ function buildMinuteOptions(defaultMinute){
   }).join('');
 }
 
-function renderSlots(){
-  const d = dateList.find(x=>x.key===activeDateKey);
-  document.getElementById('scheduleDateLabel').textContent = `${d.month}月${d.num}日（週${d.day}）`;
-  const list = document.getElementById('slotList');
-  const daySlots = allSlots
-    .filter(s => s.dateKey === activeDateKey)
-    .sort((a,b) => (a.timestamp?.seconds||0) - (b.timestamp?.seconds||0));
-
-  if(daySlots.length === 0){
-    list.innerHTML = `<div class="empty-state">📅<p>這天還沒有安排任何時段<br>點右下角「＋」新增可預約時段</p></div>`;
-    return;
-  }
-
-  const now = Date.now();
-  list.innerHTML = daySlots.map(s => {
-    const isPast = s.timestamp && s.timestamp.seconds && (s.timestamp.seconds*1000) < now;
-    return `
-    <div class="slot-card ${s.status}${isPast ? ' is-past' : ''}" data-id="${s.id}">
-      <div class="slot-stripe"></div>
-      <div class="slot-body">
-        <div class="slot-avatar">${s.status==='full' ? (s.studentName ? escapeHtml(s.studentName[0]) : '✓') : '⏰'}</div>
-        <div class="slot-text">
-          <div class="slot-time">${s.time||''}${isPast ? ' <span class=\"past-tag\">已過去</span>' : ''}</div>
-          <div class="slot-detail">${s.courseType||''}${s.location? ' · '+s.location : ''}${s.status==='full' && s.studentName ? ' · '+s.studentName : ''}</div>
-        </div>
-      </div>
-      <button class="slot-action" data-action="${s.status==='open' ? 'close' : s.status==='full' ? 'cancel' : 'reopen'}">${s.status==='open' ? '🔒關閉' : s.status==='full' ? '↩️取消預約' : '🔓重新開放'}</button>
-    </div>
-  `;
-  }).join('');
-
-  list.querySelectorAll('.slot-action').forEach(btn=>{
-    btn.addEventListener('click', (e)=>{
-      e.stopPropagation();
-      const id = btn.closest('.slot-card').dataset.id;
-      if(btn.dataset.action === 'close'){
-        confirmAction('關閉此時段','關閉後學員將無法再預約此時段，確定要關閉嗎？', ()=>{
-          db.collection('coaches').doc(currentUid).collection('slots').doc(id).update({status:'closed'})
-            .then(()=>showToast('已關閉時段'));
-        });
-      } else if(btn.dataset.action === 'cancel'){
-        cancelSlotBooking(id);
-      } else {
-        confirmAction('重新開放此時段','重新開放後學員可再次預約此時段，確定要重新開放嗎？', ()=>{
-          db.collection('coaches').doc(currentUid).collection('slots').doc(id).update({status:'open'})
-            .then(()=>showToast('已重新開放時段'));
-        });
-      }
-    });
-  });
-
-  list.querySelectorAll('.slot-card').forEach(card=>{
-    card.addEventListener('click', ()=>{
-      const slot = allSlots.find(s=>s.id===card.dataset.id);
-      if(slot) openSlotDetail(slot);
-    });
-  });
-}
-
 // 取消已預約的時段：退回 open 並清除學員相關欄位（與學員端自行取消的邏輯一致），
 // 保留時段本身讓學員之後仍能重新預約，而不是整筆刪除
 function cancelSlotBooking(id){
@@ -1034,9 +1107,10 @@ function cancelSlotBooking(id){
 }
 
 function openSlotDetail(slot){
+  const isPast = slot.timestamp && slot.timestamp.seconds && (slot.timestamp.seconds*1000) < Date.now();
   setSheet(`
     <div class="sheet-title">時段詳情</div>
-    <div class="sheet-sub">${escapeHtml(slot.time||'')}</div>
+    <div class="sheet-sub">${escapeHtml(slot.time||'')}${isPast ? ' · <span style="color:var(--text-faint);">已過去</span>' : ''}</div>
     <div class="form-row"><label>課程種類</label><div class="detail-value">${escapeHtml(slot.courseType||'-')}</div></div>
     <div class="form-row"><label>上課地點</label><div class="detail-value">${escapeHtml(slot.location||'-')}</div></div>
     <div class="form-row"><label>狀態</label><div class="detail-value">${slot.status==='open'?'可預約':slot.status==='full'?'已預約':'已關閉'}</div></div>
@@ -1044,6 +1118,8 @@ function openSlotDetail(slot){
     <div class="sheet-actions">
       <button class="sheet-btn ghost" id="detailCloseBtn">關閉視窗</button>
       ${slot.status==='full' ? `<button class="sheet-btn primary" id="detailCancelBtn">↩️&nbsp;取消預約</button>` : ''}
+      ${slot.status==='open' ? `<button class="sheet-btn primary" id="detailCloseSlotBtn">🔒&nbsp;關閉時段</button>` : ''}
+      ${slot.status==='closed' ? `<button class="sheet-btn primary" id="detailReopenBtn">🔓&nbsp;重新開放</button>` : ''}
     </div>
     <div style="margin-top:10px;"><button class="sheet-btn danger" style="width:100%;" id="detailDeleteBtn">🗑️&nbsp;刪除時段</button></div>
   `);
@@ -1052,8 +1128,27 @@ function openSlotDetail(slot){
   if(slot.status==='full'){
     document.getElementById('detailCancelBtn').onclick = ()=>{ closeSheet(); cancelSlotBooking(slot.id); };
   }
+  if(slot.status==='open'){
+    document.getElementById('detailCloseSlotBtn').onclick = ()=>{
+      closeSheet();
+      confirmAction('關閉此時段','關閉後學員將無法再預約此時段，確定要關閉嗎？', ()=>{
+        db.collection('coaches').doc(currentUid).collection('slots').doc(slot.id).update({status:'closed'})
+          .then(()=>showToast('已關閉時段'));
+      });
+    };
+  }
+  if(slot.status==='closed'){
+    document.getElementById('detailReopenBtn').onclick = ()=>{
+      closeSheet();
+      confirmAction('重新開放此時段','重新開放後學員可再次預約此時段，確定要重新開放嗎？', ()=>{
+        db.collection('coaches').doc(currentUid).collection('slots').doc(slot.id).update({status:'open'})
+          .then(()=>showToast('已重新開放時段'));
+      });
+    };
+  }
   document.getElementById('detailDeleteBtn').onclick = ()=>{
     confirmAction('刪除此時段','刪除後可於 6 秒內點擊復原，超過時間將無法復原，確定要刪除嗎？', ()=>{
+      closeSheet();
       deleteSlotWithUndo(slot.id);
     });
   };
@@ -1071,14 +1166,6 @@ function deleteSlotWithUndo(id){
         .then(()=>showToast('已復原時段'));
     });
   });
-}
-
-function switchScheduleMode(mode){
-  scheduleMode = mode;
-  document.querySelectorAll('.view-toggle-btn').forEach(b=>b.classList.toggle('active', b.dataset.mode===mode));
-  document.getElementById('dayViewGroup').style.display = mode==='day' ? 'flex' : 'none';
-  document.getElementById('weekTimelineWrap').style.display = mode==='week' ? 'flex' : 'none';
-  if(mode==='week') renderWeekTimeline();
 }
 
 function getWeekDates(baseDate){
@@ -1102,11 +1189,14 @@ function getWeekDates(baseDate){
 }
 
 let weekOffset = 0; // 0 = 本週，-1 = 上週，+1 = 下週，以此類推
+let lastWeekDates = [];
+const WEEK_TIMELINE_HOURS = 18; // 06:00 - 24:00，每小時佔 100/18 % 高度
 
 function renderWeekTimeline(){
   const base = new Date();
   base.setDate(base.getDate() + weekOffset*7);
   const weekDates = getWeekDates(base);
+  lastWeekDates = weekDates;
 
   // 週切換列文字
   const navLabel = document.getElementById('weekNavLabel');
@@ -1118,7 +1208,7 @@ function renderWeekTimeline(){
     }
   }
 
-  const HOURS = 18; // 06:00 - 24:00，每小時佔 100/18 % 高度
+  const HOURS = WEEK_TIMELINE_HOURS;
 
   let gutterHtml = '';
   for(let h=6; h<24; h++){
@@ -1135,17 +1225,18 @@ function renderWeekTimeline(){
       if(dt.getHours() < 6) return '';
       const top = ((dt.getHours() - 6) + dt.getMinutes()/60) / HOURS * 100;
       const height = (100 / HOURS);
+      const courseColor = s.courseType ? getCourseColor(s.courseType) : 'transparent';
 
       let displayLabel = escapeHtml(s.courseType||'');
       if(s.status === 'full' && s.studentName) {
         displayLabel = `<b>${escapeHtml(s.studentName)}</b><br>${escapeHtml(s.courseType||'')}`;
       }
 
-      return `<div class="wt-block ${s.status}" style="top:${top}%;height:calc(${height}% - 2px);" data-id="${s.id}">
+      return `<div class="wt-block ${s.status}" style="top:${top}%;height:calc(${height}% - 2px);border-left-color:${courseColor};" data-id="${s.id}">
         <span class="wt-block-label">${displayLabel}</span>
       </div>`;
     }).join('');
-    return `<div class="wt-day-col">${blocksHtml}</div>`;
+    return `<div class="wt-day-col" data-key="${wd.key}">${blocksHtml}</div>`;
   }).join('');
 
   document.getElementById('weekTimelineHeader').innerHTML = headerHtml;
@@ -1154,13 +1245,65 @@ function renderWeekTimeline(){
   bodyEl.innerHTML = daysHtml;
 
   bodyEl.querySelectorAll('.wt-block').forEach(b=>{
-    b.addEventListener('click', ()=>{
+    b.addEventListener('click', (e)=>{
+      e.stopPropagation();
       const slot = allSlots.find(s=>s.id===b.dataset.id);
       if(slot) openSlotDetail(slot);
     });
   });
 
   attachWeekNavControls();
+  attachWeekLongPress();
+}
+
+// 長按週行事曆中某一天的空白時段，直接以該天、該時間預帶開啟「新增排課」（手動排課模式）
+function attachWeekLongPress(){
+  const bodyEl = document.getElementById('weekTimelineBody');
+  if(!bodyEl) return;
+  const LONG_PRESS_MS = 480;
+  const MOVE_TOLERANCE = 10;
+
+  bodyEl.querySelectorAll('.wt-day-col').forEach((col, idx)=>{
+    let pressTimer = null;
+    let startX = null, startY = null;
+
+    const clear = ()=>{ if(pressTimer){ clearTimeout(pressTimer); pressTimer = null; } col.classList.remove('press-active'); };
+
+    col.addEventListener('touchstart', (e)=>{
+      if(e.touches.length !== 1) return;
+      if(e.target.closest('.wt-block')) return; // 已有課程的區塊由點擊開啟詳情，長按新增只作用在空白處
+      const touch = e.touches[0];
+      startX = touch.clientX; startY = touch.clientY;
+      col.classList.add('press-active');
+      pressTimer = setTimeout(()=>{
+        col.classList.remove('press-active');
+        const wd = lastWeekDates[idx];
+        if(!wd) return;
+        const rect = col.getBoundingClientRect();
+        const relY = Math.min(Math.max(touch.clientY - rect.top, 0), rect.height);
+        let hour = Math.round(6 + (relY / rect.height) * WEEK_TIMELINE_HOURS);
+        hour = Math.min(Math.max(hour, 6), 23);
+        if(navigator.vibrate) navigator.vibrate(12);
+        openAddSlotForCell(wd.date, hour);
+      }, LONG_PRESS_MS);
+    }, {passive:true});
+
+    col.addEventListener('touchmove', (e)=>{
+      if(startX===null || !pressTimer) return;
+      const touch = e.touches[0];
+      if(Math.abs(touch.clientX-startX) > MOVE_TOLERANCE || Math.abs(touch.clientY-startY) > MOVE_TOLERANCE){ clear(); }
+    }, {passive:true});
+
+    col.addEventListener('touchend', clear);
+    col.addEventListener('touchcancel', clear);
+  });
+}
+
+function openAddSlotForCell(date, hour){
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth()+1).padStart(2,'0');
+  const dd = String(date.getDate()).padStart(2,'0');
+  openAddSlot({ dateStr: `${yyyy}-${mm}-${dd}`, hour, forceManual: true });
 }
 
 function changeWeek(delta){
@@ -1203,11 +1346,14 @@ function attachWeekNavControls(){
     startX = null; startY = null; tracking = false;
   }, {passive:true});
 
-  window.addEventListener('resize', ()=>{ if(scheduleMode==='week') renderWeekTimeline(); });
+  window.addEventListener('resize', ()=>{ renderWeekTimeline(); });
 }
 
-function openAddSlot(){
+function openAddSlot(opts){
+  opts = opts || {};
   const d = dateList.find(x=>x.key===activeDateKey);
+  const dateIso = opts.dateStr || d.iso;
+  const defaultHour = (opts.hour!=null) ? opts.hour : 9;
   const studentOptions = students.map(s=>`<option value="${escapeHtml(s.name)}">`).join('');
   
   setSheet(`
@@ -1216,14 +1362,14 @@ function openAddSlot(){
       <button type="button" class="view-toggle-btn active" id="slotModeOpenBtn">批次開放時段（供約課）</button>
       <button type="button" class="view-toggle-btn" id="slotModeManualBtn">手動排課</button>
     </div>
-    <div class="form-row"><label>日期</label><input type="date" class="form-input" id="slotDate" value="${d.iso}"></div>
+    <div class="form-row"><label>日期</label><input type="date" class="form-input" id="slotDate" value="${dateIso}"></div>
     
     <div class="form-row" id="timeRangeRow">
       <label>批次時間範圍 (06:00 - 24:00)</label>
       <div class="time-select-row">
-        <select class="form-input" id="slotHour">${buildHourOptions(9)}</select>
+        <select class="form-input" id="slotHour">${buildHourOptions(defaultHour)}</select>
         <span class="time-colon">點 至</span>
-        <select class="form-input" id="slotEndHour">${buildHourOptions(12)}</select>
+        <select class="form-input" id="slotEndHour">${buildHourOptions(Math.min(defaultHour+3,24))}</select>
         <span class="time-colon">點</span>
       </div>
       <p style="font-size:12.5px;color:var(--text-faint);margin-top:6px;">系統將在範圍內自動每小時建立一堂可預約課。</p>
@@ -1232,7 +1378,7 @@ function openAddSlot(){
     <div class="form-row hidden" id="singleTimeRow">
       <label>開始時間</label>
       <div class="time-select-row">
-        <select class="form-input" id="singleHour">${buildHourOptions(9)}</select>
+        <select class="form-input" id="singleHour">${buildHourOptions(defaultHour)}</select>
         <span class="time-colon">:</span>
         <select class="form-input" id="singleMinute">${buildMinuteOptions(0)}</select>
       </div>
@@ -1244,7 +1390,10 @@ function openAddSlot(){
       <datalist id="slotStudentList">${studentOptions}</datalist>
     </div>
     <div class="form-row hidden" id="slotCourseRow"><label>課程種類</label>
-      <select class="form-input" id="slotCourse">${courseTypes.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('')}</select>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span id="slotCourseColorDot" style="flex-shrink:0;width:18px;height:18px;border-radius:6px;border:2px solid var(--border-color);background:${courseTypes.length?getCourseColor(courseTypes[0]):'transparent'};"></span>
+        <select class="form-input" id="slotCourse" style="flex:1;">${courseTypes.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('')}</select>
+      </div>
     </div>
     <div class="form-row"><label>上課地點 (選填)</label>
       <select class="form-input" id="slotLocation">
@@ -1266,6 +1415,11 @@ function openAddSlot(){
   const courseRow = document.getElementById('slotCourseRow');
   const timeRangeRow = document.getElementById('timeRangeRow');
   const singleTimeRow = document.getElementById('singleTimeRow');
+  const courseSelect = document.getElementById('slotCourse');
+  const courseColorDot = document.getElementById('slotCourseColorDot');
+  if(courseSelect && courseColorDot){
+    courseSelect.addEventListener('change', ()=>{ courseColorDot.style.background = getCourseColor(courseSelect.value); });
+  }
 
   openBtn.onclick = ()=>{ 
     slotMode='open'; 
@@ -1285,6 +1439,7 @@ function openAddSlot(){
     timeRangeRow.classList.add('hidden');
     singleTimeRow.classList.remove('hidden');
   };
+  if(opts.forceManual) manualBtn.onclick();
 
   document.getElementById('cancelSlotBtn').onclick = closeSheet;
   document.getElementById('saveSlotBtn').onclick = async ()=>{
@@ -1590,13 +1745,49 @@ function renderLedger(){
       ? `${qtyPart}+NT$${Number(l.amount||0).toLocaleString()}${l.transactionDate ? ' · '+escapeHtml(l.transactionDate) : ''}`
       : `-NT$${Number(l.amount||0).toLocaleString()}${l.note ? '' : ''}`;
     return `
-    <div class="student-card">
+    <div class="student-card" data-id="${l.id}">
       <div class="student-avatar" style="color:${isIncome ? 'var(--accent-green)' : 'var(--accent-red)'};">
         ${isIncome ? '⬇️' : '⬆️'}
       </div>
       <div class="student-info"><h3>${title}</h3><p>${sub}</p></div>
     </div>`;
   }).join('');
+
+  el.querySelectorAll('.student-card').forEach(card=>{
+    card.addEventListener('click', ()=>{
+      const entry = ledgerEntries.find(x=>x.id===card.dataset.id);
+      if(entry) openLedgerDetail(entry);
+    });
+  });
+}
+
+// 記帳明細詳情：提供「修改」（開啟預填表單）與「刪除」，解決收支明細無法刪除／修改的問題
+function openLedgerDetail(entry){
+  const isIncome = entry.type === 'income';
+  setSheet(`
+    <div class="sheet-title">${isIncome?'收入':'支出'}明細</div>
+    <div class="form-row"><label>${isIncome?'收入項目':'項目'}</label><div class="detail-value">${escapeHtml(isIncome ? (entry.incomeItem||'收入') : '支出')}</div></div>
+    ${isIncome && entry.studentName ? `<div class="form-row"><label>學員</label><div class="detail-value">${escapeHtml(entry.studentName)}</div></div>` : ''}
+    ${isIncome && entry.quantity ? `<div class="form-row"><label>堂數 x 單價</label><div class="detail-value">${entry.quantity}堂 x NT$${Number(entry.unitPrice||0).toLocaleString()}</div></div>` : ''}
+    <div class="form-row"><label>金額</label><div class="detail-value">${isIncome?'+':'-'}NT$${Number(entry.amount||0).toLocaleString()}</div></div>
+    <div class="form-row"><label>日期</label><div class="detail-value">${escapeHtml(entry.transactionDate||'-')}</div></div>
+    ${entry.note ? `<div class="form-row"><label>備註</label><div class="detail-value">${escapeHtml(entry.note)}</div></div>` : ''}
+    <div class="sheet-actions">
+      <button class="sheet-btn ghost" id="ledgerDetailCloseBtn">關閉視窗</button>
+      <button class="sheet-btn primary" id="ledgerDetailEditBtn">✏️&nbsp;修改</button>
+    </div>
+    <div style="margin-top:10px;"><button class="sheet-btn danger" style="width:100%;" id="ledgerDetailDeleteBtn">🗑️&nbsp;刪除紀錄</button></div>
+  `);
+  openSheet();
+  document.getElementById('ledgerDetailCloseBtn').onclick = closeSheet;
+  document.getElementById('ledgerDetailEditBtn').onclick = ()=> openAddLedger(entry);
+  document.getElementById('ledgerDetailDeleteBtn').onclick = ()=>{
+    confirmAction('刪除此紀錄','刪除後將無法復原，確定要刪除嗎？', ()=>{
+      db.collection('coaches').doc(currentUid).collection('ledger').doc(entry.id).delete()
+        .then(()=>{ closeSheet(); showToast('已刪除紀錄'); })
+        .catch(err=>showToast('❌ 刪除失敗: ' + err.message));
+    });
+  };
 }
 
 function renderIncomeSummary(){
@@ -1647,55 +1838,66 @@ function saveMonthlyIncome(){
     .catch(err=>showToast('❌ 儲存失敗: ' + err.message));
 }
 
-function openAddLedger(){
+function openAddLedger(existingEntry){
+  const isEdit = !!existingEntry;
   const todayIso = new Date().toISOString().slice(0,10);
   const studentOptions = students.map(s=>`<option value="${escapeHtml(s.name)}">`).join('');
   const itemOptions = incomeItems.length
     ? incomeItems.map(it=>`<option value="${escapeHtml(it)}">${escapeHtml(it)}</option>`).join('')
     : '<option value="">請先至設定頁新增收入項目</option>';
 
+  const initMode = isEdit ? existingEntry.type : 'income';
+  const initBillMode = isEdit && existingEntry.type==='income' && !existingEntry.quantity ? 'lump' : 'qty';
+  const initDate = isEdit ? (existingEntry.transactionDate || todayIso) : todayIso;
+
   setSheet(`
-    <div class="sheet-title">新增記帳</div>
+    <div class="sheet-title">${isEdit?'編輯記帳':'新增記帳'}</div>
     <div class="view-toggle-row" style="padding:0 0 14px 0;">
-      <button type="button" class="view-toggle-btn active" id="ledgerModeIncomeBtn">收入</button>
-      <button type="button" class="view-toggle-btn" id="ledgerModeExpenseBtn">支出</button>
+      <button type="button" class="view-toggle-btn${initMode==='income'?' active':''}" id="ledgerModeIncomeBtn">收入</button>
+      <button type="button" class="view-toggle-btn${initMode==='expense'?' active':''}" id="ledgerModeExpenseBtn">支出</button>
     </div>
-    <div id="ledgerIncomeFields">
+    <div id="ledgerIncomeFields" class="${initMode==='income'?'':'hidden'}">
       <div class="view-toggle-row" style="padding:0 0 12px 0;">
-        <button type="button" class="view-toggle-btn active" id="billModeQtyBtn">依堂數計費</button>
-        <button type="button" class="view-toggle-btn" id="billModeLumpBtn">整筆金額</button>
+        <button type="button" class="view-toggle-btn${initBillMode==='qty'?' active':''}" id="billModeQtyBtn">依堂數計費</button>
+        <button type="button" class="view-toggle-btn${initBillMode==='lump'?' active':''}" id="billModeLumpBtn">整筆金額</button>
       </div>
       <p style="font-size:12.5px;color:var(--text-faint);margin:-8px 0 12px 2px;line-height:1.5;" id="billModeHint">適合私人教練依購買堂數計費。若您是領月薪、包月制、團體班或按次收費的教練，可切換「整筆金額」直接輸入收到的款項。</p>
       <div class="form-row"><label>學員姓名（選填）</label>
-        <input type="text" class="form-input" id="ledgerStudentName" list="ledgerStudentList" placeholder="輸入或選擇學員姓名，團體班/薪資可留空">
+        <input type="text" class="form-input" id="ledgerStudentName" list="ledgerStudentList" placeholder="輸入或選擇學員姓名，團體班/薪資可留空" value="${isEdit?escapeHtml(existingEntry.studentName||''):''}">
         <datalist id="ledgerStudentList">${studentOptions}</datalist>
       </div>
-      <div class="form-row"><label>交易日期</label><input type="date" class="form-input" id="ledgerDate" value="${todayIso}"></div>
+      <div class="form-row"><label>交易日期</label><input type="date" class="form-input" id="ledgerDate" value="${initMode==='income'?initDate:todayIso}"></div>
       <div class="form-row"><label>收入項目</label><select class="form-input" id="ledgerItem">${itemOptions}</select></div>
-      <div id="ledgerQtyFields">
-        <div class="form-row"><label>購買堂數</label><input type="number" class="form-input" id="ledgerQty" value="1" min="0"></div>
-        <div class="form-row"><label>單價 (NT$)</label><input type="number" class="form-input" id="ledgerUnitPrice" placeholder="例如：1500"></div>
+      <div id="ledgerQtyFields" class="${initBillMode==='qty'?'':'hidden'}">
+        <div class="form-row"><label>購買堂數</label><input type="number" class="form-input" id="ledgerQty" value="${isEdit&&existingEntry.quantity?existingEntry.quantity:1}" min="0"></div>
+        <div class="form-row"><label>單價 (NT$)</label><input type="number" class="form-input" id="ledgerUnitPrice" placeholder="例如：1500" value="${isEdit&&existingEntry.unitPrice?existingEntry.unitPrice:''}"></div>
         <div class="form-row"><label>總金額 (NT$，自動計算)</label><input type="number" class="form-input" id="ledgerTotal" readonly style="opacity:0.7;"></div>
       </div>
       <div class="form-row hidden" id="ledgerLumpFields">
         <label>收到的金額 (NT$)</label>
-        <input type="number" class="form-input" id="ledgerLumpAmount" placeholder="例如：月薪 32000 / 團體班場次費 2400">
+        <input type="number" class="form-input" id="ledgerLumpAmount" placeholder="例如：月薪 32000 / 團體班場次費 2400" value="${isEdit&&initBillMode==='lump'?(existingEntry.amount||''):''}">
       </div>
     </div>
-    <div id="ledgerExpenseFields" class="hidden">
-      <div class="form-row"><label>支出日期</label><input type="date" class="form-input" id="ledgerExpenseDate" value="${todayIso}"></div>
-      <div class="form-row"><label>金額 (NT$)</label><input type="number" class="form-input" id="ledgerExpenseAmount" placeholder="例如：500"></div>
+    <div id="ledgerExpenseFields" class="${initMode==='expense'?'':'hidden'}">
+      <div class="form-row"><label>支出日期</label><input type="date" class="form-input" id="ledgerExpenseDate" value="${initMode==='expense'?initDate:todayIso}"></div>
+      <div class="form-row"><label>金額 (NT$)</label><input type="number" class="form-input" id="ledgerExpenseAmount" placeholder="例如：500" value="${isEdit&&initMode==='expense'?(existingEntry.amount||''):''}"></div>
     </div>
-    <div class="form-row"><label>備註（選填）</label><input type="text" class="form-input" id="ledgerNote" placeholder="例如：加購課程 / 場地費 / 7月份薪資"></div>
+    <div class="form-row"><label>備註（選填）</label><input type="text" class="form-input" id="ledgerNote" placeholder="例如：加購課程 / 場地費 / 7月份薪資" value="${isEdit?escapeHtml(existingEntry.note||''):''}"></div>
     <div class="sheet-actions">
       <button class="sheet-btn ghost" id="cancelLedgerBtn">取消</button>
-      <button class="sheet-btn primary" id="saveLedgerBtn">確認新增</button>
+      <button class="sheet-btn primary" id="saveLedgerBtn">${isEdit?'確認修改':'確認新增'}</button>
     </div>
   `);
   openSheet();
 
-  let ledgerMode = 'income';
-  let billMode = 'qty';
+  // 若收入項目下拉選單中有符合原紀錄的選項，預先選取
+  if(isEdit && existingEntry.type==='income' && existingEntry.incomeItem){
+    const itemSelect = document.getElementById('ledgerItem');
+    if(itemSelect) itemSelect.value = existingEntry.incomeItem;
+  }
+
+  let ledgerMode = initMode;
+  let billMode = initBillMode;
   const incomeFieldsEl = document.getElementById('ledgerIncomeFields');
   const expenseFieldsEl = document.getElementById('ledgerExpenseFields');
   const incomeBtn = document.getElementById('ledgerModeIncomeBtn');
@@ -1748,28 +1950,44 @@ function openAddLedger(){
         if(!amount || amount <= 0) return showToast('請輸入正確的金額');
       }
 
-      db.collection('coaches').doc(currentUid).collection('ledger').add({
-        type: 'income', studentName, transactionDate, incomeItem, quantity, unitPrice, amount, note,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      }).then(()=>{
-        closeSheet(); showToast('✅ 已新增收入紀錄，並自動累加至本月收入總表');
-      }).catch(err=>{
-        showToast('❌ 新增失敗: ' + err.message);
-      });
+      const payload = {
+        type: 'income', studentName, transactionDate, incomeItem, quantity, unitPrice, amount, note
+      };
+
+      if(isEdit){
+        db.collection('coaches').doc(currentUid).collection('ledger').doc(existingEntry.id).update(payload)
+          .then(()=>{ closeSheet(); showToast('✅ 已更新收入紀錄'); })
+          .catch(err=>showToast('❌ 修改失敗: ' + err.message));
+      } else {
+        db.collection('coaches').doc(currentUid).collection('ledger').add({
+          ...payload, createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        }).then(()=>{
+          closeSheet(); showToast('✅ 已新增收入紀錄，並自動累加至本月收入總表');
+        }).catch(err=>{
+          showToast('❌ 新增失敗: ' + err.message);
+        });
+      }
     } else {
       const transactionDate = document.getElementById('ledgerExpenseDate').value;
       const amount = Number(document.getElementById('ledgerExpenseAmount').value);
       const note = document.getElementById('ledgerNote').value.trim();
       if(!amount || amount <= 0) return showToast('請輸入正確金額');
 
-      db.collection('coaches').doc(currentUid).collection('ledger').add({
-        type: 'expense', amount, note, transactionDate,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      }).then(()=>{
-        closeSheet(); showToast('✅ 已新增支出');
-      }).catch(err=>{
-        showToast('❌ 新增失敗: ' + err.message);
-      });
+      const payload = { type: 'expense', amount, note, transactionDate };
+
+      if(isEdit){
+        db.collection('coaches').doc(currentUid).collection('ledger').doc(existingEntry.id).update(payload)
+          .then(()=>{ closeSheet(); showToast('✅ 已更新支出'); })
+          .catch(err=>showToast('❌ 修改失敗: ' + err.message));
+      } else {
+        db.collection('coaches').doc(currentUid).collection('ledger').add({
+          ...payload, createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        }).then(()=>{
+          closeSheet(); showToast('✅ 已新增支出');
+        }).catch(err=>{
+          showToast('❌ 新增失敗: ' + err.message);
+        });
+      }
     }
   };
 }
@@ -1927,11 +2145,10 @@ function switchView(view){
   });
 }
 document.querySelectorAll('.nav-item').forEach(item=>{ item.addEventListener('click',()=>switchView(item.dataset.view)); });
-document.querySelectorAll('.view-toggle-btn').forEach(btn=>{ btn.addEventListener('click', ()=>switchScheduleMode(btn.dataset.mode)); });
 
-document.getElementById('fabAdd').addEventListener('click', openAddSlot);
+document.getElementById('fabAdd').addEventListener('click', ()=>openAddSlot());
 document.getElementById('bell-btn').addEventListener('click', openNotifications);
-document.getElementById('fabAddLedger').addEventListener('click', openAddLedger);
+document.getElementById('fabAddLedger').addEventListener('click', ()=>openAddLedger());
 document.getElementById('addStudentBtn').addEventListener('click', openAddStudent);
 document.getElementById('sheetOverlay').addEventListener('click',(e)=>{ if(e.target.id==='sheetOverlay') closeSheet(); });
 document.getElementById('studentSearch').addEventListener('input',(e)=>renderStudents(e.target.value));
